@@ -1,11 +1,16 @@
 from django import forms
 
-from .models import Video, Actor, Tag, ActorImage
+from .models import Video, Actor, Tag, ActorImage, VideoImage, Event
 
 class VideoForm(forms.ModelForm):
 	class Meta:
 		model = Video
-		fields = ['title', 'tags','actors','public', 'file_path']
+		fields = ['title', 'tags','actors','public', 'file_path', 'poster', 'release_date']
+		labels = {'title':''}
+		widgets = {
+		'title': forms.TextInput(attrs={'placeholder':'Title','autofocus':'autofocus'}),
+		'release_date': forms.DateInput(attrs={'placeholder':'MM-DD-YYYY'}),
+		}
 
 class ActorForm(forms.ModelForm):
 	class Meta:
@@ -20,4 +25,14 @@ class TagForm(forms.ModelForm):
 class ActorImageForm(forms.ModelForm):
 	class Meta:
 		model = ActorImage
-		fields = ['actor','image']
+		fields = ['actors','image','tags']
+
+class VideoImageForm(forms.ModelForm):
+	class Meta:
+		model = VideoImage
+		fields = ['video','image','tags']
+
+class EventForm(forms.ModelForm):
+	class Meta:
+		model = Event
+		fields = ['name','seconds']
