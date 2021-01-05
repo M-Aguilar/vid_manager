@@ -31,7 +31,6 @@ def video(request, video_id):
 	video_images = VideoImage.objects.filter(video=video)
 	if video.owner != request.user and not video.public:
 		raise Http404
-
 	#list of actors and tags in videos
 	data={'video':video}
 	form = EventForm(initial=data)
@@ -74,6 +73,7 @@ def new_video(request, actor_id=None):
 			try:
 				v = mutagen.mp4.Open(new_video.file_path)
 				seconds = v.info.length
+				b_rate = v.info.bitrate
 			except mutagen.mp4.MP4StreamInfoError:
 				seconds=0
 				messages.error(request, 'Something went wrong checking length of video.')
@@ -85,10 +85,12 @@ def new_video(request, actor_id=None):
 			new_video.width = int(dim['width'])
 			statinfo = stat(new_video.file_path)
 			new_video.length = seconds
+			new_video.bitrate = b_rate
 			new_video.size = statinfo.st_size
 			new_video.save()
-			new_video.poster = request.FILES['poster']
-			new_video.save()
+			if request.FILES:
+				new_video.poster = request.FILES['poster']
+				new_video.save()
 			form.save_m2m()
 			return HttpResponseRedirect(reverse('video', args=[new_video.id]))
 	new_tag_form = TagForm()
@@ -117,8 +119,12 @@ def edit_video(request, video_id):
 @login_required
 def delete_video(request, video_id):
 	v = Video.objects.get(id=video_id)
-	if request.method == 'POST':
+	if request.method == 'POST' and request.user.projector.admin:
 		context = {'video_id': v.id, 'video': v.title}
+		events = Event.objects.filter(video=v)
+		if len(events)>0:
+			for e in events:
+				subprocess.Popen(['sudo','rm', e.file_path])
 		if v.poster:
 			ff = v.poster.open()
 			ff.delete()
@@ -330,6 +336,7 @@ def new_video_image(request, video_id):
 	context = {'form':form,'video':video}
 	return render(request, 'vid_manager/new_video_image.html', context)
 
+#TODO check for time inside bounds of video length
 @login_required
 def new_event(request,video_id):
 	if not request.user.projector.admin:

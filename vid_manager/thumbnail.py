@@ -2,6 +2,9 @@ import os
 import math
 import subprocess
 
+#TODO: could decrease the amount of subprocess calls now that it is being done at creation and 
+#Stored in DB
+# add: dur(seconds), dim(w,h)
 def capture(full_path, milli):
     filename=full_path.split('/')[len(full_path.split('/'))-1]
     o_h = 150

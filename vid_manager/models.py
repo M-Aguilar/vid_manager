@@ -66,6 +66,7 @@ class Video(models.Model):
 	poster = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
 	length = models.PositiveIntegerField()
 	size = models.PositiveBigIntegerField()
+	bitrate = models.PositiveIntegerField()
 
 	height = models.PositiveSmallIntegerField(null=True)
 	width = models.PositiveSmallIntegerField(null=True)
@@ -90,6 +91,9 @@ class Video(models.Model):
 	def event(self):
 		event = Event.objects.filter(video=self.id)[0]
 		return event
+
+	def b_rate(self):
+		return str(round((self.bitrate * 0.0001), 1)) + "MB/s"
 
 	def path(self):
 		return self.file_path[self.file_path.index('videos'):]
