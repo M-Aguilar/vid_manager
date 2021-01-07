@@ -11,15 +11,21 @@ def user_directory_path(instance, filename):
 		print("Attribute Error: user_directory_path 1")
 		pass
 	try:
+		return '{0}/{1}'.format('Images', filename)
+	except AttributeError:
+		print("Attribute Error: user_directory_path 4")
+		pass
+'''
+	try:
 		return '{0}/{1}/{2}'.format('Images', instance.actor.full_name, filename)
 	except AttributeError:
 		print("Attribute Error: user_directory_path 2")
 		pass
 	try:
-		return '{0}/{1}/{2}'.format('Images', instance.pk, filename)
+		return '{0}/{1}/{2}'.format('Images', instance.actors.first.full_name, filename)
 	except AttributeError:
 		print("Attribute Error: user_directory_path 3")
-		pass
+		pass'''
 
 class Projector(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -78,7 +84,11 @@ class Video(models.Model):
 		return self.title
 
 	def size_neat(self):
-		return str(round((self.size * 0.000001), 2)) + "MB"
+		mb = round((self.size * 0.000001), 2)
+		if mb > 1000:
+			return str(round((mb * 0.001),2)) + "GB"
+		else:
+			return str(mb) + "MB"
 
 	def time(self):
 		return '{0:.2g}'.format(floor(self.length/60)) + ':' + '{:02.0f}'.format(self.length%60)
@@ -98,41 +108,31 @@ class Video(models.Model):
 	def path(self):
 		return self.file_path[self.file_path.index('videos'):]
 
-class ImagePath(models.Model):
-	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^[^\.]+.*\.jpg$|^[^\.]+.*\.png$|^[^\.]+.*\.jpeg$|^[^\.]+.*\.gif$", recursive=True)
-
-	class Meta:
-		abstract=True
-
-	def url(self):
-		return self.file_path[self.file_path.index('/media'):]
+	def actor_list_url(self):
+		actor_list = None
+		for i in self.actors.all():
+			if not actor_list:
+				actor_list = str(i)
+			else:
+				actor_list = '{0}+{1}'.format(actor_list, str(i))
+		return actor_list
 
 '''Potentially just make this into the image class with optional video foreign key ....'''
 class Image(models.Model):
-	image = models.ImageField(upload_to=user_directory_path)
-	
-	class Meta:
-		abstract=True
+	image = models.ImageField(upload_to=user_directory_path,blank=True)
+	actors = models.ManyToManyField('Actor', related_name='actors')
+	video = models.ForeignKey(Video, on_delete=models.CASCADE, blank=True,null=True)
+	tags = models.ManyToManyField('Tag', blank=True, related_name='tags')
+
+	@property
+	def first_actor(self):
+		return self.actors.first().full_name
+
 ''' No need to a restricted number on these, but however there may be a restrictions at some point to allow for better viewing of images. Will see
 I need to decide on what it is I want in terms of functionality in the site. I want videos thumbnails to lead to the videos. i however would also like to allow
 for images tied to a video.
 Images cant already be tied to an actor. And a onetoone which is for the video thumbnail cover. HTML poster attribute. 
 '''
-
-class VideoImage(Image):
-	video = models.ForeignKey(Video, on_delete=models.CASCADE)
-	tags = models.ManyToManyField('Tag', blank=True, related_name='video_image_tags')
-
-	def ref(self):
-		return 'video_image'
-
-class ActorImage(Image):
-	actors = models.ManyToManyField('Actor', related_name='actors')
-	tags = models.ManyToManyField('Tag', blank=True, related_name='actor_image_tags')
-
-	def ref(self):
-		return 'actor_image'
-
 '''This does not need to be implemented right away. These are going to primarily used when hovering over video thumbnails as a preview
 	Eventually I want to restrict this to a certai number of Images. I want for the most partfor the maipulation of this to be automatic
 	Users will be able to djust the image frame as desired once I find a way to omplement that. by allowing for users to copy the video time
@@ -140,10 +140,14 @@ class ActorImage(Image):
 	Might need to adjust on_delete values
 '''
 
-class Event(ImagePath):
+class Event(models.Model):
 	name = models.CharField(max_length=50)
+	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^[^\.]+.*\.jpg$|^[^\.]+.*\.png$|^[^\.]+.*\.jpeg$|^[^\.]+.*\.gif$", recursive=True)
 	video = models.ForeignKey(Video, on_delete=models.CASCADE)
 	seconds = models.PositiveIntegerField()
+
+	def url(self):
+		return self.file_path[self.file_path.index('/media'):]
 
 	def time(self):
 		return '{0:.2g}'.format(floor(self.seconds/60)) + ':' + '{:02.0f}'.format(self.seconds%60)

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Video, Actor, Tag, ActorImage, VideoImage, Event
+from .models import Video, Actor, Tag, Image, Event
 
 class VideoForm(forms.ModelForm):
 	class Meta:
@@ -22,15 +22,10 @@ class TagForm(forms.ModelForm):
 		model = Tag
 		fields = ['tag_name']
 
-class ActorImageForm(forms.ModelForm):
+class ImageForm(forms.ModelForm):
 	class Meta:
-		model = ActorImage
-		fields = ['actors','image','tags']
-
-class VideoImageForm(forms.ModelForm):
-	class Meta:
-		model = VideoImage
-		fields = ['video','image','tags']
+		model = Image
+		fields = ['actors','video','image','tags']
 
 class EventForm(forms.ModelForm):
 	class Meta:

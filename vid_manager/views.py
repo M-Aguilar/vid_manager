@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponseRedirect, Http404, HttpRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -9,14 +9,15 @@ from django.core.files.images import get_image_dimensions
 import math
 from itertools import chain
 
+from django.db.models import Q
 #from datetime import datetime as dt
 #from datetime import timedelta
 import subprocess
 import mutagen.mp4
 
 from .thumbnail import capture
-from .models import Video, Tag, Actor, ActorImage, VideoImage, Event
-from .forms import VideoForm, TagForm, ActorForm, ActorImageForm, VideoImageForm, EventForm
+from .models import Video, Tag, Actor, Event, Image
+from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm
 
 # Create your views here.
 def index(request):
@@ -25,22 +26,21 @@ def index(request):
 '''########################    VIDEOS     #########################'''
 
 def video(request, video_id):
+	video = get_object_or_404(Video, id=video_id)
 	#print(request.headers)
 	#2 cases: public videos and nonpublic: Solved
-	video = Video.objects.get(id=video_id)
-	video_images = VideoImage.objects.filter(video=video)
 	if video.owner != request.user and not video.public:
 		raise Http404
+	images = Image.objects.filter(video=video)
 	#list of actors and tags in videos
-	data={'video':video}
+	data={'video':video,'actors':video.actors.all()}
 	form = EventForm(initial=data)
-
 	actors = video.actors.all()
 	tags = video.tags.all()
 	events = Event.objects.filter(video=video)
 
 #	size = str(round((statinfo.st_size * 0.000001), 2)) + "MB"
-	context = {'video': video, 'actors': actors, 'tags': tags, 'video_images':video_images, 'form':form,'events':events}
+	context = {'video': video, 'actors': actors, 'tags': tags, 'images':images, 'form':form,'events':events}
 	return render(request, 'vid_manager/video.html', context)
 
 @login_required
@@ -119,8 +119,7 @@ def edit_video(request, video_id):
 @login_required
 def delete_video(request, video_id):
 	v = Video.objects.get(id=video_id)
-	if request.method == 'POST' and request.user.projector.admin:
-		context = {'video_id': v.id, 'video': v.title}
+	if request.user.is_authenticated and request.user.projector.admin:
 		events = Event.objects.filter(video=v)
 		if len(events)>0:
 			for e in events:
@@ -129,10 +128,10 @@ def delete_video(request, video_id):
 			ff = v.poster.open()
 			ff.delete()
 		v.delete()
-		return render(request, 'vid_manager/delete_video.html', context)
+		messages.success(request, "Video {0} Succesfully Deleted".format(video_id))
 	else:
 		messages.error(request, 'Something wet wrong')
-		return HttpResponseRedirect(reverse('my_videos', args=[request.user.id]))
+	return HttpResponseRedirect(reverse('videos', args=[request.user.id]))
 
 
 '''########################    TAGS     #########################'''
@@ -200,7 +199,7 @@ def actor(request, actor_id):
 		videos= Video.objects.filter(actors=actor_id).filter(public=True)
 		images = {}
 	else:
-		images = ActorImage.objects.filter(actors=actor)
+		images = Image.objects.filter(actors=actor)
 		videos= Video.objects.filter(actors=actor)
 	context={'actor':actor, 'videos': videos, 'images':images}
 	return render(request, 'vid_manager/actor.html', context)
@@ -240,101 +239,94 @@ def images(request):
 	if not request.user.is_authenticated or not request.user.projector.admin:
 		raise Http404
 	else:
-		images = list(chain(ActorImage.objects.all(), VideoImage.objects.all()))
+		images = Image.objects.all()
+		#images = list(chain(ActorImage.objects.all(), VideoImage.objects.all()))
 	context = {'images':images}
 	return render(request,'vid_manager/images.html',context)
 
+#WHERE DID I GO WRONGS?
+'''
+
+I need to allow a few type of image additions
+1. new_image/ * No variables included
+2. new_image/ actor(+actor+...) * Actor/s variable included
+3. new_image/ actors / video * Actors/s and Video variable included
+
+'''
+
 @login_required
-def new_actor_image(request, actor_id):
-	actor = Actor.objects.get(id=actor_id)
-	if request.method != 'POST':
-		data = {'actors':actor}
-		form = ActorImageForm(initial=data)
+def new_image(request):
+	if request.method == 'GET':
+		data={}
+		ref = request.META.get('HTTP_REFERER')
+		if '/videos/' in ref:
+			#video = Video.obejcts.get(id=ref[ref.index('/videos/'+7):])
+			start = ref[ref.index('videos')+7:]
+			video = Video.objects.get(id=start)
+			data = {'video':video,'actors':video.actors.all()}
+		if '/actor/' in ref:
+			start = ref[ref.index('actor')+6:]
+			actors = Actor.objects.get(id=start)
+			data = {'actors':actors}
+		form = ImageForm(initial=data)
 	else:
-		form = ActorImageForm(data=request.POST, files=request.FILES)
-		if not request.FILES:
+		form = ImageForm(data=request.POST)
+		if request.FILES.get('image',0) == 0:
 			messages.error(request, 'No Image attached')
 			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 		if form.is_valid():
-			new_actor_image = form.save(commit=False)
-			new_actor_image.actor = actor
-			new_actor_image.save()
+			new_image = form.save(commit=False)
+			new_image.save()
+			new_image.image = request.FILES['image']
+			new_image.save()
+			form.save_m2m()
 			messages.success(request, 'The Image has been added')
+			return HttpResponseRedirect(reverse('image', args=[new_image.pk]))
 		else:
 			messages.error(request, 'Something went wrong. Form invalid')
 			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-	context = {'form':form, 'actor':actor}
-	return render(request, 'vid_manager/new_actor_image.html', context)
-
+	context = {'form':form}
+	return render(request, 'vid_manager/new_image.html', context)
 
 @login_required
-def actor_image(request, image_id):
-	image = ActorImage.objects.get(id=image_id)
+def image(request, image_id):
+	image = Image.objects.get(id=image_id)
 	if not request.user.projector.admin or not image:
 		raise Http404
-	context = {'image':image, 'actor':image.actor}
-	return render(request, 'vid_manager/actor_image.html', context)
+	actors = image.actors.all()
+	context = {'image':image,'actors':actors}
+	return render(request, 'vid_manager/image.html', context)
 
 @login_required
-def delete_actor_image(request, image_id):
-	image = ActorImage.objects.get(id=image_id)
-	actor = image.actor
+def delete_image(request, image_id):
+	image = Image.objects.get(id=image_id)
 	if request.user.is_authenticated and request.user.projector.admin:
-		context = {'image': image,'actor':actor}
-		ff = image.image.open()
-		ff.delete()
+		context = {'image': image}
+		image.image.delete()
 		image.delete()
-		return render(request, 'vid_manager/delete_actor_image.html', context)
+		return render(request, 'vid_manager/delete_image.html', context)
 	else:
 		messages.error(request, 'Something wet wrong')
-		return HttpResponseRedirect(reverse('actor', args=[actor.id]))
+		return HttpResponseRedirect(reverse('images'))
 
 #UNECESSARY EVENTUALLY. SHOULD JUST ALLOW TO DELETE. AND VIEW IMAGE.
+#ONLY ALLOW TO ADD TAGS
 @login_required
-def edit_actor_image(request, image_id):
+def edit_image(request, image_id):
 	if not request.user.projector.admin:
 		raise Http404
-
+	image = Image.objects.get(id=image_id)
 	if request.method != 'POST':
 		# initial request; pre-fill form with the current entry.
-		form = ActorImageForm(instance=image)
+		form = ImageForm(instance=image)
 	else:
 		#Post data submitted; process data
-		form = ActorImageForm(data=request.POST, files=request.FILES)
+		form = ImageForm(instance=image, files=request.FILES, data=request.POST)
 		if form.is_valid():
 			form.save()
-			return HttpResponseRedirect(reverse('actors'))
+			return HttpResponseRedirect(reverse('images'))
 	context = {'image': image,'form': form}
-	return render(request, 'vid_manager/edit_actor_image.html', context)
-
-@login_required
-def video_image(request, image_id):
-	image = VideoImage.objects.get(id=image_id)
-	video = image.video
-	context = {'image':image, 'video':video}
-	return render(request,'vid_manager/video_image.html',context)
-
-@login_required
-def new_video_image(request, video_id):
-	video = Video.objects.get(id=video_id)
-	if request.method != 'POST':
-		data = {'video':video}
-		form = VideoImageForm(initial=data)
-	else:
-		form = VideoImageForm(data=request.POST,files=request.FILES)
-		if not request.FILES:
-			messages.error(request, 'No Image attached')
-			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-		if form.is_valid():
-			new_video_image = form.save(commit=False)
-			new_video_image.video = video
-			new_video_image.save()
-			messages.success(request, 'The Video Image has been added')
-		else:
-			messages.error(request, 'Something went wrong. Form invalid')
-		return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-	context = {'form':form,'video':video}
-	return render(request, 'vid_manager/new_video_image.html', context)
+	return render(request, 'vid_manager/edit_image.html', context)
 
 #TODO check for time inside bounds of video length
 @login_required
