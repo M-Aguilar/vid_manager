@@ -149,7 +149,8 @@ def tag(request, tag_id):
 		videos= Video.objects.filter(tags=tag_id).filter(public=True)
 	else:
 		videos= Video.objects.filter(tags=tag_id)
-	context = {'tag' : tag, 'videos': videos}
+		images = Image.objects.filter(tags=tag_id)
+	context = {'tag' : tag, 'videos': videos, 'images': images}
 	return render(request, 'vid_manager/tag.html', context)	
 
 @login_required
@@ -235,13 +236,18 @@ def new_actor(request):
 
 '''########################    ACTOR IMAGE     #########################'''
 @login_required
-def images(request):
+def images(request,actor_id=None):
+	context = {'actor':None}
 	if not request.user.is_authenticated or not request.user.projector.admin:
 		raise Http404
+	if actor_id:
+		actor = Actor.objects.get(id=actor_id)
+		images = Image.objects.filter(actors=actor_id)
+		context['actor'] = actor
 	else:
 		images = Image.objects.all()
 		#images = list(chain(ActorImage.objects.all(), VideoImage.objects.all()))
-	context = {'images':images}
+	context['images'] = images
 	return render(request,'vid_manager/images.html',context)
 
 #WHERE DID I GO WRONGS?

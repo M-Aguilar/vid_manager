@@ -35,6 +35,12 @@ class Projector(models.Model):
 class Tag(models.Model):
 	tag_name = models.CharField(max_length=20)
 
+
+	def img(self):
+		img = Image.objects.filter(tags=self.id, image__isnull=False).first()
+		if img:
+			return img.image
+
 	class Meta:
 		verbose_name_plural = 'tags'
 
@@ -47,6 +53,11 @@ class Actor(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'actors'
+
+	def img(self):
+		img = Image.objects.filter(actors=self.id, image__isnull=False).last()
+		if img:
+			return img.image
 
 	def __str__(self):
 		return self.full_name

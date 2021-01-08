@@ -33,6 +33,7 @@ urlpatterns = [
 
 	#ACTOR IMAGE PAGES
 	path('images',views.images, name='images'),
+	path('<actor_id>/images',views.images, name='images'),
 	
 	path('new_image',views.new_image,name='new_image'),
 
