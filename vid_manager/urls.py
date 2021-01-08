@@ -6,9 +6,10 @@ urlpatterns = [
 	path('',views.index, name='index'),
 
 	#User Page
-	path('<user_id>/videos', views.videos, name='videos'),
+	path('<actor_id>/videos', views.videos, name='videos'),
+	path('videos', views.videos, name='videos'),
 
-	path('videos/<video_id>', views.video, name='video'),
+	path('video/<video_id>', views.video, name='video'),
 	#Add a new Video
 	path('new_video/', views.new_video, name='new_video'),
 	path('new_video/<actor_id>', views.new_video, name='new_video'),

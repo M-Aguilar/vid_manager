@@ -20,11 +20,13 @@ from .models import Video, Tag, Actor, Event, Image
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm
 
 # Create your views here.
+
 def index(request):
 	return render(request, 'vid_manager/index.html')
 
 '''########################    VIDEOS     #########################'''
 
+@login_required
 def video(request, video_id):
 	video = get_object_or_404(Video, id=video_id)
 	#print(request.headers)
@@ -44,9 +46,11 @@ def video(request, video_id):
 	return render(request, 'vid_manager/video.html', context)
 
 @login_required
-def videos(request, user_id='public'):
-	if user_id != 'public' and request.user.is_authenticated:
-		videos = Video.objects.filter(owner_id=user_id)
+def videos(request, actor_id=None):
+	if request.user.is_authenticated:
+		videos = Video.objects.filter(owner=request.user.id).order_by('-date_added')
+		if actor_id:
+			videos = videos.filter(actors=actor_id).order_by('-date_added')
 	else:
 		videos = Video.objects.filter(public=True)
 	context = {'videos': videos}
@@ -100,7 +104,7 @@ def new_video(request, actor_id=None):
 
 @login_required
 def edit_video(request, video_id):
-	video = Video.objects.get(id=video_id)
+	video = get_object_or_404(Video, id=video_id)
 	if video.owner != request.user and video.public:
 		raise Http404
 
@@ -118,7 +122,7 @@ def edit_video(request, video_id):
 
 @login_required
 def delete_video(request, video_id):
-	v = Video.objects.get(id=video_id)
+	v = get_object_or_404(id=video_id)
 	if request.user.is_authenticated and request.user.projector.admin:
 		events = Event.objects.filter(video=v)
 		if len(events)>0:
@@ -136,17 +140,20 @@ def delete_video(request, video_id):
 
 '''########################    TAGS     #########################'''
 
-
+@login_required
 def tags(request):
+	if not request.user.projector.admin:
+		raise Http404
 	tags = Tag.objects.order_by('tag_name')
 	new_tag_form = TagForm()
 	context = {'tags': tags, 'new_tag_form': new_tag_form}
 	return render(request, 'vid_manager/tags.html', context)
 
+@login_required
 def tag(request, tag_id):
-	tag = Tag.objects.get(id=tag_id)
-	if request.user == 'anonymous':
-		videos= Video.objects.filter(tags=tag_id).filter(public=True)
+	tag = get_object_or_404(Tag, id=tag_id)
+	if not request.user.projector.admin:
+		raise Http404
 	else:
 		videos= Video.objects.filter(tags=tag_id)
 		images = Image.objects.filter(tags=tag_id)
@@ -155,8 +162,10 @@ def tag(request, tag_id):
 
 @login_required
 def delete_tag(request, tag_id):
+	if not request.user.projector.admin:
+		raise Http404
 	if request.method == 'POST':
-		t =Tag.objects.get(id=tag_id)
+		t =get_object_or_404(Tag, id=tag_id)
 		context = {'tag_id': t.id, 'tag_name': t.tag_name}
 		t.delete()
 		return render(request, 'vid_manager/delete_tag.html', context)
@@ -164,6 +173,8 @@ def delete_tag(request, tag_id):
 		return render(request, 'vid_manager/tags.html')
 
 def new_tag(request):
+	if not request.user.projector.admin:
+		raise Http404
 	if request.method != 'POST':
 		#no data submitted; create a blank form.
 		form = TagForm()
@@ -195,23 +206,28 @@ def new_tag(request):
 
 @login_required
 def actor(request, actor_id):
-	actor = Actor.objects.get(id=actor_id)
-	if request.user == 'anonymous':
-		videos= Video.objects.filter(actors=actor_id).filter(public=True)
-		images = {}
+	if not request.user.projector.admin:
+		raise Http404
 	else:
-		images = Image.objects.filter(actors=actor)
+		actor = get_object_or_404(Actor,id=actor_id)
+		images = Image.objects.filter(actors=actor)[:6]
 		videos= Video.objects.filter(actors=actor)
 	context={'actor':actor, 'videos': videos, 'images':images}
 	return render(request, 'vid_manager/actor.html', context)
 
+@login_required
 def actors(request):
+	if not request.user.projector.admin:
+		raise Http404
 	actors = Actor.objects.all().order_by('first_name')
 	form = ActorForm()
 	context = {'actors': actors, 'form': form}
 	return render(request, 'vid_manager/actors.html', context)
 
+@login_required
 def new_actor(request):
+	if not request.user.projector.admin:
+		raise Http404
 	if request.method != 'POST':
 		#no data submitted; create a blank form.
 		form = ActorForm()
@@ -241,7 +257,7 @@ def images(request,actor_id=None):
 	if not request.user.is_authenticated or not request.user.projector.admin:
 		raise Http404
 	if actor_id:
-		actor = Actor.objects.get(id=actor_id)
+		actor = get_object_or_404(Actor, id=actor_id)
 		images = Image.objects.filter(actors=actor_id)
 		context['actor'] = actor
 	else:
