@@ -9,7 +9,7 @@ class VideoForm(forms.ModelForm):
 		labels = {'title':''}
 		widgets = {
 		'title': forms.TextInput(attrs={'placeholder':'Title','autofocus':'autofocus'}),
-		'release_date': forms.DateInput(attrs={'placeholder':'MM-DD-YYYY'}),
+		'release_date': forms.DateInput(attrs={'placeholder':'MM-DD-YYYY','format':'%m/%d/%Y'}),
 		}
 
 class ActorForm(forms.ModelForm):

@@ -15,17 +15,6 @@ def user_directory_path(instance, filename):
 	except AttributeError:
 		print("Attribute Error: user_directory_path 4")
 		pass
-'''
-	try:
-		return '{0}/{1}/{2}'.format('Images', instance.actor.full_name, filename)
-	except AttributeError:
-		print("Attribute Error: user_directory_path 2")
-		pass
-	try:
-		return '{0}/{1}/{2}'.format('Images', instance.actors.first.full_name, filename)
-	except AttributeError:
-		print("Attribute Error: user_directory_path 3")
-		pass'''
 
 class Projector(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -35,11 +24,12 @@ class Projector(models.Model):
 class Tag(models.Model):
 	tag_name = models.CharField(max_length=20)
 
-
 	def img(self):
 		img = Image.objects.filter(tags=self.id, image__isnull=False).first()
 		if img:
 			return img.image
+		else:
+			return False
 
 	class Meta:
 		verbose_name_plural = 'tags'
@@ -58,6 +48,8 @@ class Actor(models.Model):
 		img = Image.objects.filter(actors=self.id, image__isnull=False).last()
 		if img:
 			return img.image
+		else:
+			return False
 
 	def __str__(self):
 		return self.full_name
@@ -72,7 +64,7 @@ class Actor(models.Model):
 
 #tracking view count would be ideal
 class Video(models.Model):
-	title = models.CharField(max_length=50)
+	title = models.CharField(max_length=75)
 	date_added = models.DateTimeField(auto_now_add=True)
 	release_date = models.DateField(blank=True,null=True)
 	owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -117,7 +109,7 @@ class Video(models.Model):
 		return str(round((self.bitrate * 0.0001), 1)) + "MB/s"
 
 	def path(self):
-		return self.file_path[self.file_path.index('videos'):]
+		return "http://10.15.69.69:8800/media/{0}".format(self.file_path[self.file_path.index('videos'):])
 
 	def actor_list_url(self):
 		actor_list = None
@@ -138,18 +130,6 @@ class Image(models.Model):
 	@property
 	def first_actor(self):
 		return self.actors.first().full_name
-
-''' No need to a restricted number on these, but however there may be a restrictions at some point to allow for better viewing of images. Will see
-I need to decide on what it is I want in terms of functionality in the site. I want videos thumbnails to lead to the videos. i however would also like to allow
-for images tied to a video.
-Images cant already be tied to an actor. And a onetoone which is for the video thumbnail cover. HTML poster attribute. 
-'''
-'''This does not need to be implemented right away. These are going to primarily used when hovering over video thumbnails as a preview
-	Eventually I want to restrict this to a certai number of Images. I want for the most partfor the maipulation of this to be automatic
-	Users will be able to djust the image frame as desired once I find a way to omplement that. by allowing for users to copy the video time
-	and use that to select preview images.
-	Might need to adjust on_delete values
-'''
 
 class Event(models.Model):
 	name = models.CharField(max_length=50)
