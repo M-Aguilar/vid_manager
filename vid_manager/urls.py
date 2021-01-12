@@ -35,6 +35,10 @@ urlpatterns = [
 	#Delete Tag
 	path('delete_tag/<tag_id>', views.delete_tag, name='delete_tag'),
 
+	path('remove_tag/<tag_id>', views.remove_tag, name='remove_tag'),
+
+	path('remove_tag', views.remove_tag, name='remove_tag'),
+
 	#New Tag
 	path('new_tag', views.new_tag, name='new_tag'),
 
@@ -55,6 +59,8 @@ urlpatterns = [
 
 	#All Actors
 	path('actors', views.actors, name='actors'),
+
+	path('<actor_id>/delete', views.delete_actor, name='delete_actor'),
 	#ACTOR IMAGE PAGES
 #	path('<actor_id>/images/#=<page_num>',views.images, name='images'),
 	

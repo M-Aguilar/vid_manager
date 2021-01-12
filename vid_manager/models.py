@@ -22,10 +22,10 @@ class Projector(models.Model):
 
 # Create your models here.
 class Tag(models.Model):
-	tag_name = models.CharField(max_length=20)
+	tag_name = models.CharField(max_length=20, unique=True)
 
 	def img(self):
-		img = Image.objects.filter(tags=self.id, image__isnull=False).first()
+		img = Image.objects.filter(tags=self.id, image__isnull=False).last()
 		if img:
 			return img.image
 		else:
@@ -50,6 +50,15 @@ class Actor(models.Model):
 			return img.image
 		else:
 			return False
+
+	@property
+	def video_count(self):
+		return Video.objects.filter(actors=self.id).count()
+
+	@property
+	def images_count(self):
+		return Image.objects.filter(actors=self.id).count()
+	
 
 	def __str__(self):
 		return self.full_name

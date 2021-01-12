@@ -134,7 +134,7 @@ def delete_video(request, video_id):
 	v = get_object_or_404(Video, id=video_id)
 	if request.user.is_authenticated and request.user.projector.admin:
 		events = Event.objects.filter(video=v)
-		if len(events)>0:
+		if events.count() >0:
 			for e in events:
 				subprocess.Popen(['sudo','rm', e.file_path])
 		if v.poster:
@@ -185,22 +185,52 @@ def delete_tag(request, tag_id):
 	return HttpResponseRedirect(reverse('tags'))
 
 @login_required
+def remove_tag(request, tag_id=None):
+	print(tag_id)
+	print("Type: {0}".format(type(tag_id)))
+	t = request.META.get('HTTP_REFERER')
+	if request.is_ajax and request.user.projector.admin and tag_id:
+		tag = Tag.objects.get(id=tag_id)
+		print(tag)
+		if 'video' in t:
+			video = Video.objects.get(id=t[t.index('video')+6:])
+			video.tags.remove(tag)
+			video.save()
+			instance = tag
+			serialized = serializers.serialize('json', [ instance, ])
+			return JsonResponse({"tag":instance},status=200)
+	return JsonResponse({"error":""}, status=400)
+
+@login_required
 def new_tag(request):
 	t = request.META.get('HTTP_REFERER')
 	if request.is_ajax and request.method == "POST":
 		form = TagForm(request.POST)
-		if form.is_valid():
-			instance = form.save()
-			if 'video' in t:
-				video = Video.objects.get(id=t[t.index('video')+6:])
-				instance.videos.add(video)
-			if 'image' in t:
-				image = Image.objects.get(id=t[t.index('image')+6:])
-				instance.images.add(image)
-			serialized = serializers.serialize('json', [ instance, ])
-			return JsonResponse({"instance":serialized},status=200)
-		else:
-			return JsonResponse({"error":form.errors}, status=400)
+		try:
+			tag = Tag.objects.get(tag_name=form.data['tag_name'])
+			if tag:
+				instance = tag
+				if 'video' in t:
+					video = Video.objects.get(id=t[t.index('video')+6:])
+					tag.videos.add(video)
+				if 'image' in t:
+					image = Image.objects.get(id=t[t.index('image')+6:])
+					tag.images.add(image)
+				serialized = serializers.serialize('json', [ instance, ])
+				return JsonResponse({"instance":serialized},status=200)
+		except Tag.DoesNotExist:
+			if form.is_valid():
+				instance = form.save()
+				if 'video' in t:
+					video = Video.objects.get(id=t[t.index('video')+6:])
+					instance.videos.add(video)
+				if 'image' in t:
+					image = Image.objects.get(id=t[t.index('image')+6:])
+					instance.images.add(image)
+				serialized = serializers.serialize('json', [ instance, ])
+				return JsonResponse({"instance":serialized},status=200)
+			else:
+				return JsonResponse(form.error, status=400)
 	return JsonResponse({"error":""}, status=400)
 
 '''########################    ACTOR     #########################'''
@@ -244,6 +274,18 @@ def new_actor(request):
 			return JsonResponse({"error": "That name is already in use"}, status=400)
 	return JsonResponse({"error":""}, status=400)
 
+@login_required
+def delete_actor(request, actor_id):
+	if request.method == "POST" and request.user.projector.admin:
+		actor = get_object_or_404(Actor, id=actor_id)
+		images = Image.objects.filter(actors=actor)
+		for image in images:
+			image.delete()
+		actor.delete()
+		messages.success(request, "Actor deleted.")
+		return HttpResponseRedirect(reverse('actors'))
+	messages.error(request, "An error occured.")
+	return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 #All Images
 @login_required
@@ -339,7 +381,7 @@ def image(request, image_id):
 @login_required
 def delete_image(request, image_id):
 	image = Image.objects.get(id=image_id)
-	if request.user.is_authenticated and request.user.projector.admin:
+	if request.user.is_authenticated and request.user.projector.admin and request.method == "POST":
 		context = {'image': image}
 		i_id = image.id
 		i_i = image.image.name
