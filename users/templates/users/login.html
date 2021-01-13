@@ -1,0 +1,23 @@
+{% extends "vid_manager/base.html" %}
+{% load bootstrap4 %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block header %}
+	<div class="jumbotron pt-1 pb-3 mt-2 bg-dark text-light text-center">
+		<h2>Log in to your account.</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% buttons %}
+        <button name="submit" class="btn btn-dark">log in</button>
+        {% endbuttons %}
+        <input type="hidden" name="next" value="{% url 'index' %}" />
+    </form>
+{% endblock %}

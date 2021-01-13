@@ -1,0 +1,34 @@
+{% extends "vid_manager/base.html" %}
+{% load bootstrap4 %}
+
+{% block title %}
+Account
+{% endblock %}
+
+{% block header %}
+<div class="jumbotron bg-dark mt-3 text-light pt-1 pb-3 text-center">
+	<h2>{{ username }}</h2>
+	{% load tz %}
+	{% timezone "US/Pacific" %}
+	<h5>Date Joined: {{ date_joined }}</h5>
+	{% endtimezone %}
+</div>
+{% if message %}
+<div class="alert alert-success" role="alert">
+  This is a success alert—check it out!
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card">
+	<div class="card-body">
+		{% if request.user.is_authenticated and request.user.username == username %}
+		<div>
+			<a class="btn btn-dark" href="{% url 'edit_account' request.user.username %}">change username</a>
+			<a class="btn btn-dark" href="{% url 'password_change' %}">change password</a>
+		</div>
+		{% endif %}
+	</div>
+</div>
+{% endblock %}

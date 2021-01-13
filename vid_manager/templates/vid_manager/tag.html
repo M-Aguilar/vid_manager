@@ -1,0 +1,44 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}{{tag}}{% endblock %}
+{% block header %}
+	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
+		<h2>{{ tag }}</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<div class="text-dark">
+		<a href="{% url 'tag_videos' tag.id %}"><h2>Videos</h2></a>
+		<hr>
+		<div class="row pb-2">
+			{% for video in videos %}
+				{% include 'vid_manager/video_preview.html' %}
+			{% empty %}
+				<p class='col-12'>No videos have been added yet.</p>
+			{% endfor %}
+		</div>
+		<hr>
+		<a href="{% url 'tag_images' tag.id %}"><h2>Images</h2></a>
+		<hr>
+		<div class="row">
+		{% for image in images %}
+			<div class="col-sm-5 col-md-3 mx-auto pb-3 col-lg-2">
+				{% if request.user.is_authenticated and request.user.projector.admin %}
+				<a href="{% url 'image' image.id %}">{% endif %}<img src="{{ image.image.url }}" height="auto" width="100%">{% if request.user.is_authenticated and request.user.projector.admin %}</a>{% endif %}
+			</div>
+		{% empty %}
+			<p>Nothing here.</p>
+		{% endfor %}
+		</div>
+		<form action="{% url 'delete_tag' tag.id %}" method="post">
+			{% csrf_token %}
+			<input type="hidden" name="tag_id" value="{{ tag.id }}"/>
+			{% buttons %}
+			<button name='submit' class="btn btn-dark"><a class='text-light' href="{% url 'delete_tag' tag.id %}">Delete Tag</a></button>
+			{% endbuttons %}
+		</form>
+	</div>
+{% endblock %}

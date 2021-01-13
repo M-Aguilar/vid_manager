@@ -1,0 +1,30 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}New Image{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
+		<h2>Add Image</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+	{% if messages %}
+		<div class="list-group">
+    	{% for message in messages %}
+    		<div class="list-group-item bg-info" {% if message.tags %} class="bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    	{% endfor %}
+		</div>
+	{% endif %}
+	<div class="text-dark">
+		<form action="{% url 'new_image' %}" method='post' class="form" enctype="multipart/form-data">
+			{% csrf_token %}
+			{% bootstrap_form form %}
+			{% buttons %}
+				<button name="submit" class="btn btn-dark">add image</button>
+			{% endbuttons %}	
+		</form>
+	</div>
+{% endblock %}

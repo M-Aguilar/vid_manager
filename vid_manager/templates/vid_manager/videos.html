@@ -1,0 +1,38 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}Videos{% endblock %}
+{% block header %}
+<div class="jumbotron bg-dark text-light py-2 display-4 text-center">
+	<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Videos: {{ videos.count }}</h3>
+</div>
+{% load static %}
+{% endblock %}
+
+{% block content %}
+<div class='my-2'>
+	<a class="btn btn-dark" href="{% url 'new_video' %}">Add Video</a>
+	<a class="btn btn-dark" href="{% url 'new_actor' %}">Add Actor</a>
+	<a class="btn btn-dark" href="{% url 'new_tag' %}">Add Tag</a>
+</div>
+<hr>
+{% if messages %}
+	<ul class="messages">
+   	{% for message in messages %}
+    	<li {% if message.tags %} class="bg-{{ message.tags }}"{% endif %}>{{ message }}</li>
+   	{% endfor %}
+	</ul>
+{% endif %}
+<div class="text-dark">
+	<div class="row">
+	{% for video in videos %}
+		{% include 'vid_manager/video_preview.html' %}
+	{% empty %}
+		<div class="list-group-item">
+			No videos have been added yet.
+		</div>
+	{% endfor %}
+	</div>
+</div>
+{% endblock %}

@@ -8,6 +8,7 @@ urlpatterns = [
 	#Actor Video
 	#path('<actor_id>/videos', views.videos, name='videos'),
 
+	path('<actor_id>/auto_add', views.auto_add, name='auto_add'),
 	#All Videos
 	path('videos', views.videos, name='videos'),
 
@@ -36,8 +37,6 @@ urlpatterns = [
 	path('delete_tag/<tag_id>', views.delete_tag, name='delete_tag'),
 
 	path('remove_tag/<tag_id>', views.remove_tag, name='remove_tag'),
-
-	path('remove_tag', views.remove_tag, name='remove_tag'),
 
 	#New Tag
 	path('new_tag', views.new_tag, name='new_tag'),

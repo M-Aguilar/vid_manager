@@ -1,0 +1,27 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+
+{% block title %}VidM{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light display-4 py-2 mt-5 text-center">
+		<h2>Welcome to HELL</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	{% if request.user.is_authenticated and request.user.projector.admin %}
+	<h2>Welcome</h2>
+	<div>
+		<p>Home pages are the most important and I need </p>
+	</div>
+	{% elif request.user.is_authenticated %}
+		<h2>Hello. Not much to do here.</h2>
+	{% else %}
+	<div class="text-dark">
+		<h2>Please <a href="{% url 'login' %}">login</a> or <a href="{% url 'register' %}">register</a></h2>
+	</div>
+	{% endif %}
+</div>
+{% endblock %}

@@ -25,7 +25,7 @@ class Tag(models.Model):
 	tag_name = models.CharField(max_length=20, unique=True)
 
 	def img(self):
-		img = Image.objects.filter(tags=self.id, image__isnull=False).last()
+		img = Image.objects.filter(tags=self.id, image__isnull=False).order_by('?').first()
 		if img:
 			return img.image
 		else:
@@ -45,7 +45,7 @@ class Actor(models.Model):
 		verbose_name_plural = 'actors'
 
 	def img(self):
-		img = Image.objects.filter(actors=self.id, image__isnull=False).last()
+		img = Image.objects.filter(actors=self.id, image__isnull=False).order_by("?").first()
 		if img:
 			return img.image
 		else:

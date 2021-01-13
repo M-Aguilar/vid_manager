@@ -1,0 +1,99 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}{{ actor }}{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
+		<h2>{{ actor }}</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalDeleteVideo">Confirm</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span class="text-theme" aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Please confirm that you would like to remove this video.
+        	</div>
+        	<div class="modal-footer">
+        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+        		<form action="{% url 'delete_actor' actor.id %}" method="post">
+        			{% csrf_token %}
+        			<input type="submit" class="btn bg-danger btn-dark" value="Delete">
+        		</form>
+        	</div>
+    	</div>
+	</div>
+</div>
+<div>
+	{% if messages %}
+	<div class="messages">
+    	{% for message in messages %}
+    		<div {% if message.tags %} class="p-1 rounded bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    	{% endfor %}
+	</div>
+	{% endif %}
+	{% if request.user.is_authenticated %}
+	<div>
+		<a href="{% url 'new_actor_image' actor.id %}" class="btn btn-dark">Add Image</a>
+		<a href="{% url 'new_video' actor.id %}" class="btn btn-dark">Add Video</a>
+		<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole">Delete Actor</a>
+	</div>
+	<hr>
+	{% endif %}
+	<div>
+		{% if request.user.is_authenticated and request.user.projector.admin %}
+			{% if new_videos > 0 %}
+				<div><p>You have {{ new_videos }} new video{% if new_videos == 1 %}{% else %}'s{% endif %}! Add them <a href="{% url 'auto_add' actor.id %}">here</a>.</p></div>
+			{% endif %}
+		{% endif %}
+		<div>
+			<h3>Info</h3>
+			<div>First Name: {{ actor.first_name }}</div>
+			<div>Last Name: {{ actor.last_name }}</div>
+			<div>Total Images: {{ actor.images_count }}</div>
+			<div>Total Videos: {{ actor.video_count }}</div>
+		</div>
+		<div>
+			<h2><a href="{% url 'actor_images' actor.id %}">Images</a></h2>
+		</div>
+		<div class="row d-none d-sm-flex">
+			{% for image in images %}
+			<div class="col-sm-6 col-md-4 col-lg-2">
+				<div>
+				{% if request.user.is_authenticated and request.user.projector.admin %}
+					<a href="{% url 'image' image.id %}">
+				{% endif %}
+					<img src="{{ image.image.url }}" height="auto" width="100%">
+				{% if request.user.is_authenticated and request.user.projector.admin %}
+					</a>
+				{% endif %}
+				</div>
+			</div>
+			{% empty %}
+				<p>Nothing here</p>
+			{% endfor %}
+		</div>
+	</div>
+	<div class="text-dark">
+		<h2>Recently Added <a href="{% url 'actor_videos' actor.id %}">Videos</a></h2>
+		<div class="row">
+			{% for video in videos %}
+				{% include 'vid_manager/video_preview.html' %}
+			{% empty %}
+				<li class="list-group-item">
+					No videos have been added yet.
+				</li>
+			{% endfor %}
+		</div>
+	</div>
+</div>
+{% endblock %}

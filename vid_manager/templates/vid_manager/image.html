@@ -1,0 +1,104 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}Image{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light display-4 mt-5 py-2 text-center">
+		{% for actor in actors %}
+		<a href="{% url 'actor' actor.id %}">{{ actor }}{% if actor != actors.last %},{% endif %}</a>
+		{% endfor %}
+	</div>
+{% endblock %}
+
+{% block content %}
+<div>
+	<div class="w-100">
+		<img src="{{ image.image.url }}" class="d-block mw-100 mx-auto" height="{{ image.height_field}}">
+	</div>
+	<hr>
+	<a href="{% url 'edit_image' image.id %}" class="btn btn-dark">Edit Image</a>
+</div>
+<div class="messages list-group">
+{% if messages %}
+    {% for message in messages %}
+    <div class="list-group-item bg-info" {% if message.tags %} class="bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    {% endfor %}
+{% endif %}
+</div>
+<div>
+	<div>
+		<i class='glyphicon glyphicon-tag my-auto' style='font-size: 25px;'></i>
+	</div>
+	<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
+		{% csrf_token %}
+		{% bootstrap_form tagform %}
+	</form>
+	<div id="tags">
+		<div class="tagrow d-flex flex-row">
+		{% for tag in image.tags.all %}
+			<div id="{{ tag }}" class='p-2 m-2 border border-dark rounded col-2'>
+				<div class="d-inline">
+					<a href="{% url 'tag' tag.id %}" class="d-inline float-left">
+						<div>{{ tag }}</div>
+					</a>
+					<a href="{% url 'remove_tag' %}" id="remove_tag" class="d-inline float-right" value="{{ tag.id }}">
+						<span class="btn btn-xs btn-dark">&times;</span>
+					</a>
+				</div>
+			</div>
+		{% empty %}
+			<div class='border border-dark rounded m-2 p-2'>No tags</div>
+		{% endfor %}
+	</div>
+</div>
+<script>
+	$("#remove_tag").focusout(function (e) {
+		e.preventDefault();
+		var tag = $(this).val();
+		$.ajax({
+			type: 'GET',
+			url: "{% url 'remove_tag' %}",
+			success: function (response) {
+				$("#id_tag_name").focus();
+				var instance = JSON.parse(response["tag"]);
+				var tag = instance[0]["fields"]
+				var tag_id = "#0".replace('0',tag["tag_name"]);
+				$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${tag["tag_name"]}" has been removed.</div>`);
+				$(tag_id).remove();
+			},
+
+			error: function (response) {
+				alert(response["responseJSON"]["error"]);
+			}
+		})
+	})
+
+	$("#tag_form").submit(function (e) {
+		e.preventDefault();
+		var serializedData = $(this).serialize();
+		$.ajax({
+			type: 'POST',
+			url: "{% url 'new_tag' %}",
+			data: serializedData,
+			success: function (response) {
+				$("#tag_form").trigger('reset');
+				$("#id_tag_name").focus();
+				var instance = JSON.parse(response["instance"]);
+				var fields = instance[0]["fields"];
+				var pk = instance[0]["pk"];
+				var new_url = "{% url 'tag' 0 %}".replace('0', pk);
+				var rm_tag = "{% url 'remove_tag' %}";
+				$(".messages").empty();
+				$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]||""}" has been added.</div>`);
+				$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]||""}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span class="btn btn-xs btn-dark">&times;</span></a><div></div>`);
+			},
+
+			error: function (response) {
+				alert(response["responseJSON"]["error"]);
+			}
+		})
+	});
+</script>
+{% endblock %}

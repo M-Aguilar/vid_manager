@@ -1,0 +1,69 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}Tags{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
+		<h2>TAGS: {{ tags.count }}</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<div class="text-dark">
+		{% if messages %}
+			<div class="messages mb-3">
+    		{% for message in messages %}
+    			<div {% if message.tags %} class="rounded p-1 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    		{% endfor %}
+			</div>
+		{% endif %}
+			<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
+				{% csrf_token %}
+				{% bootstrap_form new_tag_form %}	
+			</form>
+		</div>
+		<div id="tags">
+			<div class="tagrow row pb-2">
+				{% for tag in tags %}
+				<div class="col-sm-6 col-md-4 col-lg-2 pb-3">
+					<a href="{% url 'tag' tag.id %}">
+						<div class="preview">
+							<img src="{% if tag.img %}{{ tag.img.url }}{% else %}{% static 'vid_manager/blank_image.png' %}{% endif %}" height="auto" width="100%" alt=''>
+							<div class="top-left">{{ tag }}</div>
+						</div>
+					</a>
+				</div>
+				{% empty %}
+				<div>No tags have been added yet.</div>
+				{% endfor %}
+			</div>
+		</div>
+	</div>
+<script>
+		$("#tag_form").submit(function (e) {
+			e.preventDefault();
+			var serializedData = $(this).serialize();
+			$.ajax({
+				type: 'POST',
+				url: "{% url 'new_tag' %}",
+				data: serializedData,
+				success: function (response) {
+					//TODO make messages disappear if there are more than one. or allow to remove with 'X'
+					$("#tag_form").trigger('reset');
+					$("#id_tag_name").focus();
+					var instance = JSON.parse(response["instance"]);
+					var fields = instance[0]["fields"];
+					var pk = instance[0]["pk"];
+					var new_url = "{% url 'tag' 0 %}".replace('0', pk);
+					$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields['tag_name']}"has been added.</div>`);
+					$("#tags .tagrow").prepend(`<div class="col-sm-6 col-md-4 col-lg-2 pb-3"><a href="${new_url}"><div class="preview"><img src="{% load static %}{% static 'vid_manager/blank_image.png' %}" height="auto" width="100%" alt=''><div class="top-left">${fields['tag_name']}</div></div></a></div>`);
+				},
+				error: function (response) {
+					alert(response["responseJSON"]["error"]);
+				}
+			})
+		})
+</script>
+{% endblock %}

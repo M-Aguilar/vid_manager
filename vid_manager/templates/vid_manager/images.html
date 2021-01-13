@@ -1,0 +1,38 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}Images{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
+		<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Images: {{ images.count }}</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<div>
+		<a class="btn btn-dark" href="{% url 'new_image' %}">Add Image</a>
+	</div>
+	<hr class="mb-1">
+	<div class="text-dark">
+		{% if messages %}
+			<div class="messages">
+    		{% for message in messages %}
+    			<div{% if message.tags %} class="rounded p-1 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    		{% endfor %}
+			</div>
+		<hr>
+		{% endif %}
+		<div class="pb-2 row">
+			{% for image in images %}
+				{% if request.user.is_authenticated and request.user.projector.admin %}
+				<div class="col-sm-5 col-md-3 mx-auto pb-3 col-lg-2 mx-auto">
+					<a href="{% url 'image' image.id %}">{% endif %}<img src="{{ image.image.url }}" height="auto" width="100%">{% if request.user.is_authenticated and request.user.projector.admin %}</a>{% endif %}
+				</div>
+			{% empty %}
+				<p>Nothing here</p>
+			{% endfor %}
+		</div>
+	</div>
+{% endblock %}

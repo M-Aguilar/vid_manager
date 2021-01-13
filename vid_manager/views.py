@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core import serializers #ajax
 from os import stat #video bitrate, length, and size
 
+import json
 #NOT USED CURRENTLY
 #from itertools import chain
 #from django.core.files.images import get_image_dimensions
@@ -21,6 +22,86 @@ import mutagen.mp4
 from .thumbnail import capture
 from .models import Video, Tag, Actor, Event, Image
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm
+
+
+def auto_add(request, actor_id):
+	actor = Actor.objects.get(id=actor_id)
+	new_vidss = scan(actor)
+	for new_vids in new_vidss:
+		title = new_vids.split('/')[-1]
+		data = {'title': title[:title.index('.')],'actors': [actor],'file_path':new_vids}
+		form = VideoForm(data=data)
+		if form.is_valid():
+			new_video = form.save(commit=False)
+			try:
+				v = mutagen.mp4.Open(new_video.file_path)
+				seconds = v.info.length
+				b_rate = v.info.bitrate
+			except mutagen.mp4.MP4StreamInfoError:
+				seconds=0
+				messages.error(request, 'Something went wrong checking length of video.')
+			fp = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', new_video.file_path])
+			fp = fp.decode('ascii').rstrip()
+			dim = {'width':fp.split('x')[0],'height':fp.split('x')[1]}
+			new_video.owner = request.user
+			new_video.height = int(dim['height'])
+			new_video.width = int(dim['width'])
+			statinfo = stat(new_video.file_path)
+			new_video.length = seconds
+			new_video.bitrate = b_rate
+			new_video.size = statinfo.st_size
+			new_video.save()
+			form.save_m2m()	
+		else:
+			messages.error(request,form.errors)
+			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+	return HttpResponseRedirect(reverse('video', args=[new_video.id]))
+
+def auto_add_one(request, actor_id):
+	actor = Actor.objects.get(id=actor_id)
+	new_vids = scan(actor)[0]
+	title = new_vids.split('/')[-1]
+	data = {'title': title[:title.index('.')],'actors': [actor],'file_path':new_vids}
+	form = VideoForm(data=data)
+	if form.is_valid():
+		new_video = form.save(commit=False)
+		try:
+			v = mutagen.mp4.Open(new_video.file_path)
+			seconds = v.info.length
+			b_rate = v.info.bitrate
+		except mutagen.mp4.MP4StreamInfoError:
+			seconds=0
+			messages.error(request, 'Something went wrong checking length of video.')
+		fp = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', new_video.file_path])
+		fp = fp.decode('ascii').rstrip()
+		dim = {'width':fp.split('x')[0],'height':fp.split('x')[1]}
+		new_video.owner = request.user
+		new_video.height = int(dim['height'])
+		new_video.width = int(dim['width'])
+		statinfo = stat(new_video.file_path)
+		new_video.length = seconds
+		new_video.bitrate = b_rate
+		new_video.size = statinfo.st_size
+		new_video.save()
+		form.save_m2m()	
+		return HttpResponseRedirect(reverse('video', args=[new_video.id]))
+	else:
+		messages.error(request,form.errors)
+		return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+def scan(actor):
+	form = VideoForm()
+	choices = form.fields['file_path'].choices
+	actor_videos = [x.file_path for x in actor.videos.all()]
+	found = [x[0] for x in choices if ((actor.full_name in x[0]) or (actor.first_name in x[0])) and x[0] not in actor_videos]
+	return found
+
+def form_scan(actor):
+	form = VideoForm()
+	choices = form.fields['file_path'].choices
+	actor_videos = [x.file_path for x in actor.videos.all()]
+	found = [x for x in choices if ((actor.full_name in x[0]) or (actor.first_name in x[0])) and x[0] not in actor_videos]
+	return found
 
 def index(request):
 	return render(request, 'vid_manager/index.html')
@@ -78,8 +159,12 @@ def new_video(request, actor_id=None):
 			actor = Actor.objects.get(id=actor_id)
 			data = {'actors':actor}
 			form = VideoForm(initial=data)
+			form.fields['file_path'].choices = form_scan(actor)
 		else:
+			all_fps = [x.file_path for x in Video.objects.all()]
 			form = VideoForm()
+			choices = [x for x in form.fields['file_path'].choices if x[0] not in all_fps]
+			form.fields['file_path'].choices = choices
 	else:
 		form = VideoForm(data=request.POST)
 		if form.is_valid():
@@ -121,7 +206,9 @@ def edit_video(request, video_id):
 		form = VideoForm(instance=video)
 	else:
 		form = VideoForm(instance=video, data=request.POST, files=request.FILES)
-		if (request.FILES.get('poster', False) and request.FILES['poster'] != video.poster) or (request.FILES.get('poster', True) and video.poster):
+		print("request.FILES.get('poster', False) :: {0}".format(request.FILES.get('poster', False)))
+		print("request.FILES['poster'] :: {0}".format(request.FILES.get('poster')))
+		if (request.FILES.get('poster', False) and request.FILES.get('poster') != video.poster):
 			video.poster.delete()
 		if form.is_valid():
 			form.save()
@@ -185,21 +272,22 @@ def delete_tag(request, tag_id):
 	return HttpResponseRedirect(reverse('tags'))
 
 @login_required
-def remove_tag(request, tag_id=None):
-	print(tag_id)
-	print("Type: {0}".format(type(tag_id)))
+def remove_tag(request, tag_id):
 	t = request.META.get('HTTP_REFERER')
-	if request.is_ajax and request.user.projector.admin and tag_id:
+	print(t)
+	if request.is_ajax and request.user.projector.admin:
 		tag = Tag.objects.get(id=tag_id)
 		print(tag)
 		if 'video' in t:
 			video = Video.objects.get(id=t[t.index('video')+6:])
 			video.tags.remove(tag)
-			video.save()
-			instance = tag
-			serialized = serializers.serialize('json', [ instance, ])
-			return JsonResponse({"tag":instance},status=200)
-	return JsonResponse({"error":""}, status=400)
+		if 'image' in t:
+			image = Image.objects.get(id=t[t.index('image')+6:])
+			image.tags.remove(tag)
+		instance = tag
+		return JsonResponse({'instance':serializers.serialize('json',[instance,])}, status=200)
+	else:
+		return JsonResponse({"error":""}, status=400)
 
 @login_required
 def new_tag(request):
@@ -215,7 +303,7 @@ def new_tag(request):
 					tag.videos.add(video)
 				if 'image' in t:
 					image = Image.objects.get(id=t[t.index('image')+6:])
-					tag.images.add(image)
+					image.tags.add(tag)
 				serialized = serializers.serialize('json', [ instance, ])
 				return JsonResponse({"instance":serialized},status=200)
 		except Tag.DoesNotExist:
@@ -241,9 +329,10 @@ def actor(request, actor_id):
 		raise Http404
 	else:
 		actor = get_object_or_404(Actor,id=actor_id)
+		new_videos = scan(actor)
 		images = Image.objects.filter(actors=actor)[:6]
 		videos= Video.objects.filter(actors=actor)
-	context={'actor':actor, 'videos': videos, 'images':images}
+	context={'actor':actor, 'videos': videos, 'images':images, 'new_videos': len(new_videos)}
 	return render(request, 'vid_manager/actor.html', context)
 
 @login_required
@@ -375,7 +464,7 @@ def image(request, image_id):
 		raise Http404
 	actors = image.actors.all()
 	tag_form = TagForm()
-	context = {'image':image,'actors':actors}
+	context = {'image':image,'actors':actors, 'tagform': tag_form}
 	return render(request, 'vid_manager/image.html', context)
 
 @login_required

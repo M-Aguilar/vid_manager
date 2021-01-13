@@ -1,0 +1,31 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}Edit Image {% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
+		<h2>Edit Image</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+	{{image.first}}
+	<div class="text-dark">
+		<form action="{% url 'edit_image' image.id %}" method='post' enctype="multipart/form-data">
+		{% csrf_token %}
+		{% bootstrap_form form %}
+
+		{% buttons %}
+			<button name="submit" class="btn btn-dark">save changes</button>
+		{% endbuttons %}	
+		</form>
+		{% if user.is_authenticated and user.projector.admin %} 
+		<form action="{% url 'delete_image' image.id %}" method='post'>
+			{% csrf_token %}
+			<input type="submit" class="btn btn-dark" value="delete">
+		</form>
+        {% endif %}
+	</div>
+{% endblock %}

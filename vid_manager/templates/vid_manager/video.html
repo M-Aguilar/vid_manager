@@ -1,0 +1,205 @@
+{% extends "vid_manager/base.html" %}
+{% load bootstrap4 %}
+
+{% block title %}{{ video.title }}{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark py-2 text-center text-light display-4 mt-5">
+		<h2>{{ video.title }}</h2>
+	</div>
+	{% load static %}
+	<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalDeleteVideo">Confirm</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Please confirm that you would like to remove this video.
+        	</div>
+        	<div class="modal-footer">
+        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+        		<a href="{% url 'delete_video' video.id %}"><button type="button" class="btn bg-danger">Confirm</button></a>
+        	</div>
+    	</div>
+	</div>
+</div>
+<div class="main-container">
+	{% if messages %}
+	<div class="messages list-group">
+    	{% for message in messages %}
+    	<div class="list-group-item bg-warning" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+    	{% endfor %}
+	</div>
+	{% endif %}
+	<video style="width:100%;" preload="metadata" id='vid_player' controls range poster="{% if video.poster %}{{ video.poster.url }}{% elif events.first %}{{events.first.url}}{% endif%}">
+    	<source src="{{ video.path }}" type="video/mp4">
+	</video>
+	<div>
+		Events:
+		<div class="d-flex flex-row overflow-auto">
+		{% for event in events %}
+			<a href='#' class="mr-2">
+				<div class="preview">
+					<img height='100px' src="{{ event.url }}" onclick="jump('{{event.seconds}}')">
+					<div class="top-left">
+						{{event.name}} 
+					</div>
+					<div class="bottom-right">
+						{{ event.time}}
+					</div>
+				</div>
+			</a>
+			
+			{% empty %}
+				No events
+			{% endfor %}
+		</div>
+	</div>
+	<hr>
+	<div>
+		<div class="d-md-flex flex-row d-block">
+			<div class="list-group flex-row">
+				{% for actor in actors %}
+				<a href="{% url 'actor' actor.id %}"><div class='p-2 m-2 border border-dark rounded text-center'>{{actor}}</div></a>
+				{% empty %}
+					<div class="border border-dark rounded m-2 p-2">No artists have been identified in this video.</div>
+				{% endfor %}
+			</div>
+			<div class="d-flex col justify-content-end">
+				<ul class="list-group flex-row">
+					<div>
+						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.width }}x{{video.height}}</li>
+					</div>
+					<div>
+						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.size_neat }}</li>
+					</div>
+					<div>
+						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.time }}</li>
+					</div>
+					<div>
+						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.b_rate }}</li>
+					</div>
+					{% if video.release_date %}
+					<div>
+						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.release_date }}</li>
+					</div>
+					{% endif %}
+				</ul>
+			</div>
+		</div>
+		<div class='d-flex flex-row'>
+			<div>
+				<i class='glyphicon glyphicon-tag my-auto' style='font-size: 25px;'></i>
+			</div>
+			<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
+				{% csrf_token %}
+				{% bootstrap_form tagform %}
+			</form>
+		</div>
+		<div>
+			<div id="tags">
+				<div class="tagrow d-flex flex-row">
+					{% for tag in tags %}				
+					<div id="{{ tag.id }}" class='p-2 m-2 border border-dark rounded col-2'>
+						<div class="d-inline">
+							<a href="{% url 'tag' tag.id %}" class="d-inline float-left">
+								<div>{{ tag }}</div>
+							</a>
+							<a href="{% url 'remove_tag' tag.id %}" id="remove_tag" value="{{ tag.id }}" class="d-inline float-right">
+								<span class="btn btn-xs btn-dark" value="{{ tag.id }}">&times;</span>
+							</a>
+						</div>
+					</div>
+					{% empty %}
+					<div class='border border-dark rounded m-2 p-2'>No tags</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="my-3">
+		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}">Edit Video</a>
+		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}">Add Image</a>
+		<a class='btn btn-dark mb-3' href="#add_event" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event">Add Event</a>
+		<div class="collapse" id="add_event">
+			<div class="card-body"> 
+				<form action="{% url 'new_event' video.id %}" method='post' class="form">
+					{% csrf_token %}
+					{% bootstrap_form eventform %}
+					{% buttons %}
+						<button name="submit" class="btn btn-dark">Submit</button>
+					{% endbuttons %}	
+				</form>
+			</div>
+		</div>
+		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole">Delete Video</a>
+	</div>
+	<script>
+		function jump(time) {
+			var myvideo = document.getElementById('vid_player');
+			event.preventDefault();
+    		myvideo.currentTime = time;
+    		myvideo.play();
+		}
+
+		$("a#remove_tag").on('click', function (e) {
+			e.preventDefault();
+			var new_url = "{% url 'remove_tag' 0 %}".replace('0', $(this).attr('value'));
+			$.ajax({
+				type: 'GET',
+				url: new_url,
+				success: function (response) {
+					var instance = JSON.parse(response["instance"]);
+					var fields = instance[0]["fields"];
+					var pk = instance[0]["pk"];
+					$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]}" has been removed.</div>`);
+					$('#'+pk).remove();
+				},
+
+				error: function (response) {
+					alert(response["responseJSON"]["error"]);
+				}
+			})
+		});
+
+		$("#tag_form").submit(function (e) {
+			e.preventDefault();
+			var serializedData = $(this).serialize();
+			$.ajax({
+				type: 'POST',
+				url: "{% url 'new_tag' %}",
+				data: serializedData,
+				success: function (response) {
+					$("#tag_form").trigger('reset');
+					$("#id_tag_name").focus();
+					var instance = JSON.parse(response["instance"]);
+					var fields = instance[0]["fields"];
+					var pk = instance[0]["pk"];
+					var new_url = "{% url 'tag' 0 %}".replace('0', pk);
+					var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);
+					$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span value="${pk}" class="btn btn-xs btn-dark">&times;</span></a></div></div>`);
+				},
+
+				error: function (response) {
+					alert(response["responseJSON"]["error"]);
+				}
+			})
+		});
+	</script>
+	<div>
+		{% for image in images %}
+		<a href="{% url 'image' image.id %}"><img src="{{ image.image.url }}" class="mw-100" height="300"></a>
+		{% empty %}
+		<p>No images</p>
+		{% endfor %}
+	</div>
+</div>
+{% endblock %}

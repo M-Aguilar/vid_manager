@@ -1,0 +1,31 @@
+{% extends "vid_manager/base.html" %}
+<!--CSSLINE{% load static %}-->
+{% load bootstrap4 %}
+
+{% block title %}Edit {{video.title}}{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light display-4 mt-5 pb-3 pt-1 mb-3 text-center">
+		<h2>Edit Video</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+	{% if messages %}
+	<div class="messages mb-3">
+    	{% for message in messages %}
+    	<div {% if message.tags %} class="rounded p-1 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    	{% endfor %}
+	</div>
+	{% endif %}
+	<div class="text-dark">
+		<form action="{% url 'edit_video' video.id %}" method='post' enctype="multipart/form-data">
+		{% csrf_token %}
+		{% bootstrap_form form %}
+
+		{% buttons %}
+			<button name="submit" class="btn btn-dark">save changes</button>
+		{% endbuttons %}	
+	</form>
+	</div>
+{% endblock %}
