@@ -43,7 +43,7 @@
 					<a href="{% url 'tag' tag.id %}" class="d-inline float-left">
 						<div>{{ tag }}</div>
 					</a>
-					<a href="{% url 'remove_tag' %}" id="remove_tag" class="d-inline float-right" value="{{ tag.id }}">
+					<a href="{% url 'remove_tag' tag.id %}" id="remove_tag" class="d-inline float-right" value="{{ tag.id }}">
 						<span class="btn btn-xs btn-dark">&times;</span>
 					</a>
 				</div>
@@ -54,19 +54,18 @@
 	</div>
 </div>
 <script>
-	$("#remove_tag").focusout(function (e) {
+	$(".tagrow").on('click', "a#remove_tag", function (e) {
 		e.preventDefault();
-		var tag = $(this).val();
+		var new_url = "{% url 'remove_tag' 0 %}".replace('0', $(this).attr('value'));
 		$.ajax({
 			type: 'GET',
-			url: "{% url 'remove_tag' %}",
+			url: new_url,
 			success: function (response) {
-				$("#id_tag_name").focus();
-				var instance = JSON.parse(response["tag"]);
-				var tag = instance[0]["fields"]
-				var tag_id = "#0".replace('0',tag["tag_name"]);
-				$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${tag["tag_name"]}" has been removed.</div>`);
-				$(tag_id).remove();
+				var instance = JSON.parse(response["instance"]);
+				var fields = instance[0]["fields"];
+				var pk = instance[0]["pk"];
+				$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]}" has been removed.</div>`);
+				$('#'+pk).remove();
 			},
 
 			error: function (response) {
@@ -89,7 +88,7 @@
 				var fields = instance[0]["fields"];
 				var pk = instance[0]["pk"];
 				var new_url = "{% url 'tag' 0 %}".replace('0', pk);
-				var rm_tag = "{% url 'remove_tag' %}";
+				var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);
 				$(".messages").empty();
 				$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]||""}" has been added.</div>`);
 				$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]||""}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span class="btn btn-xs btn-dark">&times;</span></a><div></div>`);

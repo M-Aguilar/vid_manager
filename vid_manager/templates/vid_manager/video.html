@@ -150,7 +150,7 @@
     		myvideo.play();
 		}
 
-		$("a#remove_tag").on('click', function (e) {
+		$(".tagrow").on('click', "a#remove_tag", function (e) {
 			e.preventDefault();
 			var new_url = "{% url 'remove_tag' 0 %}".replace('0', $(this).attr('value'));
 			$.ajax({

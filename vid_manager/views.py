@@ -93,7 +93,9 @@ def scan(actor):
 	form = VideoForm()
 	choices = form.fields['file_path'].choices
 	actor_videos = [x.file_path for x in actor.videos.all()]
-	found = [x[0] for x in choices if ((actor.full_name in x[0]) or (actor.first_name in x[0])) and x[0] not in actor_videos]
+	found = [x[0] for x in choices if actor.full_name in x[0]]
+	if len(found) == 0:
+		found = [x[0] for x in choices if actor.first_name in x[0] and x[0] not in actor_videos]
 	return found
 
 def form_scan(actor):
