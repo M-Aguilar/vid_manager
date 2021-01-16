@@ -5,7 +5,7 @@
 {% block title %}Videos{% endblock %}
 {% block header %}
 <div class="jumbotron bg-dark text-light py-2 display-4 text-center">
-	<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Videos: {{ videos.count }}</h3>
+	<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Videos: {{ total }}</h3>
 </div>
 {% load static %}
 {% endblock %}
@@ -13,8 +13,10 @@
 {% block content %}
 <div class='my-2'>
 	<a class="btn btn-dark" href="{% url 'new_video' %}">Add Video</a>
-	<a class="btn btn-dark" href="{% url 'new_actor' %}">Add Actor</a>
-	<a class="btn btn-dark" href="{% url 'new_tag' %}">Add Tag</a>
+	<span class="current float-right">
+		Page {{ videos.number }} of {{ videos.paginator.num_pages }}
+	</span>
+</div>
 </div>
 <hr>
 {% if messages %}
@@ -24,6 +26,18 @@
    	{% endfor %}
 	</ul>
 {% endif %}
+<div class="pagination d-flex justify-content-center">
+	<span class="step-links">
+		{% if videos.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}">previous</a>
+		{% endif %}
+		{% if videos.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}">last &raquo;</a>
+		{% endif %}
+	</span>
+</div>
 <div class="text-dark">
 	<div class="row">
 	{% for video in videos %}
@@ -34,5 +48,23 @@
 		</div>
 	{% endfor %}
 	</div>
+</div>
+<hr>
+<div class="d-flex justify-content-center">
+	<span class="current">
+		Page {{ videos.number }} of {{ videos.paginator.num_pages }}
+	</span>
+</div>
+<div class="pagination d-flex justify-content-center">
+	<span class="step-links">
+		{% if videos.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}">previous</a>
+		{% endif %}
+		{% if videos.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}">last &raquo;</a>
+		{% endif %}
+	</span>
 </div>
 {% endblock %}

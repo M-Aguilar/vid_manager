@@ -41,7 +41,7 @@
 				<a href="{% url 'actor' actor.id %}" >
 					<div class="preview">
 						<img src="{% if actor.img %}{{ actor.img.url }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
-						<div class="top-left">{{ actor }}</div>
+						<div class="img-top-left">{{ actor }}</div>
 					</div>
 				</a>
 			</div>

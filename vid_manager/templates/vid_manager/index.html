@@ -13,9 +13,6 @@
 <div class="container">
 	{% if request.user.is_authenticated and request.user.projector.admin %}
 	<h2>Welcome</h2>
-	<div>
-		<p>Home pages are the most important and I need </p>
-	</div>
 	{% elif request.user.is_authenticated %}
 		<h2>Hello. Not much to do here.</h2>
 	{% else %}

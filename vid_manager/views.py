@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages 
 from django.core import serializers #ajax
 from os import stat #video bitrate, length, and size
-
+from django.core.paginator import Paginator
 import json
 #NOT USED CURRENTLY
 #from itertools import chain
@@ -22,7 +22,6 @@ import mutagen.mp4
 from .thumbnail import capture
 from .models import Video, Tag, Actor, Event, Image
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm
-
 
 def auto_add(request, actor_id):
 	actor = Actor.objects.get(id=actor_id)
@@ -57,56 +56,17 @@ def auto_add(request, actor_id):
 			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 	return HttpResponseRedirect(reverse('video', args=[new_video.id]))
 
-def auto_add_one(request, actor_id):
-	actor = Actor.objects.get(id=actor_id)
-	new_vids = scan(actor)[0]
-	title = new_vids.split('/')[-1]
-	data = {'title': title[:title.index('.')],'actors': [actor],'file_path':new_vids}
-	form = VideoForm(data=data)
-	if form.is_valid():
-		new_video = form.save(commit=False)
-		try:
-			v = mutagen.mp4.Open(new_video.file_path)
-			seconds = v.info.length
-			b_rate = v.info.bitrate
-		except mutagen.mp4.MP4StreamInfoError:
-			seconds=0
-			messages.error(request, 'Something went wrong checking length of video.')
-		fp = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', new_video.file_path])
-		fp = fp.decode('ascii').rstrip()
-		dim = {'width':fp.split('x')[0],'height':fp.split('x')[1]}
-		new_video.owner = request.user
-		new_video.height = int(dim['height'])
-		new_video.width = int(dim['width'])
-		statinfo = stat(new_video.file_path)
-		new_video.length = seconds
-		new_video.bitrate = b_rate
-		new_video.size = statinfo.st_size
-		new_video.save()
-		form.save_m2m()	
-		return HttpResponseRedirect(reverse('video', args=[new_video.id]))
-	else:
-		messages.error(request,form.errors)
-		return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-
 def scan(actor):
 	form = VideoForm()
 	choices = form.fields['file_path'].choices
-	actor_videos = [x.file_path for x in actor.videos.all()]
-	found = [x[0] for x in choices if actor.full_name in x[0]]
-	if len(found) == 0:
-		found = [x[0] for x in choices if actor.first_name in x[0] and x[0] not in actor_videos]
-	return found
-
-def form_scan(actor):
-	form = VideoForm()
-	choices = form.fields['file_path'].choices
-	actor_videos = [x.file_path for x in actor.videos.all()]
-	found = [x for x in choices if ((actor.full_name in x[0]) or (actor.first_name in x[0])) and x[0] not in actor_videos]
+	actor_videos = [x.file_path for x in Video.objects.filter(actors__isnull=False)]
+	found = [x for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
 	return found
 
 def index(request):
 	return render(request, 'vid_manager/index.html')
+
+'''########################    ACTOR     #########################'''
 
 @login_required
 def video(request, video_id):
@@ -127,21 +87,27 @@ def video(request, video_id):
 
 @login_required
 def videos(request):
-	context = {}
 	if request.user.is_authenticated and request.user.projector.admin:
 		videos = Video.objects.filter(owner=request.user).order_by('-date_added')
 	else:
 		videos = Video.objects.filter(public=True)
-	context['videos'] = videos
+	total = videos.count()
+	paginator = Paginator(videos, 24)
+	page_num = request.GET.get('page')
+	page_o = paginator.get_page(page_num)
+	context = {'videos':page_o, 'total':total}
 	return render(request, 'vid_manager/videos.html', context)
-
 
 @login_required
 def tag_videos(request, tag_id):
 	tag = get_object_or_404(Tag, id=tag_id)
 	if request.user.is_authenticated and request.user.projector.admin:
 		videos = Video.objects.filter(tags=tag)
-	context = {'videos':videos, 'tag':tag}
+		total = videos.count()
+	paginator = Paginator(videos, 24)
+	page_num = request.GET.get('page')
+	page_o = paginator.get_page(page_num)
+	context = {'videos':page_o, 'tag':tag, 'total':total}
 	return render(request, 'vid_manager/videos.html', context)
 
 @login_required
@@ -149,7 +115,11 @@ def actor_videos(request, actor_id):
 	actor = get_object_or_404(Actor, id=actor_id)
 	if request.user.is_authenticated and request.user.projector.admin:
 		videos = Video.objects.filter(actors=actor)
-	context = {'videos':videos, 'actor': actor}
+		total = videos.count()
+	paginator = Paginator(videos, 24)
+	page_num = request.GET.get('page')
+	page_o = paginator.get_page(page_num)
+	context = {'videos':page_o, 'actor': actor, 'total':total}
 	return render(request, 'vid_manager/videos.html', context)
 
 @login_required
@@ -161,9 +131,9 @@ def new_video(request, actor_id=None):
 			actor = Actor.objects.get(id=actor_id)
 			data = {'actors':actor}
 			form = VideoForm(initial=data)
-			form.fields['file_path'].choices = form_scan(actor)
+			form.fields['file_path'].choices = scan(actor)
 		else:
-			all_fps = [x.file_path for x in Video.objects.all()]
+			all_fps = [x.file_path for x in Video.objects.filter(actors__isnull=False)]
 			form = VideoForm()
 			choices = [x for x in form.fields['file_path'].choices if x[0] not in all_fps]
 			form.fields['file_path'].choices = choices
@@ -208,8 +178,6 @@ def edit_video(request, video_id):
 		form = VideoForm(instance=video)
 	else:
 		form = VideoForm(instance=video, data=request.POST, files=request.FILES)
-		print("request.FILES.get('poster', False) :: {0}".format(request.FILES.get('poster', False)))
-		print("request.FILES['poster'] :: {0}".format(request.FILES.get('poster')))
 		if (request.FILES.get('poster', False) and request.FILES.get('poster') != video.poster):
 			video.poster.delete()
 		if form.is_valid():
@@ -242,8 +210,12 @@ def tags(request):
 	if not request.user.projector.admin:
 		raise Http404
 	tags = Tag.objects.order_by('tag_name')
+	total = tags.count()
+	paginator = Paginator(tags, 24)
+	page_num = request.GET.get('page')
+	page_o = paginator.get_page(page_num)
 	new_tag_form = TagForm()
-	context = {'tags': tags, 'new_tag_form': new_tag_form}
+	context = {'tags': page_o, 'new_tag_form': new_tag_form, 'total':total}
 	return render(request, 'vid_manager/tags.html', context)
 
 @login_required
@@ -332,9 +304,9 @@ def actor(request, actor_id):
 	else:
 		actor = get_object_or_404(Actor,id=actor_id)
 		new_videos = scan(actor)
-		images = Image.objects.filter(actors=actor)[:6]
+		images = Image.objects.filter(actors=actor)
 		videos= Video.objects.filter(actors=actor)
-	context={'actor':actor, 'videos': videos, 'images':images, 'new_videos': len(new_videos)}
+	context={'actor':actor, 'videos': videos[:6], 'images':images[:12], 'total_vids': videos.count(), 'total_images': images.count(), 'new_videos': len(new_videos)}
 	return render(request, 'vid_manager/actor.html', context)
 
 @login_required
@@ -378,14 +350,20 @@ def delete_actor(request, actor_id):
 	messages.error(request, "An error occured.")
 	return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
+'''########################    IMAGES     #########################'''
+
 #All Images
 @login_required
 def images(request):
 	if request.user.is_authenticated and request.user.projector.admin:
 		images = Image.objects.all()
+		total = images.count()
 	else:
 		raise Http404
-	context = {'images': images}
+	paginator = Paginator(images, 24)
+	page_num = request.GET.get('page')
+	page_o = paginator.get_page(page_num)
+	context = {'images': page_o, 'total':total}
 	return render(request,'vid_manager/images.html',context)
 
 #Tag Images
@@ -396,7 +374,10 @@ def tag_images(request, tag_id):
 		images = Image.objects.filter(tags=tag)
 	else:
 		raise Http404
-	context = {'images':images, 'tag': tag}
+	paginator = Paginator(images, 24)
+	page_num = request.GET.get('page')
+	page_o = paginator.get_page(page_num)
+	context = {'images':page_o, 'tag': tag}
 	return render(request, 'vid_manager/images.html', context)
 
 #Actor Images
@@ -407,7 +388,10 @@ def actor_images(request, actor_id):
 		images = Image.objects.filter(actors=actor)
 	else:
 		raise Http404
-	context = {'images': images, 'actor': actor}
+	paginator = Paginator(images, 24)
+	page_num = request.GET.get('page')
+	page_o = paginator.get_page(page_num)
+	context = {'images': page_o, 'actor': actor}
 	return render(request, 'vid_manager/images.html', context)
 
 #New Video Image
@@ -503,6 +487,8 @@ def edit_image(request, image_id):
 	context = {'image': image,'form': form}
 	return render(request, 'vid_manager/edit_image.html', context)
 
+
+'''########################    EVENTS     #########################'''
 #TODO check for time inside bounds of video length
 @login_required
 def new_event(request,video_id):

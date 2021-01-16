@@ -4,10 +4,8 @@ from . import views
 
 urlpatterns = [
 	path('',views.index, name='index'),
-
 	#Actor Video
 	#path('<actor_id>/videos', views.videos, name='videos'),
-
 	path('<actor_id>/auto_add', views.auto_add, name='auto_add'),
 	#All Videos
 	path('videos', views.videos, name='videos'),
@@ -36,6 +34,7 @@ urlpatterns = [
 	#Delete Tag
 	path('delete_tag/<tag_id>', views.delete_tag, name='delete_tag'),
 
+	#Remove tag.
 	path('remove_tag/<tag_id>', views.remove_tag, name='remove_tag'),
 
 	#New Tag
@@ -71,7 +70,7 @@ urlpatterns = [
 	path('images/<tag_id>', views.tag_images, name='tag_images'),
 	#path('images/#=<page_num>',views.images, name='images'),
 
-	#All Images
+	#Images
 	path('images',views.images, name='images'),
 
 	#New Actor Image

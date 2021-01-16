@@ -118,7 +118,7 @@ class Video(models.Model):
 		return str(round((self.bitrate * 0.0001), 1)) + "MB/s"
 
 	def path(self):
-		return "http://10.15.69.69:8800/media/{0}".format(self.file_path[self.file_path.index('videos'):])
+		return settings.MEDIA_SERVER + self.file_path[self.file_path.index('videos'):]
 
 	def actor_list_url(self):
 		actor_list = None

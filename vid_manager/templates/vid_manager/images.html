@@ -6,20 +6,36 @@
 
 {% block header %}
 	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
-		<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Images: {{ images.count }}</h2>
+		<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Images: {{ total }}</h2>
 	</div>
 {% endblock %}
 
 {% block content %}
-	<div>
-		<a class="btn btn-dark" href="{% url 'new_image' %}">Add Image</a>
-	</div>
+<div>
+	<a class="btn btn-dark" href="{% url 'new_image' %}">Add Image</a>
+	<span class="current float-right">
+		Page {{ images.number }} of {{ images.paginator.num_pages }}
+	</span>
+</div>
+<div class="pagination d-flex justify-content-center">
+	<span class="step-links">
+		{% if images.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ images.previous_page_number }}">previous</a>
+		{% endif %}
+		{% if images.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ images.next_page_number }}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ images.paginator.num_pages }}">last &raquo;</a>
+		{% endif %}
+	</span>
+</div>
+<div>
 	<hr class="mb-1">
 	<div class="text-dark">
 		{% if messages %}
 			<div class="messages">
     		{% for message in messages %}
-    			<div{% if message.tags %} class="rounded p-1 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    			<div {% if message.tags %} class="rounded p-1 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
     		{% endfor %}
 			</div>
 		<hr>
@@ -35,4 +51,23 @@
 			{% endfor %}
 		</div>
 	</div>
+</div>
+<hr>
+<div class="d-flex justify-content-center">
+	<span class="current">
+		Page {{ images.number }} of {{ images.paginator.num_pages }}
+	</span>
+</div>
+<div class="pagination d-flex justify-content-center">
+	<span class="step-links">
+		{% if images.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ images.previous_page_number }}">previous</a>
+		{% endif %}
+		{% if images.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ images.next_page_number }}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ images.paginator.num_pages }}">last &raquo;</a>
+		{% endif %}
+	</span>
+</div>
 {% endblock %}

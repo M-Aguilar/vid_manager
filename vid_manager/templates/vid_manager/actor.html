@@ -63,7 +63,7 @@
 			<div>Total Videos: {{ actor.video_count }}</div>
 		</div>
 		<div>
-			<h2><a href="{% url 'actor_images' actor.id %}">Images</a></h2>
+			<h2><a href="{% url 'actor_images' actor.id %}">Images ({{ total_images }})</a></h2>
 		</div>
 		<div class="row d-none d-sm-flex">
 			{% for image in images %}
@@ -84,7 +84,7 @@
 		</div>
 	</div>
 	<div class="text-dark">
-		<h2>Recently Added <a href="{% url 'actor_videos' actor.id %}">Videos</a></h2>
+		<h2>Recently Added <a href="{% url 'actor_videos' actor.id %}">Videos ({{ total_vids }})</a></h2>
 		<div class="row">
 			{% for video in videos %}
 				{% include 'vid_manager/video_preview.html' %}

@@ -6,41 +6,75 @@
 
 {% block header %}
 	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
-		<h2>TAGS: {{ tags.count }}</h2>
+		<h2>TAGS: {{ total }}</h2>
 	</div>
 {% endblock %}
 
 {% block content %}
-	<div class="text-dark">
-		{% if messages %}
-			<div class="messages mb-3">
-    		{% for message in messages %}
-    			<div {% if message.tags %} class="rounded p-1 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
-    		{% endfor %}
-			</div>
-		{% endif %}
-			<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
-				{% csrf_token %}
-				{% bootstrap_form new_tag_form %}	
-			</form>
+<div class="text-dark">
+	{% if messages %}
+		<div class="messages mb-3">
+    	{% for message in messages %}
+    		<div {% if message.tags %} class="rounded p-1 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    	{% endfor %}
 		</div>
-		<div id="tags">
-			<div class="tagrow row pb-2">
-				{% for tag in tags %}
-				<div class="col-sm-6 col-md-4 col-lg-2 pb-3">
-					<a href="{% url 'tag' tag.id %}">
-						<div class="preview">
-							<img src="{% if tag.img %}{{ tag.img.url }}{% else %}{% static 'vid_manager/blank_image.png' %}{% endif %}" height="auto" width="100%" alt=''>
-							<div class="top-left">{{ tag }}</div>
-						</div>
-					</a>
-				</div>
-				{% empty %}
-				<div>No tags have been added yet.</div>
-				{% endfor %}
+	{% endif %}
+		<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
+			{% csrf_token %}
+			{% bootstrap_form new_tag_form %}	
+		</form>
+	</div>
+	<div class="float-right">
+		<span class="current">
+			Page {{ tags.number }} of {{ tags.paginator.num_pages }}
+		</span>
+	</div>
+	<div class="pagination d-flex justify-content-center">
+		<span class="step-links">
+			{% if tags.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ tags.previous_page_number }}">previous</a>
+			{% endif %}
+			{% if tags.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ tags.next_page_number }}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ tags.paginator.num_pages }}">last &raquo;</a>
+			{% endif %}
+		</span>
+	</div>
+	<div id="tags">
+		<div class="tagrow row pb-2">
+			{% for tag in tags %}
+			<div class="col-sm-6 col-md-4 col-lg-2 pb-3">
+				<a href="{% url 'tag' tag.id %}">
+					<div class="preview">
+						<img src="{% if tag.img %}{{ tag.img.url }}{% else %}{% static 'vid_manager/blank_image.png' %}{% endif %}" height="auto" width="100%" alt=''>
+						<div class="img-top-left">{{ tag }}</div>
+					</div>
+				</a>
 			</div>
+			{% empty %}
+			<div>No tags have been added yet.</div>
+			{% endfor %}
 		</div>
 	</div>
+</div>
+<div class="d-flex justify-content-center">
+	<span class="current">
+		Page {{ tags.number }} of {{ tags.paginator.num_pages }}
+	</span>
+</div>
+<div class="pagination d-flex justify-content-center">
+	<span class="step-links">
+		{% if tags.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ tags.previous_page_number }}">previous</a>
+		{% endif %}
+		{% if tags.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ tags.next_page_number }}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ tags.paginator.num_pages }}">last &raquo;</a>
+		{% endif %}
+	</span>
+</div>
 <script>
 		$("#tag_form").submit(function (e) {
 			e.preventDefault();
