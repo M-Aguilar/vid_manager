@@ -98,7 +98,7 @@ def scan(actor):
 	form = VideoForm()
 	choices = form.fields['file_path'].choices
 	actor_videos = [x.file_path for x in Video.objects.filter(actors__isnull=False)]
-	found = [x for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
+	found = [x[0] for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
 	return found
 
 def index(request):
