@@ -37,10 +37,25 @@ class Tag(models.Model):
 	def __str__(self):
 		return self.tag_name
 
-class Actor(models.Model):
+class ActorBase(models.Model):
 	first_name = models.CharField(max_length=15)
 	last_name = models.CharField(max_length=15,blank=True)
 
+	class Meta:
+		abstract = True
+
+	def __str__(self):
+		return self.full_name
+	
+	@property
+	def full_name(self):
+		"Returns the person's full name."
+		if self.last_name:
+			return '{0} {1}'.format(self.first_name, self.last_name)
+		else:
+			return self.first_name
+
+class Actor(ActorBase):
 	class Meta:
 		verbose_name_plural = 'actors'
 
@@ -59,17 +74,8 @@ class Actor(models.Model):
 	def images_count(self):
 		return Image.objects.filter(actors=self.id).count()
 	
-
-	def __str__(self):
-		return self.full_name
-	
-	@property
-	def full_name(self):
-		"Returns the person's full name."
-		if self.last_name:
-			return '{0} {1}'.format(self.first_name, self.last_name)
-		else:
-			return self.first_name
+class Alias(ActorBase):
+	actor = models.ForeignKey(Actor, on_delete=models.CASCADE)
 
 #tracking view count would be ideal
 class Video(models.Model):

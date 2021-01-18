@@ -66,6 +66,7 @@ urlpatterns = [
 	path('<actor_id>/images',views.actor_images, name='actor_images'),
 #	path('images/<tag_id>/#=<page_num>',views.images, name='images'),
 
+	path('auto_actor_add', views.auto_actor_add, name='auto_actor_add'),
 	#Tag Images
 	path('images/<tag_id>', views.tag_images, name='tag_images'),
 	#path('images/#=<page_num>',views.images, name='images'),

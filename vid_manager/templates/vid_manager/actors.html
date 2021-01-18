@@ -12,6 +12,9 @@
 {% block content %}
 	<div>
 		<a class='btn btn-dark' href="#add_user" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_user">Add Actor</a>
+		{% if new_actors > 0 %}
+			<p>{{ new_actors }} New Actors Found! Add them <a href="{% url 'auto_actor_add' %}">here</a>.</p>
+		{% endif %}
 	</div>
 	<div class="collapse" id="add_user">
 		<div class="card-body"> 

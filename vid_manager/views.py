@@ -7,6 +7,7 @@ from django.core import serializers #ajax
 from os import stat #video bitrate, length, and size
 from django.core.paginator import Paginator
 import json
+from django.conf import settings
 #NOT USED CURRENTLY
 #from itertools import chain
 #from django.core.files.images import get_image_dimensions
@@ -23,6 +24,43 @@ from .thumbnail import capture
 from .models import Video, Tag, Actor, Event, Image
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm
 
+def auto_actor_add(request):
+	if request.user.projector.admin:
+		form = VideoForm()
+		actors = [x.full_name for x in Actor.objects.all()]
+		choices = form.fields['file_path'].choices
+		new_actors = [x[0].split('/')[-2] for x in choices if x[0].split('/')[-2] not in settings.EXCEPTIONS and x[0].split('/')[-2] not in actors]
+		added_list = []
+		for i in new_actors:
+			if i not in added_list:
+				added_list.append(i)
+				add_actor(i)		
+	return HttpResponseRedirect(reverse('actors'))
+
+def add_actor(actor_name):
+	i = actor_name.split(' ')
+	if len(i) == 1:
+		data={'first_name': i[0]}
+	elif len(i) == 2:
+		data={'first_name': i[0], 'last_name': i[1]}
+	else:
+		data={'first_name': i[0], 'last_name': ' '.join(i[1:])}
+	form = ActorForm(data=data)
+	new_actor = form.save()
+
+def new_actor_count():
+	exceptions = settings.EXCEPTIONS
+	form=VideoForm()
+	choices = form.fields['file_path'].choices
+	actors = [x.full_name for x in Actor.objects.all()]
+	new_actors = [x[0].split('/')[-2] for x in choices if x[0].split('/')[-2] not in exceptions and x[0].split('/')[-2] not in actors]
+	act_list = []
+	for i in new_actors:
+		if i not in act_list:
+			act_list.append(i)
+	return len(act_list)
+
+@login_required
 def auto_add(request, actor_id):
 	actor = Actor.objects.get(id=actor_id)
 	new_vidss = scan(actor)
@@ -315,7 +353,7 @@ def actors(request):
 		raise Http404
 	actors = Actor.objects.all().order_by('first_name')
 	form = ActorForm()
-	context = {'actors': actors, 'form': form}
+	context = {'actors': actors, 'form': form, 'new_actors':new_actor_count()}
 	return render(request, 'vid_manager/actors.html', context)
 
 @login_required
