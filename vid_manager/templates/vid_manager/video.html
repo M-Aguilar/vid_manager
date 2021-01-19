@@ -106,15 +106,15 @@
 		</div>
 		<div>
 			<div id="tags">
-				<div class="tagrow d-flex flex-row">
+				<div class="tagrow row">
 					{% for tag in tags %}				
-					<div id="{{ tag.id }}" class='p-2 m-2 border border-dark rounded col-2'>
-						<div class="d-inline">
-							<a href="{% url 'tag' tag.id %}" class="d-inline float-left">
-								<div>{{ tag }}</div>
-							</a>
+					<div id="{{ tag.id }}" class='justify-content-center col-1 border border-dark rounded mb-2 mr-3 p-2'>
+						<div class="d-inline mx-auto">
 							<a href="{% url 'remove_tag' tag.id %}" id="remove_tag" value="{{ tag.id }}" class="d-inline float-right">
 								<span class="btn btn-xs btn-dark" value="{{ tag.id }}">&times;</span>
+							</a>
+							<a href="{% url 'tag' tag.id %}" class="d-inline float-left">
+								<div>{{ tag }}</div>
 							</a>
 						</div>
 					</div>

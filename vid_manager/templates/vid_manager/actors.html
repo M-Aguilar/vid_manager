@@ -5,7 +5,7 @@
 {% block title %}Actors{% endblock %}
 {% block header %}
 	<div class="jumbotron bg-dark pt-1 pb-3 text-light display-4 text-center">
-		<h2>ACTORS: {{ actors.count }}</h2>
+		<h2>ACTORS: {{ total }}</h2>
 	</div>
 {% endblock %}
 
@@ -37,6 +37,27 @@
     	{% endfor %}
 	{% endif %}
 	</div>
+	<div class="dropdown float-right">
+		<button class="btn btn-dark dropdown-toggle" type="button" id="ddM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sort</button>
+		 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="ddM">
+    		<a class="dropdown-item {% if 'first_name' in sort %}active{% endif %}" href="?sort={% if sort == 'first_name' %}-{% endif %}first_name">{% if sort == 'first_name' %}-{% endif %}First Name</a>
+    		<a class="dropdown-item {% if 'last_name' in sort %}active{% endif %}" href="?sort={% if sort == 'last_name' %}-{% endif %}last_name">{% if sort == 'last_name' %}-{% endif %}Last Name</a>
+    		<a class="dropdown-item {% if 'vid_num' in sort %}active{% endif %}" href="?sort={% if sort == 'vid_num' %}-{% endif %}vid_num">{% if sort == 'vid_num' %}-{% endif %}Video #</a>
+    		<a class="dropdown-item {% if 'tag_num' in sort %}active{% endif %}" href="?sort={% if sort == 'tag_num' %}-{% endif %}tag_num">{% if sort == 'tag_num' %}-{% endif %}Tag #</a>
+  		</div>
+	</div>
+	<div class="pagination d-flex justify-content-center">
+		<span class="step-links">
+		{% if actors.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ actors.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+		{% endif %}
+		{% if actors.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ actors.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ actors.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+		{% endif %}
+		</span>
+	</div>
 	<div id="actors" class="mx-auto">
 		<div class="actorrow pb-2 row">
 		{% for actor in actors %}			
@@ -54,6 +75,18 @@
 				</div>
 			{% endfor %}
 		</div>
+	</div>
+	<div class="pagination d-flex justify-content-center">
+		<span class="step-links">
+		{% if actors.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ actors.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+		{% endif %}
+		{% if actors.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ actors.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ actors.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+		{% endif %}
+		</span>
 	</div>
 <script>
 		$("#actor_form").submit(function (e) {

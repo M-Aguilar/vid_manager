@@ -128,12 +128,22 @@ def video(request, video_id):
 def videos(request):
 	sort = request.GET.get('sort')
 	video_sort = ['length','bitrate','title','-title','-length','-bitrate','release_date','-release_date', 'actors', '-actors','size','-size','date_added','-date_added']
-	if not sort or sort not in video_sort:
+	act_ann = ['actor_num', '-actor_num']
+	tag_ann = ['tag_num','-tag_num']
+	if not sort or sort not in video_sort and sort not in tag_ann and sort not in act_ann:
 		sort = '-date_added'
 	if request.user.is_authenticated and request.user.projector.admin:
-		videos = Video.objects.filter(owner=request.user).order_by(sort)
+		if sort in act_ann:
+			videos = Video.objects.annotate(actor_num=Count('actors')).order_by(sort)
+		elif sort in tag_ann:
+			videos = Video.objects.annotate(tag_num=Count('tags')).order_by(sort)
+		else:
+			videos = Video.objects.filter(owner=request.user).order_by(sort)
 	else:
-		videos = Video.objects.filter(public=True)
+		if sort in act_ann:
+			videos = Video.objects.annotate(actor_num=Count('actors')).filter(public=True).order_by(sort)
+		else:
+			videos = Video.objects.filter(public=True).order_by(sort)
 	total = videos.count()
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
@@ -364,14 +374,26 @@ def actor(request, actor_id):
 
 @login_required
 def actors(request):
+	sort = request.GET.get('sort')
+	actor_sort = ['first_name','-first_name','last_name','-last_name']
+	vid_ann = ['vid_num', '-vid_num']
+	tag_ann = ['tag_num','-tag_num']
+	if not sort or sort not in actor_sort and sort not in tag_ann and sort not in vid_ann:
+		sort = 'first_name'
 	if not request.user.projector.admin:
 		raise Http404
-	actors = Actor.objects.all().order_by('first_name')
+	if sort in vid_ann:
+		actors = Actor.objects.annotate(vid_num=Count('videos')).order_by(sort)
+	elif sort in tag_ann:
+		actors = Actor.objects.annotate(tag_num=Count('tags')).order_by(sort)
+	else:
+		actors = Actor.objects.all().order_by(sort)
+	total = actors.count()
 	form = ActorForm()
 	paginator = Paginator(actors, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	context = {'actors': page_o, 'form': form, 'new_actors':new_actor_count()}
+	context = {'actors': page_o, 'form': form, 'new_actors':new_actor_count(),'total':total,'sort':sort}
 	return render(request, 'vid_manager/actors.html', context)
 
 @login_required
