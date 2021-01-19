@@ -13,10 +13,23 @@
 {% block content %}
 <div class='my-2'>
 	<a class="btn btn-dark" href="{% url 'new_video' %}">Add Video</a>
-	<span class="current float-right">
+	<div class="dropdown float-right">
+		<button class="btn btn-dark dropdown-toggle" type="button" id="ddM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sort</button>
+		 <div class="dropdown-menu" aria-labelledby="ddM">
+    		<a class="dropdown-item {% if 'title' in sort %}active{% endif %}" href="?sort={% if sort == 'title' %}-{% endif %}title">{% if sort == 'title' %}-{% endif %}Title</a>
+    		<a class="dropdown-item {% if 'actors' in sort %}active{% endif %}" href="?sort={% if sort == 'actors' %}-{% endif %}actors">{% if sort == 'actors' %}-{% endif %}Actors</a>
+    		<a class="dropdown-item {% if 'length' in sort %}active{% endif %}" href="?sort={% if sort == 'length' %}-{% endif %}length">{% if sort == 'length' %}-{% endif %}Length</a>
+    		<a class="dropdown-item {% if 'size' in sort %}active{% endif %}" href="?sort={% if sort == 'size' %}-{% endif %}size">{% if sort == 'size' %}-{% endif %}Size</a>
+    		<a class="dropdown-item {% if 'date_added' in sort %}active{% endif %}" href="?sort={% if sort == 'date_added' %}-{% endif %}date_added">{% if sort == 'date_added' %}-{% endif %}Date Added</a>
+    		<a class="dropdown-item {% if 'release_date' in sort %}active{% endif %}" href="?sort={% if sort == 'release_date' %}-{% endif %}release_date">{% if sort == 'release_date' %}-{% endif %}Release Date</a>
+    		<a class="dropdown-item {% if 'bitrate' in sort %}active{% endif %}" href="?sort={% if sort == 'bitrate' %}-{% endif %}bitrate">{% if sort == 'bitrate' %}-{% endif %}Bitrate</a>
+  		</div>
+	</div>
+</div>
+<div class='d-flex row justify-content-center'>
+	<span class="current">
 		Page {{ videos.number }} of {{ videos.paginator.num_pages }}
 	</span>
-</div>
 </div>
 <hr>
 {% if messages %}
@@ -29,12 +42,12 @@
 <div class="pagination d-flex justify-content-center">
 	<span class="step-links">
 		{% if videos.has_previous %}
-			<a class="btn btn-sm btn-dark" href="?page=1">&laquo; first</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}">previous</a>
+			<a class="btn btn-sm btn-dark" href="?page=1&{% if sort %}sort={{sort}}{% endif %}">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
 		{% endif %}
 		{% if videos.has_next %}
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}">next</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}">last &raquo;</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
 		{% endif %}
 	</span>
 </div>
@@ -58,12 +71,12 @@
 <div class="pagination d-flex justify-content-center">
 	<span class="step-links">
 		{% if videos.has_previous %}
-			<a class="btn btn-sm btn-dark" href="?page=1">&laquo; first</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}">previous</a>
+			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
 		{% endif %}
 		{% if videos.has_next %}
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}">next</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}">last &raquo;</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
 		{% endif %}
 	</span>
 </div>
