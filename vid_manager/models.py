@@ -153,7 +153,10 @@ class Event(models.Model):
 	seconds = models.PositiveIntegerField()
 
 	def url(self):
-		return self.file_path[self.file_path.index('/media'):]
+		if settings.DEBUG:
+			return self.file_path[self.file_path.index('/media'):]
+		else:
+			return settings.MEDIA_SERVER + self.file_path[self.file_path.index('videos'):]
 
 	def time(self):
 		return '{0:.2g}'.format(floor(self.seconds/60)) + ':' + '{:02.0f}'.format(self.seconds%60)

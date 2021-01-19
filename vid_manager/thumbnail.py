@@ -17,16 +17,16 @@ def capture(full_path, milli):
     print('hidden: {0}'.format(hidden))
     if '.' + filename[:filename.index('.mp4')] not in os.listdir(full_path[:full_path.index(filename)]):
         print("Hidden directory exists: False")
-        subprocess.Popen(['sudo','mkdir', hidden])
+        subprocess.Popen(['mkdir', hidden])
     else:
         print("Hidden directory exists: True")
     time = convert_secs(milli)
-    name = filename[:filename.index('.mp4')] + '{0}{1}.png'.format('_',str(milli))
+    name = '{0}{1}.png'.format('img_',str(milli))
     cmd = ['ffmpeg', '-ss',time,'-i', full_path, '-vframes', '1', '-s', str(round(((int(dem[0])/int(dem[1])*o_h)))) + 'x' + str(o_h),name]
 #    images[os.path.join(full_path,name): time]
     proc = subprocess.Popen(cmd)
     proc.wait()
-    subprocess.Popen(['sudo','mv',name,hidden])
+    subprocess.Popen(['mv',name,hidden])
     return hidden + name
 
 def convert_secs(secs):
