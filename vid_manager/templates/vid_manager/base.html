@@ -12,9 +12,25 @@
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 		<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
 		<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
+		<style>
+			.title {
+				font-size: 20px;
+			}
+
+			div.col input.form-control {
+				border-radius: 15px 0 0 15px;
+				border-color: var(--blank);
+			}
+
+			div.search-b button {
+				border-radius: 0 15px 15px 0;
+				border-color:var(--blank);
+			}
+		</style>
 	</head>
 	<body>
 		<div class="main-container">
@@ -28,8 +44,8 @@
 					<span class="navbar-toggler-icon"></span>
 					</button>
 				</div>
-				<div class="collapse navbar-collapse" id="navbarToggler">
-					<ul class="navbar-nav mt-2 mt-lg-0 w-100">
+				<div class="collapse navbar-collapse w-100" id="navbarToggler">
+					<ul class="navbar-nav mt-2 mt-lg-0 float-right">
 						{% if user.is_authenticated %}
 						<li class="navitem"><h4><a class="nav-link py-0 d-md-none" href="{% url 'index' %}">VidM</a></h4></li>
 						<li class="navitem"><a class="nav-link" href="{% url  'videos' %}">Videos</a></li>
@@ -42,6 +58,19 @@
 						<li class="navitem"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
 						<li class="navitem"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
 						{% endif %}
+						<li class="nav-item m-lg-3 search">
+    						<hr class="d-lg-none py-0 mt-0 mb-1">
+    						<form action="{% url 'search_results' %}" method='get'>
+		    					<div class="form-row">
+		    						<div class='col pr-0'>
+			    						<input name="q" class="form-control" type="search" placeholder="Search" aria-label="Search">
+									</div>
+		    						<div class='mr-1 search-b'>
+		    							<button class="btn btn-dark" type="submit"><i class="fa fa-search"></i></button>
+									</div>
+								</div>
+    						</form>
+    					</li>
 					</ul>
 				</div>
 			</nav>

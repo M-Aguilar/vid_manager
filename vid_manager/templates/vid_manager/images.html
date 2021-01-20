@@ -42,9 +42,12 @@
 		{% endif %}
 		<div class="pb-2 row">
 			{% for image in images %}
-				{% if request.user.is_authenticated and request.user.projector.admin %}
 				<div class="col-sm-5 col-md-3 mx-auto pb-3 col-lg-2 mx-auto">
-					<a href="{% url 'image' image.id %}">{% endif %}<img src="{{ image.image.url }}" height="auto" width="100%">{% if request.user.is_authenticated and request.user.projector.admin %}</a>{% endif %}
+					{% if request.user.is_authenticated and request.user.projector.admin %}
+					<a href="{% url 'image' image.id %}">
+					{% endif %}
+					<img src="{{ image.image.url }}" height="auto" width="100%">
+					{% if request.user.is_authenticated and request.user.projector.admin %}</a>{% endif %}
 				</div>
 			{% empty %}
 				<p>Nothing here</p>
