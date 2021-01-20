@@ -29,6 +29,7 @@ from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm
 
 #The Goal is to have narrow results when necessary
 #Usually the longer the query the more sepcific the result desired
+
 class SearchResultsView(ListView):
 	model = Video
 	template_name = 'vid_manager/search_results.html'
@@ -37,25 +38,33 @@ class SearchResultsView(ListView):
     	#searches for query
 		query = self.request.GET.get('q')
 		actors = self.checkActor(query)
+		print("Actors: {0}".format(actors))
 		tags = self.checkTag(query)
+		print("Tags: {0}".format(tags))
 		if self.request.user.is_authenticated and query not in ['', None]:
 			o_list = Video.objects.filter(Q(title__icontains=query), Q(owner=self.request.user))
 			if actors and tags:
 				o_list = o_list | Video.objects.exclude(id__in=[x.id for x in o_list]).filter(actors__in=[x for x in actors], tags__in=[x for x in tags])
 			else:
 				if actors:
+					temp = []
 					for actor in actors:
-						o_list = o_list | Video.objects.exclude(id__in=[x.id for x in o_list]).filter(actors=actor)
+						new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp]).filter(actors=actor)
+						temp.append(new_list)
+						o_list = o_list | new_list
 				if tags:
+					temp=[]
 					for tag in tags:
-						o_list = o_list | Video.objects.exclude(id__in=[x.id for x in o_list]).filter(tags=tag)
+						new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp]).filter(tags=tag)
+						temp.append(new_list)
+						o_list = o_list | new_list
 		else:
 			o_list = Video.objects.filter(Q(title__icontains=query), Q(public=True))
 		total = o_list.count()
 		paginator = Paginator(o_list, 24)
 		page_num = self.request.GET.get('page')
 		page_o = paginator.get_page(page_num)
-		object_list = {'object_list': page_o, 'q': query, 'total': total, 'actors': actors}
+		object_list = {'object_list': page_o, 'q': query, 'total': total, 'actors': actors,'tags':tags}
 		return object_list
 
 	def checkActor(self, q):
@@ -73,7 +82,6 @@ class SearchResultsView(ListView):
 				if self.closeEnough(n,name):
 					check = True
 			return check
-
 		if ' ' in q:
 			check = False
 			for n in q.split(' '):
@@ -81,7 +89,7 @@ class SearchResultsView(ListView):
 					check = True
 			return check
 		else:
-			if q in name or name in q:
+			if q.lower() in name.lower() or name.lower() in q.lower():
 				return True
 			else:
 				return False

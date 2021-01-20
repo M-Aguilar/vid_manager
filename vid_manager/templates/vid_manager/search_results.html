@@ -20,16 +20,31 @@
         <p class="d-inline">{{ object_list.total }} results found.</p>
     </div>
     <br>
+    {% if object_list.object_list.number == 1 and object_list.actors %}
+    <div class="row">
+        {% for actor in object_list.actors %}
+        {% load static %}
+        <div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 mx-auto">
+            <a href="{% url 'actor' actor.id %}" >
+                <div class="preview">
+                    <img src="{% if actor.img %}{{ actor.img.url }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
+                    <div class="img-top-left">{{ actor }}</div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}  
+    </div>
+    {% endif %}
     {% load tz %}
     <div class="pagination d-flex justify-content-center">
         <span class="step-links">
-        {% if videos.has_previous %}
-            <a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
-            <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+        {% if object_list.object_list.has_previous %}
+            <a class="btn btn-sm btn-dark" href="?q={{object_list.q}}&page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+            <a class="btn btn-sm btn-dark" href="?q={{object_list.q}}&page={{ object_list.object_list.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
         {% endif %}
-        {% if videos.has_next %}
-            <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-            <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+        {% if object_list.object_list.has_next %}
+            <a class="btn btn-sm btn-dark" href="?q={{object_list.q}}&page={{ object_list.object_list.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+            <a class="btn btn-sm btn-dark" href="?q={{object_list.q}}&page={{ object_list.object_list.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
         {% endif %}
         </span>
     </div>
@@ -38,18 +53,18 @@
     {% empty %}
     <p>No videos found.</p> 
     {% endfor %}
-    <div class="pagination d-flex justify-content-center">
-        <span class="step-links">
-        {% if videos.has_previous %}
-            <a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
-            <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
-        {% endif %}
-        {% if videos.has_next %}
-            <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-            <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
-        {% endif %}
-        </span>
-    </div>
+</div>
+<div class="pagination d-flex justify-content-center">
+    <span class="step-links">
+    {% if object_list.object_list.has_previous %}
+        <a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+        <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+    {% endif %}
+    {% if object_list.object_list.has_next %}
+        <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+        <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+    {% endif %}
+    </span>
 </div>
 {% else %}
 <div class="jumbotron pt-4 pb-4">

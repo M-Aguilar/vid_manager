@@ -21,6 +21,10 @@
 				font-size: 20px;
 			}
 
+			.search {
+				min-width:200px;
+			}
+
 			div.col input.form-control {
 				border-radius: 15px 0 0 15px;
 				border-color: var(--blank);
@@ -45,7 +49,7 @@
 					</button>
 				</div>
 				<div class="collapse navbar-collapse w-100" id="navbarToggler">
-					<ul class="navbar-nav mt-2 mt-lg-0 float-right">
+					<ul class="navbar-nav mt-2 mt-lg-0 md-float-right">
 						{% if user.is_authenticated %}
 						<li class="navitem"><h4><a class="nav-link py-0 d-md-none" href="{% url 'index' %}">VidM</a></h4></li>
 						<li class="navitem"><a class="nav-link" href="{% url  'videos' %}">Videos</a></li>
@@ -58,8 +62,7 @@
 						<li class="navitem"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
 						<li class="navitem"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
 						{% endif %}
-						<li class="nav-item m-lg-3 search">
-    						<hr class="d-lg-none py-0 mt-0 mb-1">
+						<li class="nav-item m-md-3 search">
     						<form action="{% url 'search_results' %}" method='get'>
 		    					<div class="form-row">
 		    						<div class='col pr-0'>
