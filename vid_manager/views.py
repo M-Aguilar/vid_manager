@@ -29,35 +29,36 @@ from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm
 
 #The Goal is to have narrow results when necessary
 #Usually the longer the query the more sepcific the result desired
-
 class SearchResultsView(ListView):
 	model = Video
 	template_name = 'vid_manager/search_results.html'
 
 	def get_queryset(self):
     	#searches for query
-		query = self.request.GET.get('q')
+		query = self.request.GET.get('q').strip()
 		actors = self.checkActor(query)
 		print("Actors: {0}".format(actors))
 		tags = self.checkTag(query)
 		print("Tags: {0}".format(tags))
 		if self.request.user.is_authenticated and query not in ['', None]:
-			o_list = Video.objects.filter(Q(title__icontains=query), Q(owner=self.request.user))
-			if actors and tags:
-				o_list = o_list | Video.objects.exclude(id__in=[x.id for x in o_list]).filter(actors__in=[x for x in actors], tags__in=[x for x in tags])
-			else:
-				if actors:
-					temp = []
-					for actor in actors:
-						new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp]).filter(actors=actor)
-						temp.append(new_list)
-						o_list = o_list | new_list
-				if tags:
-					temp=[]
-					for tag in tags:
-						new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp]).filter(tags=tag)
-						temp.append(new_list)
-						o_list = o_list | new_list
+			o_list = Video.objects.filter(Q(title__iexact=query))
+			if len(o_list) != 1:
+				o_list = Video.objects.filter(Q(title__icontains=query), Q(owner=self.request.user))
+				if actors and tags:
+					o_list = o_list | Video.objects.exclude(id__in=[x.id for x in o_list]).filter(actors__in=[x for x in actors], tags__in=[x for x in tags])
+				else:
+					if actors:
+						temp = []
+						for actor in actors:
+							new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp]).filter(actors=actor)
+							temp.append(new_list)
+							o_list = o_list | new_list
+					if tags:
+						temp=[]
+						for tag in tags:
+							new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp]).filter(tags=tag)
+							temp.append(new_list)
+							o_list = o_list | new_list
 		else:
 			o_list = Video.objects.filter(Q(title__icontains=query), Q(public=True))
 		total = o_list.count()
@@ -168,7 +169,7 @@ def scan(actor):
 	form = VideoForm()
 	choices = form.fields['file_path'].choices
 	actor_videos = [x.file_path for x in Video.objects.filter(actors__isnull=False)]
-	found = [x for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
+	found = [x[0] for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
 	return found
 
 def index(request):

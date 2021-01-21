@@ -105,7 +105,7 @@
 			</form>
 		</div>
 		<div class="mx-4">
-			<div id="tag">
+			<div id="tags">
 				<div class="tagrow row justify-content-left">
 					{% for tag in tags %}				
 					<div id="{{ tag.id }}" class='col-2 col-md-1 border border-dark rounded p-2 m-2'>
@@ -185,7 +185,7 @@
 					var pk = instance[0]["pk"];
 					var new_url = "{% url 'tag' 0 %}".replace('0', pk);
 					var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);
-					$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span value="${pk}" class="btn btn-xs btn-dark">&times;</span></a></div></div>`);
+					$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2 col-md-1'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span value="${pk}" class="btn btn-xs btn-dark">&times;</span></a></div></div>`);
 				},
 
 				error: function (response) {
