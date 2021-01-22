@@ -17,7 +17,12 @@
 </div>
 <div class="container">
     <div>
-        <p class="d-inline">{{ object_list.total }} results found.</p>
+        <div class="d-inline">
+            <p class="float-right">{{ object_list.total }} results found.</p>
+            <span class="current">
+                Page {{ object_list.object_list.number }} of {{ object_list.object_list.paginator.num_pages }}
+            </span>
+        </div>
     </div>
     <br>
     {% if object_list.object_list.number == 1 and object_list.actors %}

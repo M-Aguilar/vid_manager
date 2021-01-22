@@ -6,7 +6,7 @@
 
 {% block header %}
 	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
-		<h2>{{ actor }}</h2>
+		<h2>{{ actor }} {% for alias in actor.aliases %}/{{alias}}{% empty %}{% endfor %}</h2>
 	</div>
 {% endblock %}
 
@@ -45,7 +45,19 @@
 	<div>
 		<a href="{% url 'new_actor_image' actor.id %}" class="btn btn-dark">Add Image</a>
 		<a href="{% url 'new_video' actor.id %}" class="btn btn-dark">Add Video</a>
+		<a class='btn btn-dark' href="#add_alias" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_alias">Add Alias</a>
 		<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole">Delete Actor</a>
+		<div class="collapse" id="add_alias">
+			<div class="card-body"> 
+				<form id="alias_form" action="{% url 'new_alias' %}" method='post' class="form">
+				{% csrf_token %}
+				{% bootstrap_form alias_form %}
+				{% buttons %}
+					<button name="submit" class="btn btn-dark">Submit</button>
+				{% endbuttons %}	
+				</form>
+			</div>
+		</div>
 	</div>
 	<hr>
 	{% endif %}
@@ -59,11 +71,9 @@
 			<h3>Info</h3>
 			<div>First Name: {{ actor.first_name }}</div>
 			<div>Last Name: {{ actor.last_name }}</div>
-			<div>Total Images: {{ actor.images_count }}</div>
-			<div>Total Videos: {{ actor.video_count }}</div>
 		</div>
 		<div>
-			<h2><a href="{% url 'actor_images' actor.id %}">Images ({{ total_images }})</a></h2>
+			<h2><a href="{% url 'actor_images' actor.id %}">Images ({{ actor.images_count }})</a></h2>
 		</div>
 		<div class="row d-none d-sm-flex">
 			{% for image in images %}
@@ -84,7 +94,7 @@
 		</div>
 	</div>
 	<div class="text-dark">
-		<h2>Recently Added <a href="{% url 'actor_videos' actor.id %}">Videos ({{ total_vids }})</a></h2>
+		<h2>Recently Added <a href="{% url 'actor_videos' actor.id %}">Videos ({{ actor.video_count  }})</a></h2>
 		<div class="row">
 			{% for video in videos %}
 				{% include 'vid_manager/video_preview.html' %}
@@ -96,4 +106,26 @@
 		</div>
 	</div>
 </div>
+<script>
+	$("#alias_form").submit(function (e) {
+		e.preventDefault();
+		var serializedData = $(this).serialize();
+		$.ajax({
+			type: 'POST',
+			url: "{% url 'new_alias' %}",
+			data: serializedData,
+			success: function (response) {
+				//TODO make messages disappear if there are more than one. or allow to remove with 'X'
+				$("#alias_form").trigger('reset');
+				$("#id_first_name").focus();
+				var instance = JSON.parse(response["instance"]);
+				var fields = instance[0]["fields"];
+				$('.jumbotron h2').append(`/${fields['first_name']} ${fields['last_name']}`);
+			},
+			error: function (response) {
+				alert(response["responseJSON"]["error"]);
+			}
+		})
+	})
+</script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Video, Actor, Tag, Image, Event
+from .models import Video, Actor, Tag, Image, Event, Alias
 
 class VideoForm(forms.ModelForm):
 	class Meta:
@@ -11,6 +11,11 @@ class VideoForm(forms.ModelForm):
 		'title': forms.TextInput(attrs={'placeholder':'Title','autofocus':'autofocus'}),
 		'release_date': forms.DateInput(attrs={'placeholder':'MM-DD-YYYY','format':'%m/%d/%Y'}),
 		}
+
+class AliasForm(forms.ModelForm):
+	class Meta:
+		model = Alias
+		fields = ['first_name','last_name','actor']
 
 class ActorForm(forms.ModelForm):
 	class Meta:

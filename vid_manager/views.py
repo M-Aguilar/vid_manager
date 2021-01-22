@@ -24,8 +24,8 @@ import subprocess
 import mutagen.mp4
 
 from .thumbnail import capture
-from .models import Video, Tag, Actor, Event, Image
-from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm
+from .models import Video, Tag, Actor, Event, Image, Alias
+from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasForm
 
 #The Goal is to have narrow results when necessary
 #Usually the longer the query the more sepcific the result desired
@@ -37,9 +37,7 @@ class SearchResultsView(ListView):
     	#searches for query
 		query = self.request.GET.get('q').strip()
 		actors = self.checkActor(query)
-		print("Actors: {0}".format(actors))
 		tags = self.checkTag(query)
-		print("Tags: {0}".format(tags))
 		if self.request.user.is_authenticated and query not in ['', None]:
 			o_list = Video.objects.filter(Q(title__iexact=query))
 			if len(o_list) != 1:
@@ -70,7 +68,8 @@ class SearchResultsView(ListView):
 
 	def checkActor(self, q):
 		actors = [x for x in Actor.objects.all() if self.closeEnough(q, x.full_name)]
-		return actors
+		aliases = [x.actor for x in Alias.objects.all() if x not in actors and self.closeEnough(q,x.full_name)]
+		return actors + aliases
 
 	def checkTag(self, q):
 		tags = [x for x in Tag.objects.all() if self.closeEnough(q, x.tag_name)]
@@ -94,6 +93,26 @@ class SearchResultsView(ListView):
 				return True
 			else:
 				return False
+
+def new_alias(request):
+	if request.is_ajax and request.method == "POST":
+		form = AliasForm(request.POST)
+		if form.is_valid():
+			first_in = form['first_name'].value()
+			last_in = form['last_name'].value()
+			actor = Actor.objects.get(id=request.POST.get('actor'))
+			aliases = actor.aliases
+			if (first_in not in [x.first_name for x in aliases] and (first_in != actor.first_name)) or (last_in not in [x.last_name for x in aliases] and last_in != actor.last_name):
+				instance = form.save(commit=False)
+				instance.save()
+				serialized = serializers.serialize('json', [ instance, ])
+				return JsonResponse({"instance":serialized},status=200)
+
+			else:
+				return JsonResponse({"error": "That name already exists for this actor"}, status=400)
+		else:
+			return JsonResponse({"error": "Something went wrong"}, status=400)
+	return JsonResponse({"error":""}, status=400)
 
 def auto_actor_add(request):
 	if request.user.projector.admin:
@@ -136,6 +155,7 @@ def auto_add(request, actor_id):
 	actor = Actor.objects.get(id=actor_id)
 	new_vidss = scan(actor)
 	for new_vids in new_vidss:
+		new_vids = new_vids[0]
 		title = new_vids.split('/')[-1]
 		data = {'title': title[:title.index('.')],'actors': [actor],'file_path':new_vids}
 		form = VideoForm(data=data)
@@ -169,7 +189,7 @@ def scan(actor):
 	form = VideoForm()
 	choices = form.fields['file_path'].choices
 	actor_videos = [x.file_path for x in Video.objects.filter(actors__isnull=False)]
-	found = [x[0] for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
+	found = [x for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
 	return found
 
 def index(request):
@@ -381,10 +401,8 @@ def delete_tag(request, tag_id):
 @login_required
 def remove_tag(request, tag_id):
 	t = request.META.get('HTTP_REFERER')
-	print(t)
 	if request.is_ajax and request.user.projector.admin:
 		tag = Tag.objects.get(id=tag_id)
-		print(tag)
 		if 'video' in t:
 			video = Video.objects.get(id=t[t.index('video')+6:])
 			video.tags.remove(tag)
@@ -438,8 +456,10 @@ def actor(request, actor_id):
 		actor = get_object_or_404(Actor,id=actor_id)
 		new_videos = scan(actor)
 		images = Image.objects.filter(actors=actor)
-		videos= Video.objects.filter(actors=actor)
-	context={'actor':actor, 'videos': videos[:6], 'total_vids': videos.count(), 'total_images': images.count(), 'new_videos': len(new_videos)}
+		videos= Video.objects.filter(actors=actor).order_by('-date_added')
+	data = {'actor':actor}
+	alias_form = AliasForm(initial=data)
+	context = {'actor':actor, 'videos': videos[:6], 'new_videos': len(new_videos), 'alias_form':alias_form}
 	if len(images) > 10:
 		context['images'] = images[:10]
 	else:
@@ -451,15 +471,12 @@ def actors(request):
 	sort = request.GET.get('sort')
 	actor_sort = ['first_name','-first_name','last_name','-last_name']
 	vid_ann = ['vid_num', '-vid_num']
-	tag_ann = ['tag_num','-tag_num']
-	if not sort or sort not in actor_sort and sort not in tag_ann and sort not in vid_ann:
+	if not sort or sort not in actor_sort and sort not in vid_ann:
 		sort = 'first_name'
 	if not request.user.projector.admin:
 		raise Http404
 	if sort in vid_ann:
 		actors = Actor.objects.annotate(vid_num=Count('videos')).order_by(sort)
-	elif sort in tag_ann:
-		actors = Actor.objects.annotate(tag_num=Count('tags')).order_by(sort)
 	else:
 		actors = Actor.objects.all().order_by(sort)
 	total = actors.count()

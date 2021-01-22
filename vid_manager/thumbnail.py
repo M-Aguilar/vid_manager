@@ -14,16 +14,11 @@ def capture(full_path, milli):
     out = out.decode('ascii').rstrip()
     dem = out.split('x')
     hidden = full_path[:full_path.index(filename)] + '.' + filename[:filename.index('.mp4')] + '/'
-    print('hidden: {0}'.format(hidden))
     if '.' + filename[:filename.index('.mp4')] not in os.listdir(full_path[:full_path.index(filename)]):
-        print("Hidden directory exists: False")
         subprocess.Popen(['mkdir', hidden])
-    else:
-        print("Hidden directory exists: True")
     time = convert_secs(milli)
     name = '{0}{1}.png'.format('img_',str(milli))
     cmd = ['ffmpeg', '-ss',time,'-i', full_path, '-vframes', '1', '-s', str(round(((int(dem[0])/int(dem[1])*o_h)))) + 'x' + str(o_h),name]
-#    images[os.path.join(full_path,name): time]
     proc = subprocess.Popen(cmd)
     proc.wait()
     subprocess.Popen(['mv',name,hidden])

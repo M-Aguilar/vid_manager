@@ -65,6 +65,9 @@ class Actor(ActorBase):
 			return img.image
 		else:
 			return False
+	@property
+	def aliases(self):
+		return Alias.objects.filter(actor=self.id)
 
 	@property
 	def video_count(self):

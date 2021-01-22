@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
 	path('',views.index, name='index'),
 
+	path('new_alias', views.new_alias, name='new_alias'),
+
 	path('search/', views.SearchResultsView.as_view(), name='search_results'),
 	#Actor Video
 	#path('<actor_id>/videos', views.videos, name='videos'),
