@@ -20,12 +20,23 @@
         <div class="d-inline">
             <p class="float-right">{{ object_list.total }} results found.</p>
             <span class="current">
-                Page {{ object_list.object_list.number }} of {{ object_list.object_list.paginator.num_pages }}
+                Page <input id="pnum" type='number' minlength='1' max="{{ object_list.object_list.paginator.num_pages }}" min='1' style="width: 5%" placeholder="{{object_list.object_list.number}}"> of {{ object_list.object_list.paginator.num_pages }}
             </span>
+            <a id="plink" href="?q={{object_list.q}}"></a>
+            <script>
+                var input = document.getElementById('pnum');
+                input.addEventListener("keyup",function(event) {
+                if (event.keyCode === 13) {
+                    var link = document.getElementById('plink');
+                    link.href = link.href.concat("&page=", input.value);
+                    link.click();
+                }
+            });
+            </script>
         </div>
     </div>
     <br>
-    {% if object_list.object_list.number == 1 and object_list.actors %}
+    {% if object_list.object_list.number == 1 and object_list.actors or object_list.tags %}
     <div class="row">
         {% for actor in object_list.actors %}
         {% load static %}
@@ -38,6 +49,17 @@
             </a>
         </div>
         {% endfor %}  
+        {% for tag in object_list.tags %}
+        <div class="col-sm-6 col-md-4 col-lg-2 pb-3">
+            <a href="{% url 'tag' tag.id %}">
+                <div class="preview">
+                    <img src="{% if tag.img %}{{ tag.img.url }}{% else %}{% static 'vid_manager/blank_image.png' %}{% endif %}" height="auto" width="100%" alt=''>
+                    <div class="img-top-left">{{ tag }}</div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        {% endfor %}
     </div>
     {% endif %}
     {% load tz %}
@@ -62,12 +84,12 @@
 <div class="pagination d-flex justify-content-center">
     <span class="step-links">
     {% if object_list.object_list.has_previous %}
-        <a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
-        <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+        <a class="btn btn-sm btn-dark" href="?q={{object_list.q}}&page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+        <a class="btn btn-sm btn-dark" href="?q={{object_list.q}}&page={{ object_list.object_list.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
     {% endif %}
     {% if object_list.object_list.has_next %}
-        <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-        <a class="btn btn-sm btn-dark" href="?page={{ object_list.object_list.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+        <a class="btn btn-sm btn-dark" href="?q={{object_list.q}}&page={{ object_list.object_list.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+        <a class="btn btn-sm btn-dark" href="?q={{object_list.q}}&page={{ object_list.object_list.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
     {% endif %}
     </span>
 </div>

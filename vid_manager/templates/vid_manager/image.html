@@ -36,7 +36,7 @@
 		{% bootstrap_form tagform %}
 	</form>
 	<div id="tags">
-		<div class="tagrow d-flex flex-row">
+		<div class="tagrow d-flex row">
 		{% for tag in image.tags.all %}
 			<div id="{{ tag }}" class='p-2 m-2 border border-dark rounded col-2'>
 				<div class="d-inline">

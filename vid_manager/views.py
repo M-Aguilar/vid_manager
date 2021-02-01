@@ -48,18 +48,18 @@ class SearchResultsView(ListView):
 					if actors:
 						temp = []
 						for actor in actors:
-							new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp]).filter(actors=actor)
+							new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp and x not in o_list]).filter(actors=actor)
 							temp.append(new_list)
 							o_list = o_list | new_list
 					if tags:
 						temp=[]
 						for tag in tags:
-							new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp]).filter(tags=tag)
+							new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp and x not in o_list]).filter(tags=tag)
 							temp.append(new_list)
 							o_list = o_list | new_list
 		else:
 			o_list = Video.objects.filter(Q(title__icontains=query), Q(public=True))
-		total = o_list.count()
+		total = o_list.count() + len(tags) + len(actors)
 		paginator = Paginator(o_list, 24)
 		page_num = self.request.GET.get('page')
 		page_o = paginator.get_page(page_num)
@@ -286,7 +286,7 @@ def new_video(request, actor_id=None):
 			form = VideoForm(initial=data)
 			form.fields['file_path'].choices = scan(actor)
 		else:
-			all_fps = [x.file_path for x in Video.objects.filter(actors__isnull=False)]
+			all_fps = [x.file_path for x in Video.objects.all()]
 			form = VideoForm()
 			choices = [x for x in form.fields['file_path'].choices if x[0] not in all_fps]
 			form.fields['file_path'].choices = choices
@@ -294,24 +294,8 @@ def new_video(request, actor_id=None):
 		form = VideoForm(data=request.POST)
 		if form.is_valid():
 			new_video = form.save(commit=False)
-			try:
-				v = mutagen.mp4.Open(new_video.file_path)
-				seconds = v.info.length
-				b_rate = v.info.bitrate
-			except mutagen.mp4.MP4StreamInfoError:
-				seconds=0
-				messages.error(request, 'Something went wrong checking length of video.')
-			fp = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', new_video.file_path])
-			fp = fp.decode('ascii').rstrip()
-			dim = {'width':fp.split('x')[0],'height':fp.split('x')[1]}
+			update_vid(new_video)
 			new_video.owner = request.user
-			new_video.height = int(dim['height'])
-			new_video.width = int(dim['width'])
-			statinfo = stat(new_video.file_path)
-			new_video.length = seconds
-			new_video.bitrate = b_rate
-			new_video.size = statinfo.st_size
-			new_video.save()
 			if request.FILES:
 				new_video.poster = request.FILES['poster']
 				new_video.save()
@@ -322,15 +306,37 @@ def new_video(request, actor_id=None):
 	context = {'form': form, 'new_actor_form': new_actor_form, 'new_tag_form': new_tag_form}
 	return render(request, 'vid_manager/new_video.html', context)
 
+def update_vid(new_video):
+	try:
+		v = mutagen.mp4.Open(new_video.file_path)
+		seconds = v.info.length
+		b_rate = v.info.bitrate
+	except mutagen.mp4.MP4StreamInfoError:
+		seconds=0
+	fp = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', new_video.file_path])
+	fp = fp.decode('ascii').rstrip()
+	dim = {'width':fp.split('x')[0],'height':fp.split('x')[1]}
+	new_video.height = int(dim['height'])
+	new_video.width = int(dim['width'])
+	statinfo = stat(new_video.file_path)
+	new_video.length = seconds
+	new_video.bitrate = b_rate
+	new_video.size = statinfo.st_size
+	new_video.save()
+
 @login_required
 def edit_video(request, video_id):
 	video = get_object_or_404(Video, id=video_id)
+	f_path = video.file_path
 	if video.owner != request.user and video.public:
 		raise Http404
 	if request.method != 'POST':
 		form = VideoForm(instance=video)
 	else:
 		form = VideoForm(instance=video, data=request.POST, files=request.FILES)
+		new_video = form.save(commit=False)
+		if f_path != new_video.file_path:
+			update_vid(new_video)
 		if (request.FILES.get('poster', False) and request.FILES.get('poster') != video.poster):
 			video.poster.delete()
 		if form.is_valid():
@@ -425,10 +431,12 @@ def new_tag(request):
 				instance = tag
 				if 'video' in t:
 					video = Video.objects.get(id=t[t.index('video')+6:])
-					tag.videos.add(video)
+					if tag not in video.tags.all():
+						tag.videos.add(video)
 				if 'image' in t:
 					image = Image.objects.get(id=t[t.index('image')+6:])
-					image.tags.add(tag)
+					if tag not in image.tags.all():
+						image.tags.add(tag)
 				serialized = serializers.serialize('json', [ instance, ])
 				return JsonResponse({"instance":serialized},status=200)
 		except Tag.DoesNotExist:

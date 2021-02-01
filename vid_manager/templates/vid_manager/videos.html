@@ -29,9 +29,20 @@
 	</div>
 </div>
 <div class='d-flex row justify-content-center'>
-	<span class="current">
-		Page {{ videos.number }} of {{ videos.paginator.num_pages }}
+	<span class="current text-center">
+		Page <input id="pnum" type='number' minlength='1' max="{{ videos.paginator.num_pages }}" min='1' style="width: 15%" placeholder="{{videos.number}}"> of {{ videos.paginator.num_pages }}
 	</span>
+	<a id="plink" href=""></a>
+	<script>
+		var input = document.getElementById('pnum');
+		input.addEventListener("keyup",function(event) {
+			if (event.keyCode === 13) {
+				var link = document.getElementById('plink');
+				link.href = "?page=".concat(input.value);
+				link.click();
+			}
+		});
+	</script>
 </div>
 <hr>
 {% if messages %}
@@ -43,14 +54,14 @@
 {% endif %}
 <div class="pagination d-flex justify-content-center">
 	<span class="step-links">
-		{% if videos.has_previous %}
-			<a class="btn btn-sm btn-dark" href="?page=1&{% if sort %}sort={{sort}}{% endif %}">&laquo; first</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
-		{% endif %}
-		{% if videos.has_next %}
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
-		{% endif %}
+	{% if videos.has_previous %}
+		<a class="btn btn-sm btn-dark" href="?page=1&{% if sort %}sort={{sort}}{% endif %}">&laquo; first</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+	{% endif %}
+	{% if videos.has_next %}
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+	{% endif %}
 	</span>
 </div>
 <div class="text-dark">
