@@ -294,8 +294,8 @@ def new_video(request, actor_id=None):
 		form = VideoForm(data=request.POST)
 		if form.is_valid():
 			new_video = form.save(commit=False)
-			update_vid(new_video)
 			new_video.owner = request.user
+			update_vid(new_video)
 			if request.FILES:
 				new_video.poster = request.FILES['poster']
 				new_video.save()
