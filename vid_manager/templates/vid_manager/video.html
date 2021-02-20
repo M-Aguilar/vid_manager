@@ -6,9 +6,11 @@
 {% block header %}
 	<div class="jumbotron bg-dark py-2 text-center text-light display-4 mt-5">
 		<h2>{{ video.title }}
+			{% if video.poster %}
 			<div class='float-right'>
 				<a href="{{video.poster.url}}"><i class='glyphicon glyphicon-picture my-auto' style='font-size: 25px;'></i></a>
 			</div>
+			{% endif %}
 		</h2>
 	</div>
 	{% load static %}
