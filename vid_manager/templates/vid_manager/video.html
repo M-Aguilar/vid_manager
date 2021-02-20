@@ -5,7 +5,11 @@
 
 {% block header %}
 	<div class="jumbotron bg-dark py-2 text-center text-light display-4 mt-5">
-		<h2>{{ video.title }}</h2>
+		<h2>{{ video.title }}
+			<div class='float-right'>
+				<a href="{{video.poster.url}}"><i class='glyphicon glyphicon-picture my-auto' style='font-size: 25px;'></i></a>
+			</div>
+		</h2>
 	</div>
 	{% load static %}
 	<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
@@ -119,7 +123,7 @@
 						</div>
 					</div>
 					{% empty %}
-					<div class='border border-dark rounded m-2 p-2'>No tags</div>
+					<div id='no-tag' class='border border-dark rounded m-2 p-2'>No tags</div>
 					{% endfor %}
 				</div>
 			</div>
@@ -178,6 +182,9 @@
 				url: "{% url 'new_tag' %}",
 				data: serializedData,
 				success: function (response) {
+					if ($("#no-tag").length) {
+						$("#no-tag").remove();
+					}
 					$("#tag_form").trigger('reset');
 					$("#id_tag_name").focus();
 					var instance = JSON.parse(response["instance"]);

@@ -286,10 +286,7 @@ def new_video(request, actor_id=None):
 			form = VideoForm(initial=data)
 			form.fields['file_path'].choices = scan(actor)
 		else:
-			all_fps = [x.file_path for x in Video.objects.all()]
-			form = VideoForm()
-			choices = [x for x in form.fields['file_path'].choices if x[0] not in all_fps]
-			form.fields['file_path'].choices = choices
+			form = available_fp(VideoForm())
 	else:
 		form = VideoForm(data=request.POST)
 		if form.is_valid():
@@ -305,6 +302,13 @@ def new_video(request, actor_id=None):
 	new_actor_form = ActorForm()
 	context = {'form': form, 'new_actor_form': new_actor_form, 'new_tag_form': new_tag_form}
 	return render(request, 'vid_manager/new_video.html', context)
+
+def available_fp(f):
+	all_fps = [x.file_path for x in Video.objects.all()]
+	form = f
+	choices = [x for x in form.fields['file_path'].choices if x[0] not in all_fps]
+	form.fields['file_path'].choices = choices
+	return form
 
 def update_vid(new_video):
 	try:
@@ -331,7 +335,7 @@ def edit_video(request, video_id):
 	if video.owner != request.user and video.public:
 		raise Http404
 	if request.method != 'POST':
-		form = VideoForm(instance=video)
+		form = form = available_fp(VideoForm(instance=video))
 	else:
 		form = VideoForm(instance=video, data=request.POST, files=request.FILES)
 		new_video = form.save(commit=False)
@@ -385,9 +389,9 @@ def tag(request, tag_id=None):
 	if not request.user.projector.admin:
 		raise Http404
 	else:
-		videos= Video.objects.filter(tags=tag_id)
+		videos = Video.objects.filter(tags=tag_id)
 		images = Image.objects.filter(tags=tag_id)
-	context = {'tag' : tag, 'videos': videos, 'images': images}
+	context = {'tag' : tag, 'videos': videos[:6], 'images': images[:6], 'v_tot':videos.count(), 'i_tot':images.count()}
 	return render(request, 'vid_manager/tag.html', context)	
 
 @login_required
