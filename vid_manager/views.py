@@ -286,7 +286,7 @@ def new_video(request, actor_id=None):
 			form = VideoForm(initial=data)
 			form.fields['file_path'].choices = scan(actor)
 		else:
-			form = available_fp(VideoForm())
+			form = available_fp()
 	else:
 		form = VideoForm(data=request.POST)
 		if form.is_valid():
@@ -303,11 +303,13 @@ def new_video(request, actor_id=None):
 	context = {'form': form, 'new_actor_form': new_actor_form, 'new_tag_form': new_tag_form}
 	return render(request, 'vid_manager/new_video.html', context)
 
-def available_fp(f):
+def available_fp(cur=None):
+	if cur:
+		form = VideoForm(instance=cur)
+	else:
+		form = VideoForm()
 	all_fps = [x.file_path for x in Video.objects.all()]
-	form = f
-	choices = [x for x in form.fields['file_path'].choices if x[0] not in all_fps]
-	form.fields['file_path'].choices = choices
+	form.fields['file_path'].choices  = [x for x in form.fields['file_path'].choices if ((cur) and cur.file_path in x[0]) or x[0] not in all_fps]
 	return form
 
 def update_vid(new_video):
@@ -335,7 +337,7 @@ def edit_video(request, video_id):
 	if video.owner != request.user and video.public:
 		raise Http404
 	if request.method != 'POST':
-		form = form = available_fp(VideoForm(instance=video))
+		form = available_fp(video)
 	else:
 		form = VideoForm(instance=video, data=request.POST, files=request.FILES)
 		new_video = form.save(commit=False)
