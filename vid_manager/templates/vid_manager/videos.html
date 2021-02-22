@@ -16,15 +16,11 @@
 	<div class="dropdown float-right">
 		<button class="btn btn-dark dropdown-toggle" type="button" id="ddM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sort</button>
 		 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="ddM">
-    		<a class="dropdown-item {% if 'title' in sort %}active{% endif %}" href="?sort={% if sort == 'title' %}-{% endif %}title">{% if sort == 'title' %}-{% endif %}Title</a>
-    		<a class="dropdown-item {% if 'actors' in sort %}active{% endif %}" href="?sort={% if sort == 'actors' %}-{% endif %}actors">{% if sort == 'actors' %}-{% endif %}Actors</a>
-    		<a class="dropdown-item {% if 'length' in sort %}active{% endif %}" href="?sort={% if sort == 'length' %}-{% endif %}length">{% if sort == 'length' %}-{% endif %}Length</a>
-    		<a class="dropdown-item {% if 'size' in sort %}active{% endif %}" href="?sort={% if sort == 'size' %}-{% endif %}size">{% if sort == 'size' %}-{% endif %}Size</a>
-    		<a class="dropdown-item {% if 'date_added' in sort %}active{% endif %}" href="?sort={% if sort == 'date_added' %}-{% endif %}date_added">{% if sort == 'date_added' %}-{% endif %}Date Added</a>
-    		<a class="dropdown-item {% if 'release_date' in sort %}active{% endif %}" href="?sort={% if sort == 'release_date' %}-{% endif %}release_date">{% if sort == 'release_date' %}-{% endif %}Release Date</a>
-    		<a class="dropdown-item {% if 'bitrate' in sort %}active{% endif %}" href="?sort={% if sort == 'bitrate' %}-{% endif %}bitrate">{% if sort == 'bitrate' %}-{% endif %}Bitrate</a>
-    		<a class="dropdown-item {% if 'actor_num' in sort %}active{% endif %}" href="?sort={% if sort == 'actor_num' %}-{% endif %}actor_num">{% if sort == 'actor_num' %}-{% endif %}Actor #</a>
-    		<a class="dropdown-item {% if 'tag_num' in sort %}active{% endif %}" href="?sort={% if sort == 'tag_num' %}-{% endif %}tag_num">{% if sort == 'tag_num' %}-{% endif %}Tag #</a>
+   			{% load deslug clean %}
+			{% for so in sort_options %}
+    		<a class="dropdown-item {% if sort|deslug == so %}active{% endif %}" href="?sort={% if so == sort %}-{% endif %}{{so}}">{% if sort == so %}-{% endif %}{{so|clean}}</a>
+  			{% empty %}
+	  		{% endfor %}
   		</div>
 	</div>
 </div>

@@ -11,4 +11,5 @@ def clean(term):
 	t = t.replace('_', ' ')
 	t = t.title()
 	t = t.replace('Id', 'ID')
+	t = t.replace('Num', '#')
 	return t

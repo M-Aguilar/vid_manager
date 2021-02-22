@@ -217,20 +217,18 @@ def video(request, video_id):
 @login_required
 def videos(request):
 	sort = request.GET.get('sort')
-	video_sort = ['length','bitrate','title','-title','-length','-bitrate','release_date','-release_date', 'actors', '-actors','size','-size','date_added','-date_added']
-	act_ann = ['actor_num', '-actor_num']
-	tag_ann = ['tag_num','-tag_num']
-	if not sort or sort not in video_sort and sort not in tag_ann and sort not in act_ann:
+	video_sort = ['length','bitrate','title','release_date', 'actors','size','date_added','actor_num','tag_num']
+	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
 	if request.user.is_authenticated and request.user.projector.admin:
-		if sort in act_ann:
+		if 'actor_num' in sort:
 			videos = Video.objects.annotate(actor_num=Count('actors')).order_by(sort)
-		elif sort in tag_ann:
+		elif 'tag_num' in sort:
 			videos = Video.objects.annotate(tag_num=Count('tags')).order_by(sort)
 		else:
 			videos = Video.objects.filter(owner=request.user).order_by(sort)
 	else:
-		if sort in act_ann:
+		if 'actor_num' in sort:
 			videos = Video.objects.annotate(actor_num=Count('actors')).filter(public=True).order_by(sort)
 		else:
 			videos = Video.objects.filter(public=True).order_by(sort)
@@ -240,7 +238,7 @@ def videos(request):
 	if page_num and '&' in page_num:
 		page_num = page_num[:page_num.index('&')]
 	page_o = paginator.get_page(page_num)
-	context = {'videos':page_o, 'total':total, 'sort': sort}
+	context = {'videos':page_o, 'total':total, 'sort': sort, 'sort_options': video_sort}
 	return render(request, 'vid_manager/videos.html', context)
 
 @login_required
@@ -548,7 +546,7 @@ def images(request):
 	paginator = Paginator(images, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	context = {'images': page_o, 'total':total, 'image_sort': image_sort, 'sort':sort}
+	context = {'images': page_o, 'total':total, 'sort_options': image_sort, 'sort':sort}
 	return render(request,'vid_manager/images.html',context)
 
 #Tag Images
