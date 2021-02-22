@@ -51,12 +51,12 @@
 <div class="pagination d-flex justify-content-center">
 	<span class="step-links">
 	{% if videos.has_previous %}
-		<a class="btn btn-sm btn-dark" href="?page=1&{% if sort %}sort={{sort}}{% endif %}">&laquo; first</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+		<a class="btn btn-sm btn-dark" href="?page=1&{% if sort %}sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}">&laquo; first</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}">previous</a>
 	{% endif %}
 	{% if videos.has_next %}
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}">next</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}">last &raquo;</a>
 	{% endif %}
 	</span>
 </div>
@@ -80,12 +80,12 @@
 <div class="pagination d-flex justify-content-center">
 	<span class="step-links">
 		{% if videos.has_previous %}
-			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}">previous</a>
 		{% endif %}
 		{% if videos.has_next %}
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}">last &raquo;</a>
 		{% endif %}
 	</span>
 </div>

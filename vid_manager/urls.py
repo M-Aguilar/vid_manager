@@ -14,12 +14,6 @@ urlpatterns = [
 	#All Videos
 	path('videos', views.videos, name='videos'),
 
-	#Tag Videos
-	path('videos/<tag_id>', views.tag_videos, name='tag_videos'),
-
-	#Actor Videos
-	path('<actor_id>/videos', views.actor_videos, name='actor_videos'),
-
 	path('random_video', views.random_video, name='random_video'),
 	#Individual Video
 	path('video/<video_id>', views.video, name='video'),

@@ -216,6 +216,8 @@ def video(request, video_id):
 
 @login_required
 def videos(request):
+	tags = request.GET.get('tag')
+	actors = request.GET.get('actor')
 	sort = request.GET.get('sort')
 	video_sort = ['length','bitrate','title','release_date', 'actors','size','date_added','actor_num','tag_num']
 	if not sort or sort.replace('-','').lower() not in video_sort:
@@ -226,7 +228,7 @@ def videos(request):
 		elif 'tag_num' in sort:
 			videos = Video.objects.annotate(tag_num=Count('tags')).order_by(sort)
 		else:
-			videos = Video.objects.filter(owner=request.user).order_by(sort)
+			videos = fine_filter(request.user, sort, tags, actors)
 	else:
 		if 'actor_num' in sort:
 			videos = Video.objects.annotate(actor_num=Count('actors')).filter(public=True).order_by(sort)
@@ -238,40 +240,23 @@ def videos(request):
 	if page_num and '&' in page_num:
 		page_num = page_num[:page_num.index('&')]
 	page_o = paginator.get_page(page_num)
-	context = {'videos':page_o, 'total':total, 'sort': sort, 'sort_options': video_sort}
+	context = {'videos':page_o, 'total':total, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags}
 	return render(request, 'vid_manager/videos.html', context)
 
-@login_required
-def tag_videos(request, tag_id):
-	sort = request.GET.get('sort')
-	video_sort = ['length','bitrate','title','-title','-length','-bitrate','release_date','-release_date', 'actors', '-actors','size','-size','date_added','-date_added']
-	if not sort or sort not in video_sort:
-		sort = '-date_added'
-	tag = get_object_or_404(Tag, id=tag_id)
-	if request.user.is_authenticated and request.user.projector.admin:
-		videos = Video.objects.filter(tags=tag).order_by(sort)
-		total = videos.count()
-	paginator = Paginator(videos, 24)
-	page_num = request.GET.get('page')
-	page_o = paginator.get_page(page_num)
-	context = {'videos':page_o, 'tag':tag, 'total':total,'sort':sort}
-	return render(request, 'vid_manager/videos.html', context)
-
-@login_required
-def actor_videos(request, actor_id):
-	sort = request.GET.get('sort')
-	video_sort = ['length','bitrate','title','-title','-length','-bitrate','release_date','-release_date', 'actors', '-actors','size','-size','date_added','-date_added']
-	if not sort or sort not in video_sort:
-		sort = '-date_added'
-	actor = get_object_or_404(Actor, id=actor_id)
-	if request.user.is_authenticated and request.user.projector.admin:
-		videos = Video.objects.filter(actors=actor).order_by(sort)
-		total = videos.count()
-	paginator = Paginator(videos, 24)
-	page_num = request.GET.get('page')
-	page_o = paginator.get_page(page_num)
-	context = {'videos':page_o, 'actor': actor, 'total':total,'sort':sort}
-	return render(request, 'vid_manager/videos.html', context)
+def fine_filter(user, sort, tag=None, actor=None):
+	if tag and actor:
+		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag), Q(actors__first_name__icontains=actor), owner=user).order_by(sort)
+	elif tag:
+		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag), owner=user).order_by(sort)
+	elif actor:
+		first_name, last_name = actor.split()[0], ' '.join(actor.split()[1:])
+		if last_name:
+			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(actors__last_name__icontains=last_name), owner=user).order_by(sort)
+		else:
+			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name), owner=user).order_by(sort)
+	else:
+		videos = Video.objects.filter(owner=user).order_by(sort)
+	return videos
 
 @login_required
 def new_video(request, actor_id=None):

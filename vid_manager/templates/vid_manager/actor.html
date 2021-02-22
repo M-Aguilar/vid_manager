@@ -94,7 +94,7 @@
 		</div>
 	</div>
 	<div class="text-dark">
-		<h2>Recently Added <a href="{% url 'actor_videos' actor.id %}">Videos ({{ actor.video_count  }})</a></h2>
+		<h2>Recently Added <a href="{% url 'videos' %}?actor={{actor}}">Videos ({{ actor.video_count  }})</a></h2>
 		<div class="row">
 			{% for video in videos %}
 				{% include 'vid_manager/video_preview.html' %}

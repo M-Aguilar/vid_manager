@@ -19,10 +19,17 @@
     	{% endfor %}
 		</div>
 	{% endif %}
-		<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
-			{% csrf_token %}
-			{% bootstrap_form new_tag_form %}	
-		</form>
+		<a class='btn btn-dark' href="#add_tag" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_tag">Add Tag</a>
+		<div class="collapse" id="add_tag">
+			<div class="card-body"> 
+			{% buttons %}
+				<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
+					{% csrf_token %}
+					{% bootstrap_form new_tag_form %}	
+				</form>
+			</div>
+			{% endbuttons %}
+		</div>
 	</div>
 	<div class="float-right">
 		<span class="current">

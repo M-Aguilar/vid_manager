@@ -11,7 +11,7 @@
 
 {% block content %}
 	<div class="text-dark">
-		<a href="{% url 'tag_videos' tag.id %}"><h2>Videos ({{v_tot}})</h2></a>
+		<a href="{% url 'videos' %}?tag={{tag}}"><h2>Videos ({{v_tot}})</h2></a>
 		<hr>
 		<div class="row pb-2">
 			{% for video in videos %}
