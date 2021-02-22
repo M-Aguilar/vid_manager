@@ -368,6 +368,10 @@ def delete_video(request, video_id):
 		messages.error(request, 'Something wet wrong')
 	return HttpResponseRedirect(reverse('videos'))
 
+@login_required
+def random_video(request):
+    video = Video.objects.all().order_by("?").first()
+    return HttpResponseRedirect(reverse('video', args=[video.id]))
 '''########################    TAGS     #########################'''
 
 @login_required

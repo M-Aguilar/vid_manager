@@ -20,6 +20,7 @@ urlpatterns = [
 	#Actor Videos
 	path('<actor_id>/videos', views.actor_videos, name='actor_videos'),
 
+	path('random_video', views.random_video, name='random_video'),
 	#Individual Video
 	path('video/<video_id>', views.video, name='video'),
 

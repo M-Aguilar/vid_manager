@@ -12,7 +12,7 @@
 {% block content %}
 <div class="container">
 	{% if request.user.is_authenticated and request.user.projector.admin %}
-	<h2>Welcome</h2>
+	<a href="{% url 'random_video' %}"><h2>Random Vid</h2></a>
 	{% elif request.user.is_authenticated %}
 		<h2>Hello. Not much to do here.</h2>
 	{% else %}
