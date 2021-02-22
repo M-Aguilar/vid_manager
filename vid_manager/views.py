@@ -219,6 +219,7 @@ def videos(request):
 	tags = request.GET.get('tag')
 	actors = request.GET.get('actor')
 	sort = request.GET.get('sort')
+	res = request.GET.get('res')
 	video_sort = ['length','bitrate','title','release_date', 'actors','size','date_added','actor_num','tag_num']
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
@@ -228,7 +229,7 @@ def videos(request):
 		elif 'tag_num' in sort:
 			videos = Video.objects.annotate(tag_num=Count('tags')).order_by(sort)
 		else:
-			videos = fine_filter(request.user, sort, tags, actors)
+			videos = fine_filter(request.user, sort, tags, actors, res)
 	else:
 		if 'actor_num' in sort:
 			videos = Video.objects.annotate(actor_num=Count('actors')).filter(public=True).order_by(sort)
@@ -240,22 +241,25 @@ def videos(request):
 	if page_num and '&' in page_num:
 		page_num = page_num[:page_num.index('&')]
 	page_o = paginator.get_page(page_num)
-	context = {'videos':page_o, 'total':total, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags}
+	context = {'videos':page_o, 'total':total, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res}
 	return render(request, 'vid_manager/videos.html', context)
 
-def fine_filter(user, sort, tag=None, actor=None):
+def fine_filter(user, sort, tag=None, actor=None,res=None):
+	reses = {'ALL':0 , 'HD':720, '1080P':1080,'4K':2160,'UHD':2160,'2K':1440,'1440p':1440,'2160p':2160,'2k':1440,'4k':2160, '1080p':1080}
+	if not res or res not in reses.keys():
+		res = 'ALL'
 	if tag and actor:
-		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag), Q(actors__first_name__icontains=actor), owner=user).order_by(sort)
+		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(actors__first_name__icontains=actor) & Q(height=reses[res]),owner=user).order_by(sort)
 	elif tag:
-		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag), owner=user).order_by(sort)
+		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(height=reses[res]), owner=user).order_by(sort)
 	elif actor:
 		first_name, last_name = actor.split()[0], ' '.join(actor.split()[1:])
 		if last_name:
-			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(actors__last_name__icontains=last_name), owner=user).order_by(sort)
+			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(actors__last_name__icontains=last_name) & Q(height=reses[res]), owner=user).order_by(sort)
 		else:
-			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name), owner=user).order_by(sort)
+			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(height=reses[res]), owner=user).order_by(sort)
 	else:
-		videos = Video.objects.filter(owner=user).order_by(sort)
+		videos = Video.objects.filter(height=reses[res],owner=user).order_by(sort)
 	return videos
 
 @login_required
