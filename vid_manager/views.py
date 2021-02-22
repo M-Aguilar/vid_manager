@@ -536,15 +536,19 @@ def delete_actor(request, actor_id):
 #All Images
 @login_required
 def images(request):
+	sort = request.GET.get('sort')
+	image_sort = ['actors', 'id', 'image', 'tags', 'video', 'video_id']
+	if not sort or sort.replace('-','') not in image_sort:
+		sort = '-id'
 	if request.user.is_authenticated and request.user.projector.admin:
-		images = Image.objects.all()
+		images = Image.objects.all().order_by(sort)
 		total = images.count()
 	else:
 		raise Http404
 	paginator = Paginator(images, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	context = {'images': page_o, 'total':total}
+	context = {'images': page_o, 'total':total, 'image_sort': image_sort, 'sort':sort}
 	return render(request,'vid_manager/images.html',context)
 
 #Tag Images
