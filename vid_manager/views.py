@@ -220,7 +220,7 @@ def videos(request):
 	actors = request.GET.get('actor')
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
-	video_sort = ['length','bitrate','title','release_date', 'actors','size','date_added','actor_num','tag_num']
+	video_sort = ['release_date','date_added','title','length','resolution','size','actor_num','tag_num','bitrate']
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
 	if request.user.is_authenticated and request.user.projector.admin:
@@ -246,6 +246,8 @@ def videos(request):
 
 def fine_filter(user, sort, tag=None, actor=None,res=None):
 	reses = {'ALL':0 , 'HD':720, '1080P':1080,'4K':2160,'UHD':2160,'2K':1440,'1440p':1440,'2160p':2160,'2k':1440,'4k':2160, '1080p':1080}
+	if 'resolution' in sort:
+		sort = sort.replace('resolution','height')
 	if not res or res not in reses.keys():
 		res = 'ALL'
 	if tag and actor:
@@ -259,7 +261,7 @@ def fine_filter(user, sort, tag=None, actor=None,res=None):
 		else:
 			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(height=reses[res]), owner=user).order_by(sort)
 	else:
-		videos = Video.objects.filter(height=reses[res],owner=user).order_by(sort)
+		videos = Video.objects.filter(height__gte=reses[res],owner=user).order_by(sort)
 	return videos
 
 @login_required
