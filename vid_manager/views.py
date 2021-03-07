@@ -66,22 +66,28 @@ class SearchResultsView(ListView):
 		object_list = {'object_list': page_o, 'q': query, 'total': total, 'actors': actors,'tags':tags}
 		return object_list
 
+	#Returns a list of actors/aliases the query is found in. 
 	def checkActor(self, q):
 		actors = [x for x in Actor.objects.all() if self.closeEnough(q, x.full_name)]
 		aliases = [x.actor for x in Alias.objects.all() if x not in actors and self.closeEnough(q,x.full_name)]
 		return actors + aliases
 
+	#Returns a list of tags the query is found in
 	def checkTag(self, q):
 		tags = [x for x in Tag.objects.all() if self.closeEnough(q, x.tag_name)]
 		return tags
 
+	#Truthy checks name against query.
 	def closeEnough(self, q, name):
+		#Meant to allow for multiple names separated by commas
 		if ',' in q:
 			check = False
 			for n in q.split(','):
 				if self.closeEnough(n,name):
 					check = True
 			return check
+		#Checks each input word individually
+		#TODO. If a full name is found the query should move on to the next pair of names.
 		if ' ' in q:
 			check = False
 			for n in q.split(' '):
@@ -94,6 +100,7 @@ class SearchResultsView(ListView):
 			else:
 				return False
 
+#Alias Form Handler. Only found in actor.html
 def new_alias(request):
 	if request.is_ajax and request.method == "POST":
 		form = AliasForm(request.POST)
@@ -114,6 +121,7 @@ def new_alias(request):
 			return JsonResponse({"error": "Something went wrong"}, status=400)
 	return JsonResponse({"error":""}, status=400)
 
+#Assumes videos are organized into actor dirs. Creates Actor for each.
 def auto_actor_add(request):
 	if request.user.projector.admin:
 		form = VideoForm()
@@ -127,6 +135,7 @@ def auto_actor_add(request):
 				add_actor(i)		
 	return HttpResponseRedirect(reverse('actors'))
 
+#Takes actor_name and creates Actor.
 def add_actor(actor_name):
 	i = actor_name.split(' ')
 	if len(i) == 1:
@@ -138,6 +147,7 @@ def add_actor(actor_name):
 	form = ActorForm(data=data)
 	new_actor = form.save()
 
+#Returns number of Actors not created based on dir tree.
 def new_actor_count():
 	exceptions = settings.EXCEPTIONS
 	form=VideoForm()
@@ -150,8 +160,11 @@ def new_actor_count():
 			act_list.append(i)
 	return len(act_list)
 
+#Add all Videos in actor subdir or contain actor name
 @login_required
 def auto_add(request, actor_id):
+	if not request.user.is_authenticated:
+		raise Http404
 	actor = Actor.objects.get(id=actor_id)
 	new_vidss = scan(actor)
 	for new_vids in new_vidss:
@@ -161,30 +174,15 @@ def auto_add(request, actor_id):
 		form = VideoForm(data=data)
 		if form.is_valid():
 			new_video = form.save(commit=False)
-			try:
-				v = mutagen.mp4.Open(new_video.file_path)
-				seconds = v.info.length
-				b_rate = v.info.bitrate
-			except mutagen.mp4.MP4StreamInfoError:
-				seconds=0
-				messages.error(request, 'Something went wrong checking length of video.')
-			fp = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', new_video.file_path])
-			fp = fp.decode('ascii').rstrip()
-			dim = {'width':fp.split('x')[0],'height':fp.split('x')[1]}
 			new_video.owner = request.user
-			new_video.height = int(dim['height'])
-			new_video.width = int(dim['width'])
-			statinfo = stat(new_video.file_path)
-			new_video.length = seconds
-			new_video.bitrate = b_rate
-			new_video.size = statinfo.st_size
-			new_video.save()
+			update_vid(new_video)
 			form.save_m2m()	
 		else:
 			messages.error(request,form.errors)
 			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 	return HttpResponseRedirect(reverse('video', args=[new_video.id]))
 
+#Returns videos found in actor subdir or contain actor name
 def scan(actor):
 	form = VideoForm()
 	choices = form.fields['file_path'].choices
@@ -192,10 +190,9 @@ def scan(actor):
 	found = [x for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
 	return found
 
+#Empty Home page
 def index(request):
 	return render(request, 'vid_manager/index.html')
-
-'''########################    ACTOR     #########################'''
 
 @login_required
 def video(request, video_id):
@@ -214,6 +211,7 @@ def video(request, video_id):
 	context = {'video': video, 'actors': actors, 'tags': tags, 'images':images, 'eventform':eventform, 'actorform': actorform, 'tagform': tagform, 'events':events}
 	return render(request, 'vid_manager/video.html', context)
 
+#Paginated videos. Allows for sorting. filtering by resolution, tag, and actor.
 @login_required
 def videos(request):
 	tags = request.GET.get('tag')
@@ -235,15 +233,15 @@ def videos(request):
 			videos = Video.objects.annotate(actor_num=Count('actors')).filter(public=True).order_by(sort)
 		else:
 			videos = Video.objects.filter(public=True).order_by(sort)
-	total = videos.count()
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
 	if page_num and '&' in page_num:
 		page_num = page_num[:page_num.index('&')]
 	page_o = paginator.get_page(page_num)
-	context = {'videos':page_o, 'total':total, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res}
+	context = {'videos':page_o, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res}
 	return render(request, 'vid_manager/videos.html', context)
 
+#Handles multiple filter inputs and returns a filtered and sorted list. 
 def fine_filter(user, sort, tag=None, actor=None,res=None):
 	reses = {'ALL':0 , 'HD':720, '1080P':1080,'4K':2160,'UHD':2160,'2K':1440,'1440p':1440,'2160p':2160,'2k':1440,'4k':2160, '1080p':1080}
 	if 'resolution' in sort:
@@ -264,6 +262,7 @@ def fine_filter(user, sort, tag=None, actor=None,res=None):
 		videos = Video.objects.filter(height__gte=reses[res],owner=user).order_by(sort)
 	return videos
 
+#Takes POST and creates Video or provides empty VideoForm
 @login_required
 def new_video(request, actor_id=None):
 	if not request.user.projector.admin:
@@ -292,6 +291,7 @@ def new_video(request, actor_id=None):
 	context = {'form': form, 'new_actor_form': new_actor_form, 'new_tag_form': new_tag_form}
 	return render(request, 'vid_manager/new_video.html', context)
 
+#Returns a blank or existing VideoForm containing filtered file_path choices. Only non-claimed file_paths allowed
 def available_fp(cur=None):
 	if cur:
 		form = VideoForm(instance=cur)
@@ -301,6 +301,7 @@ def available_fp(cur=None):
 	form.fields['file_path'].choices  = [x for x in form.fields['file_path'].choices if ((cur) and cur.file_path in x[0]) or x[0] not in all_fps]
 	return form
 
+#Takes a video objects. scans and creates/updates video attributes. Video dimmensions/length/size/bitrate
 def update_vid(new_video):
 	try:
 		v = mutagen.mp4.Open(new_video.file_path)
@@ -324,6 +325,7 @@ def update_vid(new_video):
 	new_video.size = statinfo.st_size
 	new_video.save()
 
+#Takes video id and returns VideoForm instance or varifies and applies POST changes.
 @login_required
 def edit_video(request, video_id):
 	video = get_object_or_404(Video, id=video_id)
@@ -345,6 +347,7 @@ def edit_video(request, video_id):
 	context = {'video': video,'form': form}
 	return render(request, 'vid_manager/edit_video.html', context)
 
+#Takes video id and verifies ownerships before deleting video. deletes corresponding poster file. 
 @login_required
 def delete_video(request, video_id):
 	v = get_object_or_404(Video, id=video_id)
@@ -366,8 +369,10 @@ def delete_video(request, video_id):
 def random_video(request):
     video = Video.objects.all().order_by("?").first()
     return HttpResponseRedirect(reverse('video', args=[video.id]))
-'''########################    TAGS     #########################'''
 
+#========================    TAGS     ==========================
+
+#Returns Paginated list of all Tags and empty TagForm
 @login_required
 def tags(request):
 	if not request.user.projector.admin:
@@ -379,6 +384,7 @@ def tags(request):
 	context = {'tags': page_o, 'new_tag_form': TagForm()}
 	return render(request, 'vid_manager/tags.html', context)
 
+#Takes tag id and returns <=6 images and videos and total of each.
 @login_required
 def tag(request, tag_id=None):
 	if not tag_id:
@@ -392,6 +398,7 @@ def tag(request, tag_id=None):
 	context = {'tag' : tag, 'videos': videos[:6], 'images': images[:6], 'v_tot':videos.count(), 'i_tot':images.count()}
 	return render(request, 'vid_manager/tag.html', context)	
 
+#Checks for permissions and deletes tag
 @login_required
 def delete_tag(request, tag_id):
 	if not request.user.projector.admin:
@@ -406,6 +413,7 @@ def delete_tag(request, tag_id):
 		message.error(request, "Something went wrong")
 	return HttpResponseRedirect(reverse('tags'))
 
+#Removes the tag from video or image without deleting the tag.
 @login_required
 def remove_tag(request, tag_id):
 	t = request.META.get('HTTP_REFERER')
