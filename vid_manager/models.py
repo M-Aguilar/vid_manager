@@ -22,7 +22,7 @@ class Projector(models.Model):
 
 # Create your models here.
 class Tag(models.Model):
-	tag_name = models.CharField(max_length=20, unique=True)
+	tag_name = models.CharField(max_length=50, unique=True)
 
 	def img(self):
 		img = Image.objects.filter(tags=self.id, image__isnull=False).order_by('?').first()
@@ -65,7 +65,7 @@ class Actor(ActorBase):
 			return img.image
 		else:
 			return False
-	
+
 	@property
 	def aliases(self):
 		return Alias.objects.filter(actor=self.id)

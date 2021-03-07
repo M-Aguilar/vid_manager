@@ -574,10 +574,10 @@ def actor_images(request, actor_id):
 #New Video Image
 @login_required
 def new_video_image(request, video_id):
-	if request.method == 'GET':
+	if request.method != 'POST':
 		data={}
 		video = get_object_or_404(Video, id=video_id)
-		data = {'video':video,'actors':video.actors.all()}
+		data = {'video':video,'actors':video.actors.all(),'tags':video.tags.all()}
 	else:
 		new_image(request)
 	form = ImageForm(initial=data)
