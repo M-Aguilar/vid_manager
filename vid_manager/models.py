@@ -65,20 +65,16 @@ class Actor(ActorBase):
 			return img.image
 		else:
 			return False
+	
 	@property
 	def aliases(self):
 		return Alias.objects.filter(actor=self.id)
-
-	@property
-	def video_count(self):
-		return Video.objects.filter(actors=self.id).count()
-
-	@property
-	def images_count(self):
-		return Image.objects.filter(actors=self.id).count()
 	
 class Alias(ActorBase):
-	actor = models.ForeignKey(Actor, on_delete=models.CASCADE)
+	actor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name='alias')
+
+	class Meta:
+		verbose_name_plural = 'aliases'
 
 #tracking view count would be ideal
 class Video(models.Model):
@@ -141,9 +137,9 @@ class Video(models.Model):
 '''Potentially just make this into the image class with optional video foreign key ....'''
 class Image(models.Model):
 	image = models.ImageField(upload_to=user_directory_path,blank=True)
-	actors = models.ManyToManyField('Actor', related_name='actors')
+	actors = models.ManyToManyField('Actor', related_name='actor_images')
 	video = models.ForeignKey(Video, on_delete=models.CASCADE, blank=True,null=True)
-	tags = models.ManyToManyField('Tag', blank=True, related_name='tags')
+	tags = models.ManyToManyField('Tag', blank=True, related_name='tag_images')
 
 	@property
 	def first_actor(self):

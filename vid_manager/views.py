@@ -308,10 +308,15 @@ def update_vid(new_video):
 		b_rate = v.info.bitrate
 	except mutagen.mp4.MP4StreamInfoError:
 		seconds=0
+		b_rate=0
 	fp = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', new_video.file_path])
 	fp = fp.decode('ascii').rstrip()
 	dim = {'width':fp.split('x')[0],'height':fp.split('x')[1]}
-	new_video.height = int(dim['height'])
+	try:
+		new_video.height = int(dim['height'])
+	except ValueError:
+		new_video.height = int(dim['height'][:dim['height'].index('\n')])
+		print(new_video.height)
 	new_video.width = int(dim['width'])
 	statinfo = stat(new_video.file_path)
 	new_video.length = seconds
@@ -368,12 +373,10 @@ def tags(request):
 	if not request.user.projector.admin:
 		raise Http404
 	tags = Tag.objects.order_by('tag_name')
-	total = tags.count()
 	paginator = Paginator(tags, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	new_tag_form = TagForm()
-	context = {'tags': page_o, 'new_tag_form': new_tag_form, 'total':total}
+	context = {'tags': page_o, 'new_tag_form': TagForm()}
 	return render(request, 'vid_manager/tags.html', context)
 
 @login_required

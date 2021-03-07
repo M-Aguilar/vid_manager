@@ -5,7 +5,7 @@
 {% block title %}Videos{% endblock %}
 {% block header %}
 <div class="jumbotron bg-dark text-light py-2 display-4 text-center">
-	<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Videos: {{ total }}</h3>
+	<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Videos: {{ videos.paginator.count }}</h3>
 </div>
 {% load static %}
 {% endblock %}
