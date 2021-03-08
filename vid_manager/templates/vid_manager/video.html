@@ -14,7 +14,6 @@
 		</h2>
 	</div>
 	{% load static %}
-	<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -105,9 +104,12 @@
 			<div>
 				<i class='glyphicon glyphicon-tag my-auto' style='font-size: 25px;'></i>
 			</div>
-			<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
+			<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form mb-0">
 				{% csrf_token %}
 				{% bootstrap_form tagform %}
+				<datalist id="tag_results">
+					{% include 'vid_manager/tag_results.html' %}
+				</datalist>
 			</form>
 		</div>
 		<div class="mx-4">
@@ -148,11 +150,12 @@
 		</div>
 		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole">Delete Video</a>
 	</div>
+	<script type="text/javascript" src="{% static 'vid_manager/tags.js' %}"></script>
 	<script>
 		function jump(time) {
 			var myvideo = document.getElementById('vid_player');
 			event.preventDefault();
-    		myvideo.currentTime = time;
+	    	myvideo.currentTime = time;
     		myvideo.play();
 		}
 
@@ -174,7 +177,7 @@
 					alert(response["responseJSON"]["error"]);
 				}
 			})
-		});
+		})
 
 		$("#tag_form").submit(function (e) {
 			e.preventDefault();

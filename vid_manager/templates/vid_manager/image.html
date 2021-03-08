@@ -14,6 +14,7 @@
 {% endblock %}
 
 {% block content %}
+{% load static %}
 <div>
 	<div class="w-100">
 		<a href="{{ image.image.url }}"><img src="{{ image.image.url }}" class="d-block mw-100 mx-auto" height="{{ image.height_field}}"></a>
@@ -35,6 +36,9 @@
 	<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
 		{% csrf_token %}
 		{% bootstrap_form tagform %}
+		<datalist id="tag_results">
+			{% include 'vid_manager/tag_results.html' %}
+		</datalist>
 	</form>
 	<div id="tags">
 		<div class="tagrow d-flex row">
@@ -54,6 +58,7 @@
 		{% endfor %}
 	</div>
 </div>
+<script type="text/javascript" src="{% static 'vid_manager/tags.js' %}"></script>
 <script>
 	$(".tagrow").on('click', "a#remove_tag", function (e) {
 		e.preventDefault();
@@ -73,7 +78,7 @@
 				alert(response["responseJSON"]["error"]);
 			}
 		})
-	})
+	});
 
 	$("#tag_form").submit(function (e) {
 		e.preventDefault();

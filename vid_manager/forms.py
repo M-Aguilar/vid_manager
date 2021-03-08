@@ -26,6 +26,9 @@ class TagForm(forms.ModelForm):
 	class Meta:
 		model = Tag
 		fields = ['tag_name']
+		widgets = {
+			'tag_name': forms.TextInput(attrs={'list':'tag_results', 'autocomplete': 'off'})
+		}
 
 class ImageForm(forms.ModelForm):
 	class Meta:

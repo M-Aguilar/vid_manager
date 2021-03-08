@@ -12,6 +12,9 @@ from django.conf import settings
 
 from django.db.models import Q
 from django.views.generic import ListView
+
+#for Ajax rendering. ?
+from django.template.loader import render_to_string
 #NOT USED CURRENTLY
 #from itertools import chain
 #from django.core.files.images import get_image_dimensions
@@ -372,6 +375,19 @@ def random_video(request):
 
 #========================    TAGS     ==========================
 
+@login_required
+def tag_results(request):
+	q = request.GET.get('q')
+	tags = None
+	if q:
+		tags = Tag.objects.filter(tag_name__icontains=q)
+	if request.is_ajax():
+		html = render_to_string(template_name='vid_manager/tag_results.html', context={'tags':tags})
+		data = {"tag_results_view":html}
+		return JsonResponse(data=data, safe=False)
+	else:
+		return JsonResponse({"error":""}, status=400)
+
 #Returns Paginated list of all Tags and empty TagForm
 @login_required
 def tags(request):
@@ -442,11 +458,11 @@ def new_tag(request):
 				if 'video' in t:
 					video = Video.objects.get(id=t[t.index('video')+6:])
 					if tag not in video.tags.all():
-						tag.videos.add(video)
+						instance.videos.add(video)
 				if 'image' in t:
 					image = Image.objects.get(id=t[t.index('image')+6:])
 					if tag not in image.tags.all():
-						image.tags.add(tag)
+						instance.tag_images.add(image)
 				serialized = serializers.serialize('json', [ instance, ])
 				return JsonResponse({"instance":serialized},status=200)
 		except Tag.DoesNotExist:
@@ -457,7 +473,7 @@ def new_tag(request):
 					instance.videos.add(video)
 				if 'image' in t:
 					image = Image.objects.get(id=t[t.index('image')+6:])
-					instance.images.add(image)
+					instance.tag_images.add(image)
 				serialized = serializers.serialize('json', [ instance, ])
 				return JsonResponse({"instance":serialized},status=200)
 			else:
