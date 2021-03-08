@@ -1,6 +1,10 @@
 const ui = $("#id_tag_name");
 const tag_list = $("#tag_results");
-const endpoint = '/tag_results';
+var is_local = '';
+if ($(location).attr('href').includes('local_site')) {
+	is_local = '/local_site'
+}
+const endpoint = is_local.concat('/tag_results');
 const d_lay = 700;
 let scheduled = false;
 
