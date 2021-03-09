@@ -197,7 +197,7 @@ def scan(actor):
 def index(request):
 	total=0
 	if request.user.is_authenticated and request.user.projector.admin:
-		total = str(round((Video.objects.aggregate(Sum('size'))['size__sum'] * 0.00000001),2)) + "GB" 
+		total = str(round((Video.objects.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
 	context = {'total':total}
 	return render(request, 'vid_manager/index.html', context)
 
