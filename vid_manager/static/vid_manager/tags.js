@@ -11,10 +11,10 @@ let scheduled = false;
 let tag_search = function(endpoint, tag_in) {
 	$.getJSON(endpoint, tag_in)
 		.done(response => {
-			tag_list.html(response['tag_results_view']);
-			tag_list.focus();
+			tag_list.html(response['tag_results_view'])
+			tag_list.focus()
 		})
-}
+};
 
 ui.on('keyup', function () {
 	const tag_in = {
@@ -27,6 +27,16 @@ ui.on('keyup', function () {
 
 	if (tag_in.q.length > 0){
 		scheduled = setTimeout(tag_search, d_lay, endpoint, tag_in)
+	}
+});
+
+ui.on('change', function() {
+	let options = $(".results");
+	for (let i = 0; i < options.length; i++) {
+		if (options[i].value == $(this).val()) {
+			$('#tag_form').submit();
+			break;
+		}
 	}
 });
 
