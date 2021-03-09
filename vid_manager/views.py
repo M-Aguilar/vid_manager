@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.core import serializers #ajax
 from os import stat #video bitrate, length, and size
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Sum
 import json
 from django.conf import settings
 
@@ -195,7 +195,11 @@ def scan(actor):
 
 #Empty Home page
 def index(request):
-	return render(request, 'vid_manager/index.html')
+	total=0
+	if request.user.is_authenticated and request.user.projector.admin:
+		total = str(round((Video.objects.aggregate(Sum('size'))['size__sum'] * 0.00000001),2)) + "GB" 
+	context = {'total':total}
+	return render(request, 'vid_manager/index.html', context)
 
 @login_required
 def video(request, video_id):
