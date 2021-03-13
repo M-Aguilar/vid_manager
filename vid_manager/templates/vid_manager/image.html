@@ -30,16 +30,18 @@
 {% endif %}
 </div>
 <div>
-	<div>
-		<i class='glyphicon glyphicon-tag my-auto' style='font-size: 25px;'></i>
+	<div class='d-flex flex-row'>
+		<div>
+			<i class='glyphicon glyphicon-tag my-auto' style='font-size: 25px;'></i>
+		</div>
+		<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
+			{% csrf_token %}
+			{% bootstrap_form tagform %}
+			<datalist id="tag_results">
+				{% include 'vid_manager/tag_results.html' %}
+			</datalist>
+		</form>
 	</div>
-	<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
-		{% csrf_token %}
-		{% bootstrap_form tagform %}
-		<datalist id="tag_results">
-			{% include 'vid_manager/tag_results.html' %}
-		</datalist>
-	</form>
 	<div id="tags">
 		<div class="tagrow d-flex row">
 		{% for tag in image.tags.all %}
@@ -100,7 +102,7 @@
 				var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);
 				$(".messages").empty();
 				$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]||""}" has been added.</div>`);
-				$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]||""}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span class="btn btn-xs btn-dark">&times;</span></a><div></div>`);
+				$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2 col-md-1'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]||""}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span class="btn btn-xs btn-dark">&times;</span></a><div></div>`);
 			},
 
 			error: function (response) {

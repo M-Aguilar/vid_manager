@@ -179,7 +179,7 @@ def auto_add(request, actor_id):
 			new_video = form.save(commit=False)
 			new_video.owner = request.user
 			update_vid(new_video)
-			form.save_m2m()	
+			form.save_m2m()
 		else:
 			messages.error(request,form.errors)
 			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -222,7 +222,7 @@ def video(request, video_id):
 @login_required
 def videos(request):
 	tags = request.GET.get('tag')
-	actors = request.GET.get('actor')
+	actors = request.GET.get('actors')
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
 	video_sort = ['release_date','date_added','title','length','resolution','size','actor_num','tag_num','bitrate']
@@ -262,7 +262,7 @@ def fine_filter(user, sort, tag=None, actor=None,res=None):
 	elif actor:
 		first_name, last_name = actor.split()[0], ' '.join(actor.split()[1:])
 		if last_name:
-			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(actors__last_name__icontains=last_name) & Q(height=reses[res]), owner=user).order_by(sort)
+			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(actors__last_name__icontains=last_name) & Q(height__gte=reses[res]), owner=user).order_by(sort)
 		else:
 			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(height=reses[res]), owner=user).order_by(sort)
 	else:

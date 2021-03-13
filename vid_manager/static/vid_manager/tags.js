@@ -1,9 +1,11 @@
 const ui = $("#id_tag_name");
 const tag_list = $("#tag_results");
 var is_local = '';
+var sub = 0;
 if ($(location).attr('href').includes('local_site')) {
 	is_local = '/local_site'
 }
+
 const endpoint = is_local.concat('/tag_results');
 const d_lay = 700;
 let scheduled = false;
@@ -15,6 +17,14 @@ let tag_search = function(endpoint, tag_in) {
 			tag_list.focus()
 		})
 };
+
+function submit() {
+	if (sub == 0) {
+		sub = 1;
+		sub = setTimeout($('#tag_form').submit(),500);
+		sub = 0;
+	}
+}
 
 ui.on('keyup', function () {
 	const tag_in = {
@@ -34,12 +44,12 @@ ui.on('change', function() {
 	let options = $(".results");
 	for (let i = 0; i < options.length; i++) {
 		if (options[i].value == $(this).val()) {
-			$('#tag_form').submit();
+			submit();
 			break;
 		}
 	}
 });
 
 ui.on('select', function() {
-	$('#tag_form').submit();
+	submit();
 });
