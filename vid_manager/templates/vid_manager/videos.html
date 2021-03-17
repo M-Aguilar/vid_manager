@@ -5,7 +5,7 @@
 {% block title %}Videos{% endblock %}
 {% block header %}
 <div class="jumbotron bg-dark text-light py-2 display-4 text-center">
-	<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Videos: {{ videos.paginator.count }}</h3>
+	<h2>{% if actors %}{{ actors }}{% elif tags %}{{ tags }}{% endif %} Videos: {{ videos.paginator.count }}</h3>
 </div>
 {% load static %}
 {% endblock %}
@@ -51,11 +51,11 @@
 <div class="pagination d-flex justify-content-center">
 	<span class="step-links">
 	{% if videos.has_previous %}
-		<a class="btn btn-sm btn-dark" href="?page=1&{% if sort %}sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">&laquo; first</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">previous</a>
+		<a class="btn btn-sm btn-dark" href="?page=1&{% if sort %}sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">&laquo; first</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">previous</a>
 	{% endif %}
 	{% if videos.has_next %}
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">next</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">next</a>
 		<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">last &raquo;</a>
 	{% endif %}
 	</span>
@@ -80,12 +80,12 @@
 <div class="pagination d-flex justify-content-center">
 	<span class="step-links">
 		{% if videos.has_previous %}
-			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">&laquo; first</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">previous</a>
+			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">previous</a>
 		{% endif %}
 		{% if videos.has_next %}
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">next</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">last &raquo;</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">last &raquo;</a>
 		{% endif %}
 	</span>
 </div>

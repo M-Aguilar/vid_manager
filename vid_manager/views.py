@@ -256,15 +256,15 @@ def fine_filter(user, sort, tag=None, actor=None,res=None):
 	if not res or res not in reses.keys():
 		res = 'ALL'
 	if tag and actor:
-		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(actors__first_name__icontains=actor) & Q(height=reses[res]),owner=user).order_by(sort)
+		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(actors__first_name__icontains=actor) & Q(height__gte=reses[res]),owner=user).order_by(sort)
 	elif tag:
-		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(height=reses[res]), owner=user).order_by(sort)
+		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(height__gte=reses[res]), owner=user).order_by(sort)
 	elif actor:
 		first_name, last_name = actor.split()[0], ' '.join(actor.split()[1:])
 		if last_name:
 			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(actors__last_name__icontains=last_name) & Q(height__gte=reses[res]), owner=user).order_by(sort)
 		else:
-			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(height=reses[res]), owner=user).order_by(sort)
+			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(height_gte=reses[res]), owner=user).order_by(sort)
 	else:
 		videos = Video.objects.filter(height__gte=reses[res],owner=user).order_by(sort)
 	return videos
