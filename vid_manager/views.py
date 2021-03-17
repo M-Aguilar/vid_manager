@@ -382,15 +382,21 @@ def random_video(request):
 @login_required
 def tag_results(request):
 	q = request.GET.get('q')
-	tags = None
-	if q:
-		tags = Tag.objects.filter(tag_name__icontains=q)
-	if request.is_ajax():
-		html = render_to_string(template_name='vid_manager/tag_results.html', context={'tags':tags})
-		data = {"tag_results_view":html}
-		return JsonResponse(data=data, safe=False)
-	else:
-		return JsonResponse({"error":""}, status=400)
+	t = request.META.get('HTTP_REFERER')
+	if request.user.projector.admin and q:
+		tags = None
+		if 'video' in t:
+			video = Video.objects.get(id=t[t.index('video')+6:])
+			tags = Tag.objects.filter(tag_name__icontains=q).exclude(id__in=video.tags.all())
+		if 'image' in t:
+			image = Image.objects.get(id=t[t.index('image')+6:])
+			tags = Tag.objects.filter(tag_name__icontains=q).exclude(id__in=image.tags.all())
+		if request.is_ajax():
+			html = render_to_string(template_name='vid_manager/tag_results.html', context={'tags':tags})
+			data = {"tag_results_view":html}
+			return JsonResponse(data=data, safe=False)
+		else:
+			return JsonResponse({"error":""}, status=400)
 
 #Returns Paginated list of all Tags and empty TagForm
 @login_required
@@ -462,11 +468,11 @@ def new_tag(request):
 				if 'video' in t:
 					video = Video.objects.get(id=t[t.index('video')+6:])
 					if tag not in video.tags.all():
-						instance.videos.add(video)
-				if 'image' in t:
+						video.tags.add(instance)
+				elif 'image' in t:
 					image = Image.objects.get(id=t[t.index('image')+6:])
 					if tag not in image.tags.all():
-						instance.tag_images.add(image)
+						image.tags.add(instance)
 				serialized = serializers.serialize('json', [ instance, ])
 				return JsonResponse({"instance":serialized},status=200)
 		except Tag.DoesNotExist:
@@ -475,7 +481,7 @@ def new_tag(request):
 				if 'video' in t:
 					video = Video.objects.get(id=t[t.index('video')+6:])
 					instance.videos.add(video)
-				if 'image' in t:
+				elif 'image' in t:
 					image = Image.objects.get(id=t[t.index('image')+6:])
 					instance.tag_images.add(image)
 				serialized = serializers.serialize('json', [ instance, ])

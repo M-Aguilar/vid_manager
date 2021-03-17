@@ -42,13 +42,13 @@
 	</div>
 </div>
 <div class="main-container">
-	{% if messages %}
 	<div class="messages list-group">
-    	{% for message in messages %}
-    	<div class="list-group-item bg-warning" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
-    	{% endfor %}
+		{% if messages %}
+    		{% for message in messages %}
+    		<div class="list-group-item bg-warning" {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+	    	{% endfor %}
+		{% endif %}
 	</div>
-	{% endif %}
 	<video style="width:100%;" preload="metadata" id='vid_player' controls range poster="{% if video.poster %}{{ video.poster.url }}{% elif events.first %}{{events.first.url}}{% endif%}">
     	<source src="{{ video.path }}" type="video/mp4">
 	</video>
@@ -200,11 +200,16 @@
 					var instance = JSON.parse(response["instance"]);
 					var fields = instance[0]["fields"];
 					var pk = instance[0]["pk"];
-					var new_url = "{% url 'tag' 0 %}".replace('0', pk);
-					var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);
-					$(".messages").empty();
-					$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]||""}" has been added.</div>`);
-					$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2 col-md-1'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span value="${pk}" class="btn btn-xs btn-dark">&times;</span></a></div></div>`);
+					if ($("#tags .tagrow #0".replace('0',pk)).length < 1) {
+						var new_url = "{% url 'tag' 0 %}".replace('0', pk);
+						var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);
+						$(".messages").empty();
+						$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]||""}" has been added.</div>`);
+						$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2 col-md-1'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span value="${pk}" class="btn btn-xs btn-dark">&times;</span></a></div></div>`);
+					} else {
+						$(".messages").empty();
+						$('.messages').prepend(`<div class="rounded p-1 bg-warning">Tag already exists.</div>`);
+					}
 				},
 
 				error: function (response) {

@@ -1,7 +1,6 @@
 const ui = $("#id_tag_name");
 const tag_list = $("#tag_results");
 var is_local = '';
-var sub = 0;
 if ($(location).attr('href').includes('local_site')) {
 	is_local = '/local_site'
 }
@@ -9,6 +8,7 @@ if ($(location).attr('href').includes('local_site')) {
 const endpoint = is_local.concat('/tag_results');
 const d_lay = 700;
 let scheduled = false;
+let sub = true;
 
 let tag_search = function(endpoint, tag_in) {
 	$.getJSON(endpoint, tag_in)
@@ -19,10 +19,12 @@ let tag_search = function(endpoint, tag_in) {
 };
 
 function submit() {
-	if (sub == 0) {
-		sub = 1;
+	if (sub) {
+		sub = false;
 		sub = setTimeout($('#tag_form').submit(),500);
-		sub = 0;
+		sub = true;
+	} else {
+		sub = true;
 	}
 }
 
