@@ -18,7 +18,7 @@
 		 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="ddM">
    			{% load deslug clean %}
 			{% for so in sort_options %}
-    		<a class="dropdown-item {% if sort|deslug == so %}active{% endif %}" href="?sort={% if so == sort %}-{% endif %}{{so}}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">{% if sort == so %}-{% endif %}{{so|clean}}</a>
+    		<a class="dropdown-item {% if sort|deslug == so %}active{% endif %}" href="?sort={% if so == sort %}-{% endif %}{{so}}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">{% if sort == so %}-{% endif %}{{so|clean}}</a>
   			{% empty %}
 	  		{% endfor %}
   		</div>

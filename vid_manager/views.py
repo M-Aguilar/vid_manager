@@ -225,7 +225,7 @@ def videos(request):
 	actors = request.GET.get('actors')
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
-	video_sort = ['release_date','date_added','title','length','resolution','size','actor_num','tag_num','bitrate']
+	video_sort = ['release_date','date_added','title','length','resolution','size','actor_num','tag_num','bitrate','image']
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
 	if request.user.is_authenticated and request.user.projector.admin:
