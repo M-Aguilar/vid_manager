@@ -1,9 +1,5 @@
 const ui = $("#id_tag_name");
 const tag_list = $("#tag_results");
-var is_local = '';
-if ($(location).attr('href').includes('local_site')) {
-	is_local = '/local_site'
-}
 
 const endpoint = is_local.concat('/tag_results');
 const d_lay = 700;
@@ -27,6 +23,8 @@ function submit() {
 		sub = true;
 	}
 }
+
+$(".s_content").off();
 
 ui.on('keyup', function () {
 	const tag_in = {

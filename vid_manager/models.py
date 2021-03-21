@@ -34,6 +34,10 @@ class Tag(models.Model):
 	class Meta:
 		verbose_name_plural = 'tags'
 
+	@property
+	def type(self):
+		return 'tag'
+
 	def __str__(self):
 		return self.tag_name
 
@@ -70,6 +74,10 @@ class Actor(ActorBase):
 	def aliases(self):
 		return Alias.objects.filter(actor=self.id)
 	
+	@property
+	def type(self):
+		return 'actor'
+
 class Alias(ActorBase):
 	actor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name='alias')
 
@@ -133,6 +141,10 @@ class Video(models.Model):
 			else:
 				actor_list = '{0}+{1}'.format(actor_list, str(i))
 		return actor_list
+
+	@property
+	def type(self):
+		return 'video'
 
 '''Potentially just make this into the image class with optional video foreign key ....'''
 class Image(models.Model):

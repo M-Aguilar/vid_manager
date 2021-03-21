@@ -1,0 +1,5 @@
+<div class="dropdown-menu s_content">
+{% for result in results %}
+	<a class="qsr" href="{% if result.type == 'video' %}{% url 'video' result.id %}{% elif result.type == 'actor' %}{% url 'actor' result.id %}{% elif result.type == 'tag' %}{% url 'tag' result.id %}{% endif %}"><div class="dropdown-item">{{ result }}</div></a>
+{% endfor %}
+</div>

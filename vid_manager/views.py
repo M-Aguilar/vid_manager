@@ -16,7 +16,7 @@ from django.views.generic import ListView
 #for Ajax rendering. ?
 from django.template.loader import render_to_string
 #NOT USED CURRENTLY
-#from itertools import chain
+from itertools import chain
 #from django.core.files.images import get_image_dimensions
 #import math
 #from decimal import Decimal 
@@ -102,6 +102,39 @@ class SearchResultsView(ListView):
 				return True
 			else:
 				return False
+
+def quick_search_results(request):
+	if request.is_ajax():
+		q = request.GET.get('q')
+		results = fltr(q)
+		html = render_to_string(template_name='vid_manager/quick_search_results.html', context={'results':results})
+		data = {"quick_search_results_view":html}
+		return JsonResponse(data=data, safe=False)
+	return JsonResponse({"error":""}, status=400)
+
+def fltr(q):
+	if len(q.split()) > 1:
+		results = Actor.objects.filter(first_name__icontains=q.split()[0], last_name__icontains=q.split()[1:])
+		if results.count() == 1:
+			return results
+	else:
+		tag_results = Tag.objects.filter(tag_name__icontains=q)
+		actor_results = Actor.objects.filter(first_name__icontains=q)
+		video_results = Video.objects.filter(title__icontains=q)
+	results = {}
+	if tag_results.count() > 3:
+		results =  chain(results, tag_results[:3])
+	elif tag_results.count() > 0:
+		results = chain(results, tag_results)
+	if actor_results.count() > 3:
+		actor_results = actor_results[:3]
+	elif actor_results.count() > 0:
+		results = chain(results, actor_results)
+	if video_results.count() > 3:
+		video_results = video_results[:3]
+	elif video_results.count() > 0:
+		results = chain(results, video_results)
+	return results
 
 #Alias Form Handler. Only found in actor.html
 def new_alias(request):
@@ -513,14 +546,15 @@ def actor(request, actor_id):
 @login_required
 def actors(request):
 	sort = request.GET.get('sort')
-	actor_sort = ['first_name','-first_name','last_name','-last_name']
-	vid_ann = ['vid_num', '-vid_num']
-	if not sort or sort not in actor_sort and sort not in vid_ann:
+	actor_sort = ['first_name','last_name','vid_num','image_num']
+	if not sort or sort.replace('-','') not in actor_sort:
 		sort = 'first_name'
 	if not request.user.projector.admin:
 		raise Http404
-	if sort in vid_ann:
+	if sort.replace('-','') == 'vid_num':
 		actors = Actor.objects.annotate(vid_num=Count('videos')).order_by(sort)
+	elif sort.replace('-','') == 'image_num':
+		actors = Actor.objects.annotate(image_num=Count('actor_images')).order_by(sort)
 	else:
 		actors = Actor.objects.all().order_by(sort)
 	total = actors.count()
@@ -528,7 +562,7 @@ def actors(request):
 	paginator = Paginator(actors, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	context = {'actors': page_o, 'form': form, 'new_actors':new_actor_count(),'total':total,'sort':sort}
+	context = {'actors': page_o, 'form': form, 'new_actors':new_actor_count(),'total':total,'sort':sort,'sort_options': actor_sort}
 	return render(request, 'vid_manager/actors.html', context)
 
 @login_required

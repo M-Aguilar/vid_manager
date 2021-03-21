@@ -8,6 +8,7 @@ urlpatterns = [
 
 	#Search
 	path('search/', views.SearchResultsView.as_view(), name='search_results'),
+	path('quick_search_results', views.quick_search_results, name='quick_search_results'),
 	
 	#Videos
 	path('videos', views.videos, name='videos'),
