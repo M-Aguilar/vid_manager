@@ -27,8 +27,8 @@ def edit_account(request, username):
 	return render(request, 'users/edit_account.html', {'form' : form})
 
 def account(request, username):
-	date_joined = User.objects.get(username=username).date_joined
-	context = {'date_joined': date_joined, 'username':username}
+	user = User.objects.get(username=username)
+	context = {'user':user}
 	return render(request, 'users/account.html', context)
 
 @login_required
