@@ -6,7 +6,7 @@
 
 {% block header %}
 <div>
-	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
+	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
 		<h2>{{ actor }} {% for alias in actor.aliases %}/{{alias}}{% empty %}{% endfor %}</h2>
 	</div>
 	<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
@@ -32,7 +32,7 @@
 	</div>
 </div>
 {% if request.user.is_authenticated %}
-<div>
+<div class="mt-3">
 	<a href="{% url 'new_actor_image' actor.id %}" class="btn btn-dark">Add Image</a>
 	<a href="{% url 'new_video' actor.id %}" class="btn btn-dark">Add Video</a>
 	<a class='btn btn-dark' href="#add_alias" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_alias">Add Alias</a>
@@ -49,7 +49,7 @@
 		</div>
 	</div>
 </div>
-<hr>
+<br>
 {% endif %}
 <div>
 	{% if request.user.is_authenticated and request.user.projector.admin %}
@@ -70,41 +70,35 @@
 </div>
 <div>
 	<div>
-		<div>
-			<h3>Info</h3>
-			<div>First Name: {{ actor.first_name }}</div>
-			<div>Last Name: {{ actor.last_name }}</div>
-		</div>
-		<div>
-			<h2><a href="{% url 'images' %}?actors={{actors}}">Images ({{ actor.actor_images.all.count }})</a></h2>
-		</div>
-		<div class="row d-none d-sm-flex">
+		<h3>Info</h3>
+		<div>First Name: {{ actor.first_name }}</div>
+		<div>Last Name: {{ actor.last_name }}</div>
+	</div>
+	<div>
+		<h2><a href="{% url 'images' %}?actors={{actors}}">Images ({{ actor.actor_images.all.count }})</a>
+	</div>
+	<div class="w-100 d-inline-block overflow-hidden">
+		<div class="row d-block overflow-auto text-center" style="white-space: nowrap;">
 			{% for image in images %}
-			<div class="col-sm-6 col-md-4 col-lg-2">
-				<div>
 				{% if request.user.is_authenticated and request.user.projector.admin %}
 					<a href="{% url 'image' image.id %}">
 				{% endif %}
-					<img src="{{ image.image.url }}" height="auto" width="100%">
+					<img src="{{ image.image.url }}" height="300px" width="auto">
 				{% if request.user.is_authenticated and request.user.projector.admin %}
 					</a>
 				{% endif %}
-				</div>
-			</div>
 			{% empty %}
-				<p>Nothing here</p>
+			<p>Nothing here</p>
 			{% endfor %}
 		</div>
 	</div>
-	<div class="text-dark">
-		<h2>Recently Added <a href="{% url 'videos' %}?actors={{actor}}">Videos ({{ actor.videos.all.count }})</a></h2>
-		<div class="row">
+	<h2>Recently Added <a href="{% url 'videos' %}?actors={{actor}}">Videos ({{ actor.videos.all.count }})</a></h2>
+	<div class="d-inline-block">
+		<div class='row'>
 			{% for video in videos %}
 				{% include 'vid_manager/video_preview.html' %}
 			{% empty %}
-				<li class="list-group-item">
-					No videos have been added yet.
-				</li>
+				No videos have been added yet.
 			{% endfor %}
 		</div>
 	</div>

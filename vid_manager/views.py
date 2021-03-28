@@ -259,7 +259,7 @@ def videos(request):
 	actors = request.GET.get('actors')
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
-	video_sort = ['release_date','date_added','title','length','resolution','size','actor_num','tag_num','bitrate','image']
+	video_sort = ['release_date','date_added','title','length','resolution','size','actor_num','tag_num','bitrate','image_num']
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
 	if request.user.is_authenticated and request.user.projector.admin:
@@ -267,6 +267,8 @@ def videos(request):
 			videos = Video.objects.annotate(actor_num=Count('actors')).order_by(sort)
 		elif 'tag_num' in sort:
 			videos = Video.objects.annotate(tag_num=Count('tags')).order_by(sort)
+		elif 'image_num' in sort:
+			videos = Video.objects.annotate(image_num=Count('image')).order_by(sort)
 		else:
 			videos = fine_filter(request.user, sort, tags, actors, res)
 	else:
@@ -558,7 +560,7 @@ def actor(request, actor_id):
 		videos= Video.objects.filter(actors=actor).order_by('-date_added')
 	data = {'actor':actor}
 	alias_form = AliasForm(initial=data)
-	context = {'actor':actor, 'videos': videos[:6], 'new_videos': len(new_videos), 'alias_form':alias_form}
+	context = {'actor':actor, 'videos': videos[:8], 'new_videos': len(new_videos), 'alias_form':alias_form}
 	if len(images) > 10:
 		context['images'] = images[:10]
 	else:

@@ -4,7 +4,7 @@
 {% block title %}{{ video.title }}{% endblock %}
 
 {% block header %}
-	<div class="jumbotron bg-dark py-2 text-center text-light display-4 mt-5">
+	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
 		<h2>{{ video.title }}
 			{% if video.poster %}
 			<div class='float-right'>
@@ -218,12 +218,14 @@
 			})
 		});
 	</script>
-	<div>
-		{% for image in images %}
-		<a href="{% url 'image' image.id %}"><img src="{{ image.image.url }}" class="mw-100" height="300"></a>
-		{% empty %}
-		<p>No images</p>
-		{% endfor %}
+	<div class="w-100 d-inline-block">
+		<div class='row d-block overflow-auto text-center' style="white-space: nowrap;">
+			{% for image in images %}
+			<a href="{% url 'image' image.id %}"><img src="{{ image.image.url }}" height="300px"></a>
+			{% empty %}
+			<p>No images</p>
+			{% endfor %}
+		</div>
 	</div>
 </div>
 {% endblock %}

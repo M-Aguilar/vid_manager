@@ -63,7 +63,7 @@
 		<div class="tagrow row pb-2 mx-1">
 			{% load static %}
 			{% for tag in tags %}
-			<div class="col-sm-6 col-md-4 col-xl-3 pb-3 px-1">
+			<div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 pb-3 px-1">
 				<a href="{% url 'tag' tag.id %}">
 					<div class="preview">
 						<img src="{% if tag.img %}{{ tag.img.url }}{% else %}{% static 'vid_manager/blank_image.png' %}{% endif %}" height="auto" width="100%" alt=''>
