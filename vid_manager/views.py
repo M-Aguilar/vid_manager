@@ -332,9 +332,16 @@ def new_video(request, actor_id=None):
 	return render(request, 'vid_manager/new_video.html', context)
 
 #Returns a blank or existing VideoForm containing filtered file_path choices. Only non-claimed file_paths allowed
+#Provide current video to exclude.
 def available_fp(cur=None):
 	if cur:
 		form = VideoForm(instance=cur)
+		actors = [x for x in form.fields['actors'].choices if x[0].instance in cur.actors.all()]
+		actors.extend([x for x in form.fields['actors'].choices if x[0].instance not in cur.actors.all()])
+		form.fields['actors'].choices = actors
+		tags = [x for x in form.fields['tags'].choices if x[0].instance in cur.tags.all()]
+		tags.extend([x for x in form.fields['tags'].choices if x[0].instance not in cur.tags.all()])
+		form.fields['tags'].choices = tags
 	else:
 		form = VideoForm()
 	all_fps = [x.file_path for x in Video.objects.all()]
