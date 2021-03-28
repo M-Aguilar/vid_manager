@@ -41,12 +41,6 @@ urlpatterns = [
 	#Auto add actors
 	path('auto_actor_add', views.auto_actor_add, name='auto_actor_add'),
 
-	#Actor Images
-	path('<actor_id>/images',views.actor_images, name='actor_images'),
-
-	#Tag Images
-	path('images/<tag_id>', views.tag_images, name='tag_images'),
-
 	#Images
 	path('image/<image_id>', views.image, name='image'),
 	path('images',views.images, name='images'),

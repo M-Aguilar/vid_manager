@@ -21,7 +21,7 @@
 			{% endfor %}
 		</div>
 		<hr>
-		<a href="{% url 'tag_images' tag.id %}"><h2>Images ({{i_tot}})</h2></a>
+		<a href="{% url 'images' %}?tags={{tag}}"><h2>Images ({{i_tot}})</h2></a>
 		<hr>
 		<div class="row">
 		{% for image in images %}

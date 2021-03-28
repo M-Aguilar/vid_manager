@@ -103,8 +103,9 @@ class SearchResultsView(ListView):
 			else:
 				return False
 
+@login_required
 def quick_search_results(request):
-	if request.is_ajax():
+	if request.is_ajax() and request.projector.admin:
 		q = request.GET.get('q')
 		results = fltr(q)
 		html = render_to_string(template_name='vid_manager/quick_search_results.html', context={'results':results})
@@ -604,47 +605,33 @@ def delete_actor(request, actor_id):
 @login_required
 def images(request):
 	sort = request.GET.get('sort')
-	image_sort = ['actors', 'id', 'image', 'tags', 'video', 'video_id']
+	image_sort = ['actors', 'id', 'tags', 'video', 'video_id', 'tag_num', 'actor_num']
+	tags = request.GET.get('tags')
+	actors = request.GET.get('actors')
 	if not sort or sort.replace('-','') not in image_sort:
 		sort = '-id'
 	if request.user.is_authenticated and request.user.projector.admin:
-		images = Image.objects.all().order_by(sort)
-		total = images.count()
+		images = None
+		if actors:
+			images = Image.objects.filter(Q(actors__first_name__icontains=actors) | Q(actors__last_name__icontains=actors))
+		elif tags and images:
+			images = images.filter(tags__tag_name__icontains=tags)
+		elif tags:
+			images = Image.objects.filter(tags__tag_name__icontains=tags)
+		else:
+			images = Image.objects.all()
 	else:
 		raise Http404
+	if sort.replace('-','') == 'tag_num':
+		images = Image.objects.annotate(tag_num=Count('tags'))
+	elif sort.replace('-','') == 'actor_num':
+		images = Image.objects.annotate(actor_num=Count('actors'))
+	images = images.order_by(sort)
 	paginator = Paginator(images, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	context = {'images': page_o, 'total':total, 'sort_options': image_sort, 'sort':sort}
+	context = {'images': page_o,'sort_options': image_sort, 'sort':sort}
 	return render(request,'vid_manager/images.html',context)
-
-#Tag Images
-@login_required
-def tag_images(request, tag_id):
-	tag = get_object_or_404(Tag, id=tag_id)
-	if request.user.is_authenticated and request.user.projector.admin:
-		images = Image.objects.filter(tags=tag)
-	else:
-		raise Http404
-	paginator = Paginator(images, 24)
-	page_num = request.GET.get('page')
-	page_o = paginator.get_page(page_num)
-	context = {'images':page_o, 'tag': tag}
-	return render(request, 'vid_manager/images.html', context)
-
-#Actor Images
-@login_required
-def actor_images(request, actor_id):
-	actor = get_object_or_404(Actor, id=actor_id)
-	if request.user.is_authenticated and request.user.projector.admin:
-		images = Image.objects.filter(actors=actor)
-	else:
-		raise Http404
-	paginator = Paginator(images, 24)
-	page_num = request.GET.get('page')
-	page_o = paginator.get_page(page_num)
-	context = {'images': page_o, 'actor': actor}
-	return render(request, 'vid_manager/images.html', context)
 
 #New Video Image
 @login_required

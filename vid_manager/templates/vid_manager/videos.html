@@ -56,11 +56,11 @@
 	{% endif %}
 	{% if videos.has_next %}
 		<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">next</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actor={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">last &raquo;</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}&actors={{actors}}{% endif %}{% if tags %}&tag={{tags}}{% endif %}{% if res %}&res={{res}}{% endif %}">last &raquo;</a>
 	{% endif %}
 	</span>
 </div>
-<div class="text-dark">
+<div class="text-dark mw-100">
 	<div class="row">
 	{% for video in videos %}
 		{% include 'vid_manager/video_preview.html' %}

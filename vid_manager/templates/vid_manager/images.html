@@ -6,7 +6,7 @@
 
 {% block header %}
 	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
-		<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Images: {{ total }}</h2>
+		<h2>{% if actor %}{{ actor }}{% elif tag %}{{ tag }}{% endif %} Images: {{ images.paginator.count }}</h2>
 	</div>
 {% endblock %}
 
