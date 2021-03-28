@@ -4,20 +4,22 @@
 
 {% block title %}Actors{% endblock %}
 {% block header %}
-	<div class="jumbotron bg-dark pt-1 pb-3 text-light display-4 text-center">
-		<h2>Actors: {{ total }}</h2>
-	</div>
-{% endblock %}
 
-{% block content %}
-	<div>
+<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
+	<h2>Actors: {{ total }}</h2>
+</div>
+<div class="d-inline">
+	<div class="mt-3 dropdown">
 		<a class='btn btn-dark' href="#add_user" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_user">Add Actor</a>
-		{% if new_actors > 0 %}
-			<div class="float-right">
-				<p>{{ new_actors }} New Actors Found! Add them <a href="{% url 'auto_actor_add' %}">here</a>.</p>
-			</div>
-		{% endif %}
-	</div>
+		<button class="btn btn-dark dropdown-toggle float-right" type="button" id="ddM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sort</button>
+		<div class="dropdown-menu dropdown-menu-right" aria-labelledby="ddM">
+    		{% load deslug clean %}
+    		{% for so in sort_options %}
+    		<a class="dropdown-item {% if sort|deslug == so %}active{% endif %}" href="?sort={% if so == sort %}-{% endif %}{{so}}">{% if sort == so %}-{% endif %}{{so|clean}}</a>
+    		{% empty %}
+    		{% endfor %}
+  		</div>
+  	</div>
 	<div class="collapse" id="add_user">
 		<div class="card-body"> 
 		{% buttons %}
@@ -31,98 +33,106 @@
 		{% endbuttons %}
 		</div>
 	</div>
-	<hr>
 	<div class="messages">
 	{% if messages %}
     	{% for message in messages %}
-    	<div{% if message.tags %} class="bg-{{ message.tags }} p-2 mb-3"{% endif %}>{{ message }}</div>
+    	<div class="{% if message.tags %}bg-{{ message.tags }} p-2 mb-3{% endif %}">{{ message }}</div>
     	{% endfor %}
 	{% endif %}
 	</div>
-	<div class="d-inline">
-		<span class="current">
-		Page {{ actors.number }} of {{ actors.paginator.num_pages }}
+	<div class='d-flex row justify-content-center'>
+		<span class="current text-center">
+			Page <input id="pnum" type='number' minlength='1' max="{{ actors.paginator.num_pages }}" min='1' style="width: 35px" placeholder="{{actors.number}}"> of {{ actors.paginator.num_pages }}
 		</span>
-	</div>
-	<div class="d-inline float-right">
-		<div class="dropdown">
-			<button class="btn btn-dark dropdown-toggle" type="button" id="ddM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Sort</button>
-			<div class="dropdown-menu dropdown-menu-right" aria-labelledby="ddM">
-    			{% load deslug clean %}
-    			{% for so in sort_options %}
-    			<a class="dropdown-item {% if sort|deslug == so %}active{% endif %}" href="?sort={% if so == sort %}-{% endif %}{{so}}">{% if sort == so %}-{% endif %}{{so|clean}}</a>
-    			{% empty %}
-    			{% endfor %}
-  			</div>
-  		</div>
-	</div>
-	<div class="pagination d-flex justify-content-center w-100">
-		<span class="step-links">
-		{% if actors.has_previous %}
-			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ actors.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
-		{% endif %}
-		{% if actors.has_next %}
-			<a class="btn btn-sm btn-dark" href="?page={{ actors.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ actors.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
-		{% endif %}
-		</span>
-	</div>
-	<div id="actors" class="mx-auto">
-		<div class="actorrow pb-2 row">
-		{% for actor in actors %}			
-			<div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 ml-auto">
-				<a href="{% url 'actor' actor.id %}" >
-					<div class="preview">
-						<img src="{% if actor.img %}{{ actor.img.url }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
-						<div class="img-top-left">{{ actor }}</div>
-					</div>
-				</a>
-			</div>
-			{% empty %}
-				<div>
-					No Actors have been added yet.
-				</div>
-			{% endfor %}
-		</div>
-	</div>
-	<div class="pagination d-flex justify-content-center">
-		<span class="step-links">
-		{% if actors.has_previous %}
-			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ actors.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
-		{% endif %}
-		{% if actors.has_next %}
-			<a class="btn btn-sm btn-dark" href="?page={{ actors.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ actors.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
-		{% endif %}
-		</span>
-	</div>
-	<script>
-		$("#actor_form").submit(function (e) {
-			e.preventDefault();
-			var serializedData = $(this).serialize();
-			$.ajax({
-				type: 'POST',
-				url: "{% url 'new_actor' %}",
-				data: serializedData,
-				success: function (response) {
-					//TODO make messages disappear if there are more than one. or allow to remove with 'X'
-					$("#actor_form").trigger('reset');
-					$("#id_first_name").focus();
-					var instance = JSON.parse(response["instance"]);
-					var fields = instance[0]["fields"];
-					var pk = instance[0]["pk"];
-					var new_url = "{% url 'actor' 0 %}".replace('0', pk);
-					$('.messages').empty();
-					$('.messages').prepend(`<div class="rounded p-2 mb-3 bg-success">Actor "${fields['first_name']} ${fields['last_name']}"has been added.</div>`);
-					$("#actors .actorrow").prepend(`<div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 ml-auto"><a href="${new_url}" ><div class="preview"><img src="{% static 'vid_manager/blank_image.png'%}" height="auto" width="100%" alt="" class="mx-auto">
-						<div class="top-left">${fields['first_name']} ${fields['last_name']}</div></div></a></div>`);
-				},
-				error: function (response) {
-					alert(response["responseJSON"]["error"]);
+		<a id="plink" href=""></a>
+		<script>
+			var input = document.getElementById('pnum');
+			input.addEventListener("keyup",function(event) {
+				if (event.keyCode === 13) {
+					var link = document.getElementById('plink');
+					link.href = "?page=".concat(input.value, '{% if sort %}&sort={{sort}}{% endif %}');
+					link.click();
 				}
-			})
+			});
+		</script>
+	</div>
+</div>
+<div class="pagination d-flex w-100 justify-content-center">
+	<span class="step-links">
+	{% if actors.has_previous %}
+		<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ actors.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+	{% endif %}
+	{% if actors.has_next %}
+		<a class="btn btn-sm btn-dark" href="?page={{ actors.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ actors.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+	{% endif %}
+	</span>
+</div>
+{% if new_actors > 0 %}
+<div class="float-right">
+	<p>{{ new_actors }} New Actors Found! Add them <a href="{% url 'auto_actor_add' %}">here</a>.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="actors">
+	<div class="pb-2 row mx-1">
+	{% for actor in actors %}			
+		<div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 ml-auto px-1">
+			<a href="{% url 'actor' actor.id %}" >
+				<div class="preview">
+					<img src="{% if actor.img %}{{ actor.img.url }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
+					<div class="img-top-left">{{ actor }}</div>
+				</div>
+			</a>
+		</div>
+		{% empty %}
+			<div>
+				No Actors have been added yet.
+			</div>
+		{% endfor %}
+	</div>
+</div>
+<div class="pagination d-flex justify-content-center">
+	<span class="step-links">
+	{% if actors.has_previous %}
+		<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ actors.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+	{% endif %}
+	{% if actors.has_next %}
+		<a class="btn btn-sm btn-dark" href="?page={{ actors.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+		<a class="btn btn-sm btn-dark" href="?page={{ actors.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+	{% endif %}
+	</span>
+</div>
+<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
+<script>
+	$("#actor_form").submit(function (e) {
+		e.preventDefault();
+		var serializedData = $(this).serialize();
+		$.ajax({
+			type: 'POST',
+			url: "{% url 'new_actor' %}",
+			data: serializedData,
+			success: function (response) {
+				//TODO make messages disappear if there are more than one. or allow to remove with 'X'
+				$("#actor_form").trigger('reset');
+				$("#id_first_name").focus();
+				var instance = JSON.parse(response["instance"]);
+				var fields = instance[0]["fields"];
+				var pk = instance[0]["pk"];
+				var new_url = "{% url 'actor' 0 %}".replace('0', pk);
+				$('.messages').empty();
+				$('.messages').prepend(`<div class="rounded p-2 mb-3 bg-success">Actor "${fields['first_name']} ${fields['last_name']}"has been added.</div>`);
+				$("#actors .actorrow").prepend(`<div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 ml-auto"><a href="${new_url}" ><div class="preview"><img src="{% static 'vid_manager/blank_image.png'%}" height="auto" width="100%" alt="" class="mx-auto">
+					<div class="top-left">${fields['first_name']} ${fields['last_name']}</div></div></a></div>`);
+			},
+			error: function (response) {
+				alert(response["responseJSON"]["error"]);
+			}
 		})
-	</script>
+	})
+</script>
 {% endblock %}

@@ -413,43 +413,13 @@ def delete_video(request, video_id):
 		messages.error(request, 'Something wet wrong')
 	return HttpResponseRedirect(reverse('videos'))
 
+#random video
 @login_required
 def random_video(request):
     video = Video.objects.all().order_by("?").first()
     return HttpResponseRedirect(reverse('video', args=[video.id]))
 
 #========================    TAGS     ==========================
-
-@login_required
-def tag_results(request):
-	q = request.GET.get('q')
-	t = request.META.get('HTTP_REFERER')
-	if request.user.projector.admin and q:
-		tags = None
-		if 'video' in t:
-			video = Video.objects.get(id=t[t.index('video')+6:])
-			tags = Tag.objects.filter(tag_name__icontains=q).exclude(id__in=video.tags.all())
-		if 'image' in t:
-			image = Image.objects.get(id=t[t.index('image')+6:])
-			tags = Tag.objects.filter(tag_name__icontains=q).exclude(id__in=image.tags.all())
-		if request.is_ajax():
-			html = render_to_string(template_name='vid_manager/tag_results.html', context={'tags':tags})
-			data = {"tag_results_view":html}
-			return JsonResponse(data=data, safe=False)
-		else:
-			return JsonResponse({"error":""}, status=400)
-
-#Returns Paginated list of all Tags and empty TagForm
-@login_required
-def tags(request):
-	if not request.user.projector.admin:
-		raise Http404
-	tags = Tag.objects.order_by('tag_name')
-	paginator = Paginator(tags, 24)
-	page_num = request.GET.get('page')
-	page_o = paginator.get_page(page_num)
-	context = {'tags': page_o, 'new_tag_form': TagForm()}
-	return render(request, 'vid_manager/tags.html', context)
 
 #Takes tag id and returns <=6 images and videos and total of each.
 @login_required
@@ -464,6 +434,28 @@ def tag(request, tag_id=None):
 		images = Image.objects.filter(tags=tag_id)
 	context = {'tag' : tag, 'videos': videos[:6], 'images': images[:6], 'v_tot':videos.count(), 'i_tot':images.count()}
 	return render(request, 'vid_manager/tag.html', context)	
+
+#Returns Paginated list of all Tags and empty TagForm
+@login_required
+def tags(request):
+	sort_options = ['tag_name', 'id', 'video_num','image_num']
+	sort = request.GET.get('sort')
+	if not sort or sort.replace('-','') not in sort_options:
+		sort = 'tag_name'
+	if not request.user.projector.admin:
+		raise Http404
+	if sort and sort.replace('-','') == 'video_num':
+		tags = Tag.objects.annotate(video_num=Count('videos'))
+	elif sort and sort.replace('-','') == 'image_num':
+		tags = Tag.objects.annotate(image_num=Count('tag_images'))
+	else:
+		tags = Tag.objects.all()
+	tags = tags.order_by(sort)
+	paginator = Paginator(tags, 24)
+	page_num = request.GET.get('page')
+	page_o = paginator.get_page(page_num)
+	context = {'tags': page_o, 'new_tag_form': TagForm(),'sort_options':sort_options,'sort':sort}
+	return render(request, 'vid_manager/tags.html', context)
 
 #Checks for permissions and deletes tag
 @login_required
@@ -497,6 +489,8 @@ def remove_tag(request, tag_id):
 	else:
 		return JsonResponse({"error":""}, status=400)
 
+#Creates a new tag if requested tag does not exists.
+#Otherwise tag is ammended to the referring objects tag list
 @login_required
 def new_tag(request):
 	t = request.META.get('HTTP_REFERER')
@@ -530,6 +524,26 @@ def new_tag(request):
 			else:
 				return JsonResponse(form.error, status=400)
 	return JsonResponse({"error":""}, status=400)
+
+#Returns JSON list of tags matching q
+@login_required
+def tag_results(request):
+	q = request.GET.get('q')
+	t = request.META.get('HTTP_REFERER')
+	if request.user.projector.admin and q:
+		tags = None
+		if 'video' in t:
+			video = Video.objects.get(id=t[t.index('video')+6:])
+			tags = Tag.objects.filter(tag_name__icontains=q).exclude(id__in=video.tags.all())
+		if 'image' in t:
+			image = Image.objects.get(id=t[t.index('image')+6:])
+			tags = Tag.objects.filter(tag_name__icontains=q).exclude(id__in=image.tags.all())
+		if request.is_ajax():
+			html = render_to_string(template_name='vid_manager/tag_results.html', context={'tags':tags})
+			data = {"tag_results_view":html}
+			return JsonResponse(data=data, safe=False)
+		else:
+			return JsonResponse({"error":""}, status=400)
 
 '''########################    ACTOR     #########################'''
 
@@ -574,19 +588,6 @@ def actors(request):
 	return render(request, 'vid_manager/actors.html', context)
 
 @login_required
-def new_actor(request):
-	if request.is_ajax and request.method == "POST":
-		form = ActorForm(request.POST)
-		if form.is_valid():
-			instance = form.save(commit=False)
-			instance.save()
-			serialized = serializers.serialize('json', [ instance, ])
-			return JsonResponse({"instance":serialized},status=200)
-		else:
-			return JsonResponse({"error": "That name is already in use"}, status=400)
-	return JsonResponse({"error":""}, status=400)
-
-@login_required
 def delete_actor(request, actor_id):
 	if request.method == "POST" and request.user.projector.admin:
 		actor = get_object_or_404(Actor, id=actor_id)
@@ -599,7 +600,31 @@ def delete_actor(request, actor_id):
 	messages.error(request, "An error occured.")
 	return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
+@login_required
+def new_actor(request):
+	if request.is_ajax and request.method == "POST":
+		form = ActorForm(request.POST)
+		if form.is_valid():
+			instance = form.save(commit=False)
+			instance.save()
+			serialized = serializers.serialize('json', [ instance, ])
+			return JsonResponse({"instance":serialized},status=200)
+		else:
+			return JsonResponse({"error": "That name is already in use"}, status=400)
+	return JsonResponse({"error":""}, status=400)
+
+
 '''########################    IMAGES     #########################'''
+
+@login_required
+def image(request, image_id):
+	image = Image.objects.get(id=image_id)
+	if not request.user.projector.admin or not image:
+		raise Http404
+	actors = image.actors.all()
+	tag_form = TagForm()
+	context = {'image':image,'actors':actors, 'tagform': tag_form}
+	return render(request, 'vid_manager/image.html', context)
 
 #All Images
 @login_required
@@ -630,67 +655,8 @@ def images(request):
 	paginator = Paginator(images, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	context = {'images': page_o,'sort_options': image_sort, 'sort':sort}
+	context = {'images': page_o,'sort_options': image_sort, 'sort':sort,'actors':actors,'tags':tags}
 	return render(request,'vid_manager/images.html',context)
-
-#New Video Image
-@login_required
-def new_video_image(request, video_id):
-	if request.method != 'POST':
-		data={}
-		video = get_object_or_404(Video, id=video_id)
-		data = {'video':video,'actors':video.actors.all(),'tags':video.tags.all()}
-	else:
-		new_image(request)
-	form = ImageForm(initial=data)
-	context = {'form':form}
-	return render(request, 'vid_manager/new_image.html', context)
-
-#New Actor Image
-@login_required
-def new_actor_image(request, actor_id):
-	if request.method == 'GET':
-		data={}
-		actors = get_object_or_404(Actor, id=actor_id)
-		data = {'actors':actors}
-	else:
-		new_image(request)
-	form = ImageForm(initial=data)
-	context = {'form':form}
-	return render(request, 'vid_manager/new_image.html', context)
-
-@login_required
-def new_image(request):
-	if request.method == 'GET':
-		form = ImageForm()
-	else:
-		form = ImageForm(data=request.POST)
-		if request.FILES.get('image',0) == 0:
-			messages.error(request, 'No Image attached')
-			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-		if form.is_valid():
-			new_image = form.save(commit=False)
-			new_image.save()
-			new_image.image = request.FILES['image']
-			new_image.save()
-			form.save_m2m()
-			messages.success(request, 'The Image has been added')
-			return HttpResponseRedirect(reverse('image', args=[new_image.pk]))
-		else:
-			messages.error(request, 'Something went wrong. Form invalid')
-			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-	context = {'form':form}
-	return render(request, 'vid_manager/new_image.html', context)
-
-@login_required
-def image(request, image_id):
-	image = Image.objects.get(id=image_id)
-	if not request.user.projector.admin or not image:
-		raise Http404
-	actors = image.actors.all()
-	tag_form = TagForm()
-	context = {'image':image,'actors':actors, 'tagform': tag_form}
-	return render(request, 'vid_manager/image.html', context)
 
 @login_required
 def delete_image(request, image_id):
@@ -725,6 +691,55 @@ def edit_image(request, image_id):
 			return HttpResponseRedirect(reverse('images'))
 	context = {'image': image,'form': form}
 	return render(request, 'vid_manager/edit_image.html', context)
+
+@login_required
+def new_image(request):
+	if request.method == 'GET':
+		form = ImageForm()
+	else:
+		form = ImageForm(data=request.POST)
+		if request.FILES.get('image',0) == 0:
+			messages.error(request, 'No Image attached')
+			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+		if form.is_valid():
+			new_image = form.save(commit=False)
+			new_image.save()
+			new_image.image = request.FILES['image']
+			new_image.save()
+			form.save_m2m()
+			messages.success(request, 'The Image has been added')
+			return HttpResponseRedirect(reverse('image', args=[new_image.pk]))
+		else:
+			messages.error(request, 'Something went wrong. Form invalid')
+			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+	context = {'form':form}
+	return render(request, 'vid_manager/new_image.html', context)
+
+#New Video Image
+@login_required
+def new_video_image(request, video_id):
+	if request.method != 'POST':
+		data={}
+		video = get_object_or_404(Video, id=video_id)
+		data = {'video':video,'actors':video.actors.all(),'tags':video.tags.all()}
+	else:
+		new_image(request)
+	form = ImageForm(initial=data)
+	context = {'form':form}
+	return render(request, 'vid_manager/new_image.html', context)
+
+#New Actor Image
+@login_required
+def new_actor_image(request, actor_id):
+	if request.method == 'GET':
+		data={}
+		actors = get_object_or_404(Actor, id=actor_id)
+		data = {'actors':actors}
+	else:
+		new_image(request)
+	form = ImageForm(initial=data)
+	context = {'form':form}
+	return render(request, 'vid_manager/new_image.html', context)
 
 
 '''########################    EVENTS     #########################'''

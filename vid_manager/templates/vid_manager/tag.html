@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="container">
 	<div class="text-dark">
 		<a href="{% url 'videos' %}?tag={{tag}}"><h2>Videos ({{v_tot}})</h2></a>
 		<hr>
@@ -41,4 +42,5 @@
 			{% endbuttons %}
 		</form>
 	</div>
+</div>
 {% endblock %}

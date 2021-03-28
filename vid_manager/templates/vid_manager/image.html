@@ -15,13 +15,6 @@
 
 {% block content %}
 {% load static %}
-<div>
-	<div class="w-100">
-		<a href="{{ image.image.url }}"><img src="{{ image.image.url }}" class="d-block mw-100 mx-auto" height="{{ image.height_field}}"></a>
-	</div>
-	<hr>
-	<a href="{% url 'edit_image' image.id %}" class="btn btn-dark">Edit Image</a>
-</div>
 <div class="messages list-group">
 {% if messages %}
     {% for message in messages %}
@@ -29,7 +22,12 @@
     {% endfor %}
 {% endif %}
 </div>
-<div>
+<div class="container">
+	<div class="w-100">
+		<a href="{{ image.image.url }}"><img src="{{ image.image.url }}" class="d-block mw-100 mx-auto" height="{{ image.height_field}}"></a>
+	</div>
+	<hr>
+	<a href="{% url 'edit_image' image.id %}" class="btn btn-dark">Edit Image</a>
 	<div class='d-flex flex-row'>
 		<div>
 			<i class='glyphicon glyphicon-tag my-auto' style='font-size: 25px;'></i>

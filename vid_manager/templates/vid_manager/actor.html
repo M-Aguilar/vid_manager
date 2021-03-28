@@ -5,13 +5,11 @@
 {% block title %}{{ actor }}{% endblock %}
 
 {% block header %}
+<div>
 	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
 		<h2>{{ actor }} {% for alias in actor.aliases %}/{{alias}}{% empty %}{% endfor %}</h2>
 	</div>
-{% endblock %}
-
-{% block content %}
-<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
+	<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -33,40 +31,45 @@
     	</div>
 	</div>
 </div>
+{% if request.user.is_authenticated %}
 <div>
-	{% if messages %}
-	<div class="messages">
-    	{% for message in messages %}
-    		<div {% if message.tags %} class="p-1 rounded bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
-    	{% endfor %}
-	</div>
-	{% endif %}
-	{% if request.user.is_authenticated %}
-	<div>
-		<a href="{% url 'new_actor_image' actor.id %}" class="btn btn-dark">Add Image</a>
-		<a href="{% url 'new_video' actor.id %}" class="btn btn-dark">Add Video</a>
-		<a class='btn btn-dark' href="#add_alias" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_alias">Add Alias</a>
-		<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole">Delete Actor</a>
-		<div class="collapse" id="add_alias">
-			<div class="card-body"> 
-				<form id="alias_form" action="{% url 'new_alias' %}" method='post' class="form">
-				{% csrf_token %}
-				{% bootstrap_form alias_form %}
-				{% buttons %}
-					<button name="submit" class="btn btn-dark">Submit</button>
-				{% endbuttons %}	
-				</form>
-			</div>
+	<a href="{% url 'new_actor_image' actor.id %}" class="btn btn-dark">Add Image</a>
+	<a href="{% url 'new_video' actor.id %}" class="btn btn-dark">Add Video</a>
+	<a class='btn btn-dark' href="#add_alias" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_alias">Add Alias</a>
+	<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole">Delete Actor</a>
+	<div class="collapse" id="add_alias">
+		<div class="card-body"> 
+			<form id="alias_form" action="{% url 'new_alias' %}" method='post' class="form">
+			{% csrf_token %}
+			{% bootstrap_form alias_form %}
+			{% buttons %}
+				<button name="submit" class="btn btn-dark">Submit</button>
+			{% endbuttons %}	
+			</form>
 		</div>
 	</div>
-	<hr>
-	{% endif %}
-	<div>
-		{% if request.user.is_authenticated and request.user.projector.admin %}
-			{% if new_videos > 0 %}
-				<div><p>You have {{ new_videos }} new video{% if new_videos == 1 %}{% else %}'s{% endif %}! Add them <a href="{% url 'auto_add' actor.id %}">here</a>.</p></div>
-			{% endif %}
+</div>
+<hr>
+{% endif %}
+<div>
+	{% if request.user.is_authenticated and request.user.projector.admin %}
+		{% if new_videos > 0 %}
+			<div><p>You have {{ new_videos }} new video{% if new_videos == 1 %}{% else %}'s{% endif %}! Add them <a href="{% url 'auto_add' actor.id %}">here</a>.</p></div>
 		{% endif %}
+	{% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="messages">
+{% if messages %}
+	{% for message in messages %}
+		<div {% if message.tags %} class="p-1 rounded bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    {% endfor %}
+{% endif %}
+</div>
+<div>
+	<div>
 		<div>
 			<h3>Info</h3>
 			<div>First Name: {{ actor.first_name }}</div>
