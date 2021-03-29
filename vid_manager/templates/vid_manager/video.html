@@ -121,16 +121,7 @@
 			<div id="tags">
 				<div class="tagrow row justify-content-left">
 					{% for tag in tags %}				
-					<div id="{{ tag.id }}" class='overflow-auto col-2 col-md-1 border border-dark rounded p-2 m-2'>
-						<div class="d-inline">
-							<a href="{% url 'remove_tag' tag.id %}" id="remove_tag" value="{{ tag.id }}" class="d-inline float-right">
-								<span class="btn btn-xs btn-dark" value="{{ tag.id }}">&times;</span>
-							</a>
-							<a href="{% url 'tag' tag.id %}" class="d-inline float-left">
-								<div>{{ tag }}</div>
-							</a>
-						</div>
-					</div>
+						{% include 'vid_manager/tag_tile.html' %}
 					{% empty %}
 					<div id='no-tag' class='border border-dark rounded m-2 p-2'>No tags</div>
 					{% endfor %}
@@ -205,7 +196,9 @@
 						var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);
 						$(".messages").empty();
 						$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]||""}" has been added.</div>`);
-						$("#tags .tagrow ").prepend(`<div id="${pk}" class='p-2 m-2 border border-dark rounded col-2 col-md-1'><div class="d-inline"><a href="${new_url}" class="d-inline float-left"><div>${fields["tag_name"]}</div></a><a href="${rm_tag}" id="remove_tag" class="d-inline float-right" value="${pk}"><span value="${pk}" class="btn btn-xs btn-dark">&times;</span></a></div></div>`);
+						$.get('tag_tile/'.concat(pk.toString()), function(result) {
+							$("#tags .tagrow ").append(result);
+						}, 'html')
 					} else {
 						$(".messages").empty();
 						$('.messages').prepend(`<div class="rounded p-1 bg-warning">Tag already exists.</div>`);

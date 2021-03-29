@@ -1,5 +1,10 @@
 const ui = $("#id_tag_name");
 const tag_list = $("#tag_results");
+var is_local = '';
+
+if ($(location).attr('href').includes('local_site')) {
+	is_local = '/local_site';
+}
 
 const endpoint = is_local.concat('/tag_results');
 const d_lay = 700;
@@ -15,14 +20,18 @@ let tag_search = function(endpoint, tag_in) {
 };
 
 function submit() {
+	$('#tag_form').submit();
+};
+
+function sched_submit() {
 	if (sub) {
 		sub = false;
-		sub = setTimeout($('#tag_form').submit(),500);
+		sub = setTimeout(submit(),500);
 		sub = true;
 	} else {
 		sub = true;
 	}
-}
+};
 
 $(".s_content").off();
 
@@ -51,5 +60,5 @@ ui.on('change', function() {
 });
 
 ui.on('select', function() {
-	submit();
+	sched_submit();
 });

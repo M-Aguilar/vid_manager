@@ -549,6 +549,11 @@ def tag_results(request):
 		else:
 			return JsonResponse({"error":""}, status=400)
 
+def tag_tile(request, tag_id):
+	tag = get_object_or_404(Tag, id=tag_id)
+	return render(request, 'vid_manager/tag_tile.html', {'tag':tag})
+
+
 '''########################    ACTOR     #########################'''
 
 @login_required
