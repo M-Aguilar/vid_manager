@@ -1,6 +1,4 @@
-<!--##CSS LINE CUT DOUBLE HASHES+BETWEEN##{% load static %}-->
 {% load bootstrap4 %}
-
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -17,25 +15,6 @@
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
 		{% load static %}
-		<style>
-			.title {
-				font-size: 20px;
-			}
-
-			.search {
-				min-width:200px;
-			}
-
-			div.col input.form-control {
-				border-radius: 15px 0 0 15px;
-				border-color: var(--blank);
-			}
-
-			div.search-b button {
-				border-radius: 0 15px 15px 0;
-				border-color:var(--blank);
-			}
-		</style>
 	</head>
 	<body>
 		<div class="main-container">
@@ -70,7 +49,6 @@
 			    						<input id="search" name="q" class="form-control s_content" type="search" placeholder="Search" autocomplete='off'>
 			    						<div class="dropdown s_content" id="quick_search_results">{% include 'vid_manager/quick_search_results.html' %}</div>
 									</div>
-									<script type="text/javascript" src="{% static 'vid_manager/search.js' %}"></script>
 		    						<div class='mr-1 search-b'>
 		    							<button class="btn btn-dark" type="submit"><i class="fa fa-search"></i></button>
 									</div>
@@ -99,4 +77,24 @@
 			</div>
 		</div>
 	</body>
+	<style>
+		.title {
+			font-size: 20px;
+		}
+
+		.search {
+			min-width:200px;
+		}
+
+		div.col input.form-control {
+			border-radius: 15px 0 0 15px;
+			border-color: var(--blank);
+		}
+
+		div.search-b button {
+			border-radius: 0 15px 15px 0;
+			border-color:var(--blank);
+		}
+	</style>
+	<script type="text/javascript" src="{% static 'vid_manager/search.js' %}"></script>
 </html>

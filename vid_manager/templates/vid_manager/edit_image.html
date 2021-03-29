@@ -11,6 +11,7 @@
 {% endblock %}
 
 {% block content %}
+<div class="container">
 	{{image.first}}
 	<div class="text-dark">
 		<form action="{% url 'edit_image' image.id %}" method='post' enctype="multipart/form-data">
@@ -28,4 +29,5 @@
 		</form>
         {% endif %}
 	</div>
+</div>
 {% endblock %}

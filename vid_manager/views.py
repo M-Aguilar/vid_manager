@@ -105,7 +105,7 @@ class SearchResultsView(ListView):
 
 @login_required
 def quick_search_results(request):
-	if request.is_ajax() and request.projector.admin:
+	if request.is_ajax() and request.user.projector.admin:
 		q = request.GET.get('q')
 		results = fltr(q)
 		html = render_to_string(template_name='vid_manager/quick_search_results.html', context={'results':results})
@@ -340,10 +340,10 @@ def available_fp(cur=None):
 	if cur:
 		form = VideoForm(instance=cur)
 		actors = [x for x in form.fields['actors'].choices if x[0].instance in cur.actors.all()]
-		actors.extend([x for x in form.fields['actors'].choices if x[0].instance not in cur.actors.all()])
+		actors.extend([x for x in form.fields['actors'].choices if x[0].instance not in cur.actors.all().order_by('first_name')])
 		form.fields['actors'].choices = actors
 		tags = [x for x in form.fields['tags'].choices if x[0].instance in cur.tags.all()]
-		tags.extend([x for x in form.fields['tags'].choices if x[0].instance not in cur.tags.all()])
+		tags.extend([x for x in form.fields['tags'].choices if x[0].instance not in cur.tags.all().order_by('tag_name')])
 		form.fields['tags'].choices = tags
 	else:
 		form = VideoForm()
@@ -384,6 +384,8 @@ def edit_video(request, video_id):
 		raise Http404
 	if request.method != 'POST':
 		form = available_fp(video)
+		form.fields['actors'].choices = edit_actor_sort(form, video.actors.all())
+		form.fields['tags'].choices = edit_tag_sort(form, video.tags.all()) 
 	else:
 		form = VideoForm(instance=video, data=request.POST, files=request.FILES)
 		new_video = form.save(commit=False)
@@ -683,8 +685,9 @@ def edit_image(request, image_id):
 		raise Http404
 	image = Image.objects.get(id=image_id)
 	if request.method != 'POST':
-		# initial request; pre-fill form with the current entry.
 		form = ImageForm(instance=image)
+		form.fields['actors'].choices = edit_actor_sort(form, image.actors.all())
+		form.fields['tags'].choices = edit_tag_sort(form, image.tags.all())
 	else:
 		#Post data submitted; process data
 		form = ImageForm(instance=image, files=request.FILES, data=request.POST)
@@ -693,6 +696,26 @@ def edit_image(request, image_id):
 			return HttpResponseRedirect(reverse('images'))
 	context = {'image': image,'form': form}
 	return render(request, 'vid_manager/edit_image.html', context)
+
+def edit_actor_sort(form, a):
+	actors = [x for x in form.fields['actors'].choices if x[0].instance in a]
+	o_actors = [y for y in form.fields['actors'].choices if y[0].instance not in a]
+	o_actors.sort(key=actor_sort)
+	actors.extend(o_actors)
+	return actors
+
+def edit_tag_sort(form, t):
+	tags = [x for x in form.fields['tags'].choices if x[0].instance in t]
+	o_tags = [x for x in form.fields['tags'].choices if x[0].instance not in t]
+	o_tags.sort(key=tag_sort)
+	tags.extend(o_tags)
+	return tags
+
+def tag_sort(e):
+	return e[0].instance.tag_name
+
+def actor_sort(e):
+	return e[0].instance.first_name
 
 @login_required
 def new_image(request):
