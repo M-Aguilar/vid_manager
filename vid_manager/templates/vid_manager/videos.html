@@ -64,14 +64,15 @@
 	{% for video in videos %}
 		{% include 'vid_manager/video_preview.html' %}
 	{% empty %}
+	<div class="container">
 		<div class="list-group-item">
 			No videos have been added yet.
 		</div>
+	</div>
 	{% endfor %}
 	</div>
 </div>
-<hr>
-<div class="d-flex justify-content-center">
+<div class="d-flex justify-content-center mt-4">
 	<span class="current">
 		Page {{ videos.number }} of {{ videos.paginator.num_pages }}
 	</span>

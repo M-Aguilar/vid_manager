@@ -54,7 +54,6 @@
 {% block content %}
 <div>
 	<div>
-		<hr class="mb-1">
 		<div class="text-dark">
 			{% if messages %}
 				<div class="messages">
@@ -74,12 +73,13 @@
 						{% if request.user.is_authenticated and request.user.projector.admin %}</a>{% endif %}
 					</div>
 				{% empty %}
+				<div class="container">
 					<p>Nothing here</p>
+				</div>
 				{% endfor %}
 			</div>
 		</div>
 	</div>
-	<hr>
 	<div class="d-flex justify-content-center">
 		<span class="current">
 			Page {{ images.number }} of {{ images.paginator.num_pages }}

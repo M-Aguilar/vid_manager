@@ -296,11 +296,15 @@ def fine_filter(user, sort, tag=None, actor=None,res=None):
 	elif tag:
 		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(height__gte=reses[res]), owner=user).order_by(sort)
 	elif actor:
-		first_name, last_name = actor.split()[0], ' '.join(actor.split()[1:])
+		a = actor.split()
+		first_name = a[0]
+		last_name = ''
+		if len(a) > 1 :
+			last_name = ' '.join(a[1:])
 		if last_name:
 			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(actors__last_name__icontains=last_name) & Q(height__gte=reses[res]), owner=user).order_by(sort)
 		else:
-			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(height_gte=reses[res]), owner=user).order_by(sort)
+			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(height__gte=reses[res]), owner=user).order_by(sort)
 	else:
 		videos = Video.objects.filter(height__gte=reses[res],owner=user).order_by(sort)
 	return videos
@@ -703,15 +707,17 @@ def edit_image(request, image_id):
 	return render(request, 'vid_manager/edit_image.html', context)
 
 def edit_actor_sort(form, a):
-	actors = [x for x in form.fields['actors'].choices if x[0].instance in a]
-	o_actors = [y for y in form.fields['actors'].choices if y[0].instance not in a]
+	choices = form.fields['actors'].choices
+	actors = [x for x in choices if x[0].instance in a]
+	o_actors = [y for y in choices if y[0].instance not in a]
 	o_actors.sort(key=actor_sort)
 	actors.extend(o_actors)
 	return actors
 
 def edit_tag_sort(form, t):
-	tags = [x for x in form.fields['tags'].choices if x[0].instance in t]
-	o_tags = [x for x in form.fields['tags'].choices if x[0].instance not in t]
+	choices = form.fields['tags'].choices
+	tags = [x for x in choices if x[0].instance in t]
+	o_tags = [x for x in choices if x[0].instance not in t]
 	o_tags.sort(key=tag_sort)
 	tags.extend(o_tags)
 	return tags

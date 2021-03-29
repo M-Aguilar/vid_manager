@@ -1,16 +1,16 @@
 {% extends "vid_manager/base.html" %}
-<!--CSSLINE{% load static %}-->
 {% load bootstrap4 %}
 
 {% block title %}New Video{% endblock %}
 
 {% block header %}
-	<div class="jumbotron bg-dark text-light display-4 mt-5 pt-1 pb-3 text-center">
-		<h2>NEW VIDEO</h2>
+	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
+		<h2>New Video</h2>
 	</div>
 {% endblock %}
 
 {% block content %}
+<div class="container">
 	{% if messages %}
 		<div class="list-group">
     	{% for message in messages %}
@@ -27,4 +27,5 @@
 			{% endbuttons %}	
 		</form>
 	</div>
+</div>
 {% endblock %}
