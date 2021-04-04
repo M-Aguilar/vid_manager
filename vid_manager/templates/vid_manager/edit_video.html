@@ -1,5 +1,4 @@
 {% extends "vid_manager/base.html" %}
-<!--CSSLINE{% load static %}-->
 {% load bootstrap4 %}
 
 {% block title %}Edit {{video.title}}{% endblock %}
@@ -26,9 +25,11 @@
 
 		{% buttons %}
 			<button name="submit" class="btn btn-dark">save changes</button>
+			<a href="{{ video.path }}" class='btn btn-dark'>Video Source</a>
 		{% endbuttons %}	
 		</form>
-		<div class='btn btn-dark'><a href="{{ video.path }}">Video Source</a></div>
 	</div>
 </div>
+{% load static %}
+<script type="text/javascript" src="{% static 'vid_manager/edit_sort.js' %}"></script>
 {% endblock %}

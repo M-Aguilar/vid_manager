@@ -22,7 +22,7 @@ from itertools import chain
 #from decimal import Decimal 
 #from datetime import datetime as dt
 #from datetime import timedelta
-
+from time import time
 import subprocess
 import mutagen.mp4
 
@@ -240,16 +240,8 @@ def video(request, video_id):
 	video = get_object_or_404(Video, id=video_id)
 	if video.owner != request.user and not video.public:
 		raise Http404
-	images = Image.objects.filter(video=video)
-	data={'video':video}
-	eventform = EventForm(initial=data)
-	tagform = TagForm()
-	actorform = ActorForm()
-	actors = video.actors.all()
-	video.actors.all()
-	tags = video.tags.all()
-	events = Event.objects.filter(video=video)
-	context = {'video': video, 'actors': actors, 'tags': tags, 'images':images, 'eventform':eventform, 'actorform': actorform, 'tagform': tagform, 'events':events}
+	eventform = EventForm(initial={'video':video})
+	context = {'video': video, 'eventform': eventform, 'tagform': TagForm()}
 	return render(request, 'vid_manager/video.html', context)
 
 #Paginated videos. Allows for sorting. filtering by resolution, tag, and actor.
@@ -259,7 +251,7 @@ def videos(request):
 	actors = request.GET.get('actors')
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
-	video_sort = ['release_date','date_added','title','length','resolution','size','actor_num','tag_num','bitrate','image_num']
+	video_sort = ['release_date' ,'date_added' ,'title' , 'poster', 'length', 'resolution', 'size', 'actor_num', 'tag_num', 'bitrate', 'image_num']
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
 	if request.user.is_authenticated and request.user.projector.admin:
@@ -278,8 +270,6 @@ def videos(request):
 			videos = Video.objects.filter(public=True).order_by(sort)
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
-	if page_num and '&' in page_num:
-		page_num = page_num[:page_num.index('&')]
 	page_o = paginator.get_page(page_num)
 	context = {'videos':page_o, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res}
 	return render(request, 'vid_manager/videos.html', context)
@@ -343,12 +333,6 @@ def new_video(request, actor_id=None):
 def available_fp(cur=None):
 	if cur:
 		form = VideoForm(instance=cur)
-		actors = [x for x in form.fields['actors'].choices if x[0].instance in cur.actors.all()]
-		actors.extend([x for x in form.fields['actors'].choices if x[0].instance not in cur.actors.all().order_by('first_name')])
-		form.fields['actors'].choices = actors
-		tags = [x for x in form.fields['tags'].choices if x[0].instance in cur.tags.all()]
-		tags.extend([x for x in form.fields['tags'].choices if x[0].instance not in cur.tags.all().order_by('tag_name')])
-		form.fields['tags'].choices = tags
 	else:
 		form = VideoForm()
 	all_fps = [x.file_path for x in Video.objects.all()]
@@ -388,8 +372,6 @@ def edit_video(request, video_id):
 		raise Http404
 	if request.method != 'POST':
 		form = available_fp(video)
-		form.fields['actors'].choices = edit_actor_sort(form, video.actors.all())
-		form.fields['tags'].choices = edit_tag_sort(form, video.tags.all()) 
 	else:
 		form = VideoForm(instance=video, data=request.POST, files=request.FILES)
 		new_video = form.save(commit=False)
@@ -695,8 +677,6 @@ def edit_image(request, image_id):
 	image = Image.objects.get(id=image_id)
 	if request.method != 'POST':
 		form = ImageForm(instance=image)
-		form.fields['actors'].choices = edit_actor_sort(form, image.actors.all())
-		form.fields['tags'].choices = edit_tag_sort(form, image.tags.all())
 	else:
 		#Post data submitted; process data
 		form = ImageForm(instance=image, files=request.FILES, data=request.POST)
@@ -705,22 +685,6 @@ def edit_image(request, image_id):
 			return HttpResponseRedirect(reverse('images'))
 	context = {'image': image,'form': form}
 	return render(request, 'vid_manager/edit_image.html', context)
-
-def edit_actor_sort(form, a):
-	choices = form.fields['actors'].choices
-	actors = [x for x in choices if x[0].instance in a]
-	o_actors = [y for y in choices if y[0].instance not in a]
-	o_actors.sort(key=actor_sort)
-	actors.extend(o_actors)
-	return actors
-
-def edit_tag_sort(form, t):
-	choices = form.fields['tags'].choices
-	tags = [x for x in choices if x[0].instance in t]
-	o_tags = [x for x in choices if x[0].instance not in t]
-	o_tags.sort(key=tag_sort)
-	tags.extend(o_tags)
-	return tags
 
 def tag_sort(e):
 	return e[0].instance.tag_name

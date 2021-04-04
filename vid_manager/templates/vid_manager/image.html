@@ -23,21 +23,23 @@
 </div>
 <div class="container">
 	<div class="w-100">
-		<a href="{{ image.image.url }}"><img src="{{ image.image.url }}" class="d-block mw-100 mx-auto" height="{{ image.height_field}}"></a>
+		<a href="{{ image.image.url }}"><img src="{{ image.image.url }}" class="d-block mx-auto" width="100%"></a>
 	</div>
 	<hr>
-	<a href="{% url 'edit_image' image.id %}" class="btn btn-dark">Edit Image</a>
 	<div class='d-flex flex-row'>
 		<div>
-			<i class='glyphicon glyphicon-tag my-auto' style='font-size: 25px;'></i>
+			<i class='glyphicon glyphicon-tag mt-1' style='font-size: 25px;'></i>
 		</div>
-		<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form">
+		<form id="tag_form" action="{% url 'new_tag' %}" method='post' class="form mx-3">
 			{% csrf_token %}
 			{% bootstrap_form tagform %}
 			<datalist id="tag_results">
 				{% include 'vid_manager/tag_results.html' %}
 			</datalist>
 		</form>
+		<div>
+			<a href="{% url 'edit_image' image.id %}" class="btn btn-dark">Edit Image</a>
+		</div>
 	</div>
 	<div id="tags">
 		<div class="row tagrow">

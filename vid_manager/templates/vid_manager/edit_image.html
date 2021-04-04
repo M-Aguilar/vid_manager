@@ -12,12 +12,14 @@
 
 {% block content %}
 <div class="container">
-	{{image.first}}
+	<div>
+		Dimensions: W x H {{ image.image.width }} x {{ image.image.height }}
+		Size: {{ image.image.size }}
+	</div>
 	<div class="text-dark">
 		<form action="{% url 'edit_image' image.id %}" method='post' enctype="multipart/form-data">
 		{% csrf_token %}
 		{% bootstrap_form form %}
-
 		{% buttons %}
 			<button name="submit" class="btn btn-dark">save changes</button>
 		{% endbuttons %}	
@@ -30,4 +32,6 @@
         {% endif %}
 	</div>
 </div>
+{% load static %}
+<script type="text/javascript" src="{% static 'vid_manager/edit_sort.js' %}"></script>
 {% endblock %}

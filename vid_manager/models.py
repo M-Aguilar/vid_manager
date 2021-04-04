@@ -33,6 +33,7 @@ class Tag(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'tags'
+		ordering = ['tag_name']
 
 	@property
 	def type(self):
@@ -62,6 +63,7 @@ class ActorBase(models.Model):
 class Actor(ActorBase):
 	class Meta:
 		verbose_name_plural = 'actors'
+		ordering = ['first_name']
 
 	def img(self):
 		img = Image.objects.filter(actors=self.id, image__isnull=False).order_by("?").first()
@@ -156,6 +158,9 @@ class Image(models.Model):
 	@property
 	def first_actor(self):
 		return self.actors.first().full_name
+
+	class Meta:
+		verbose_name_plural = 'images'
 
 class Event(models.Model):
 	name = models.CharField(max_length=50)

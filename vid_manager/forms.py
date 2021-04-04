@@ -25,9 +25,10 @@ class ActorForm(forms.ModelForm):
 class TagForm(forms.ModelForm):
 	class Meta:
 		model = Tag
+		labels = {'tag_name': ''}
 		fields = ['tag_name']
 		widgets = {
-			'tag_name': forms.TextInput(attrs={'list':'tag_results', 'autocomplete': 'off'})
+			'tag_name': forms.TextInput(attrs={'list':'tag_results', 'autocomplete': 'off', 'placeholder':'Tag Name'})
 		}
 
 class ImageForm(forms.ModelForm):
