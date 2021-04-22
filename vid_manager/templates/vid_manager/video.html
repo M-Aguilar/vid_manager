@@ -133,6 +133,7 @@
 		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}">Edit Video</a>
 		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}">Add Image</a>
 		<a class='btn btn-dark mb-3' href="#add_event" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event">Add Event</a>
+		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole">Delete Video</a>
 		<div class="collapse" id="add_event">
 			<div class="card-body"> 
 				<form action="{% url 'new_event' video.id %}" method='post' class="form">
@@ -144,7 +145,6 @@
 				</form>
 			</div>
 		</div>
-		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole">Delete Video</a>
 	</div>
 	<script type="text/javascript" src="{% static 'vid_manager/tags.js' %}"></script>
 	<script>

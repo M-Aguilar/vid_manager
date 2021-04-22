@@ -120,15 +120,6 @@ class Video(models.Model):
 	def time(self):
 		return '{0:.2g}'.format(floor(self.length/60)) + ':' + '{:02.0f}'.format(self.length%60)
 
-	def has_events(self):
-		if len(Event.objects.filter(video=self.id)) > 0:
-			return True
-		return False
-
-	def event(self):
-		event = Event.objects.filter(video=self.id)[0]
-		return event
-
 	def b_rate(self):
 		return str(round((self.bitrate * 0.0001), 1)) + "MB/s"
 

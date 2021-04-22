@@ -230,7 +230,7 @@ def scan(actor):
 #Empty Home page
 def index(request):
 	total=0
-	if request.user.is_authenticated and request.user.projector.admin:
+	if request.user.is_authenticated and request.user.projector.admin and Video.objects.filter(owner_id=request.user.id).count() > 0:
 		total = str(round((Video.objects.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
 	context = {'total':total}
 	return render(request, 'vid_manager/index.html', context)
@@ -693,9 +693,14 @@ def actor_sort(e):
 	return e[0].instance.first_name
 
 @login_required
-def new_image(request):
+def new_image(request, video_id=None):
 	if request.method == 'GET':
-		form = ImageForm()
+		if video_id:
+			video = get_object_or_404(Video, id=video_id)
+			data = {'video': video}
+			form = ImageForm(initial=data)
+		else:
+			form = ImageForm()
 	else:
 		form = ImageForm(data=request.POST)
 		if request.FILES.get('image',0) == 0:
