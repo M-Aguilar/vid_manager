@@ -633,11 +633,15 @@ def images(request):
 	if request.user.is_authenticated and request.user.projector.admin:
 		images = None
 		if actors:
-			images = Image.objects.filter(Q(actors__first_name__icontains=actors) | Q(actors__last_name__icontains=actors))
-		elif tags and images:
-			images = images.filter(tags__tag_name__icontains=tags)
+			all_actors = return_many(actors)
+			for actor in all_actors:
+				n = parse_name(actor)
+				images = Image.objects.filter(Q(actors__first_name__icontains=n[0]) | Q(actors__last_name__icontains=n[1]))
 		elif tags:
-			images = Image.objects.filter(tags__tag_name__icontains=tags)
+			all_tags = return_many(tags)
+			for tag in tags:
+				n = parse_name(actor)
+				images = Image.objects.filter(tags__tag_name__icontains=tags)
 		else:
 			images = Image.objects.all()
 	else:
@@ -652,6 +656,21 @@ def images(request):
 	page_o = paginator.get_page(page_num)
 	context = {'images': page_o,'sort_options': image_sort, 'sort':sort,'actors':actors,'tags':tags}
 	return render(request,'vid_manager/images.html',context)
+
+def return_many(names):
+	if '+' in names:
+		all_names = names.split('+')
+	else:
+		all_names = [names]
+	return all_names
+
+def parse_name(full_name):
+	if ' ' in full_name:
+		all_names = full_name.split()
+		if len(all_names) > 2:
+			return (all_names[0], all_names[1:])
+		return (all_names[0], all_names[1])
+	return (full_name, ' ')
 
 @login_required
 def delete_image(request, image_id):
