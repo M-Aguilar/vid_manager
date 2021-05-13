@@ -195,7 +195,7 @@ def new_actor_count():
 	for i in new_actors:
 		if i not in act_list:
 			act_list.append(i)
-	return len(act_list)
+	return act_list
 
 #Add all Videos in actor subdir or contain actor name
 @login_required
@@ -579,7 +579,7 @@ def actors(request):
 	paginator = Paginator(actors, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	context = {'actors': page_o, 'form': form, 'new_actors':new_actor_count(),'total':total,'sort':sort,'sort_options': actor_sort}
+	context = {'actors': page_o, 'form': form, 'new_actors':len(new_actor_count()),'total':total,'sort':sort,'sort_options': actor_sort}
 	return render(request, 'vid_manager/actors.html', context)
 
 @login_required
@@ -613,6 +613,7 @@ def new_actor(request):
 
 @login_required
 def image(request, image_id):
+	request.session['ref'] = request.META.get('HTTP_REFERER')
 	image = Image.objects.get(id=image_id)
 	if not request.user.projector.admin or not image:
 		raise Http404
@@ -682,6 +683,13 @@ def delete_image(request, image_id):
 		image.image.delete()
 		image.delete()
 		messages.success(request, "Image ID: {0} Filename: {1} has been deleted.".format(i_id,i_i))
+		ref = request.session.get('ref')
+		if 'actor' in ref:
+			request.session['ref'] = None
+			return HttpResponseRedirect(reverse('actor', args=[ref.split('/')[-1]]))
+		if 'video' in ref:
+			request.session['ref'] = None
+			return HttpResponseRedirect(reverse('video', args=[ref.split('/')[-1]]))
 		return HttpResponseRedirect(reverse('images'))
 	else:
 		messages.error(request, 'Something wet wrong')
@@ -701,6 +709,12 @@ def edit_image(request, image_id):
 		form = ImageForm(instance=image, files=request.FILES, data=request.POST)
 		if form.is_valid():
 			form.save()
+			ref = request.session.get('ref')
+			request.session['ref'] = None
+			if 'actor' in ref:
+				return HttpResponseRedirect(reverse('actor', args=[ref.split('/')[-1]]))
+			if 'video' in ref:
+				return HttpResponseRedirect(reverse('video', args=[ref.split('/')[-1]]))
 			return HttpResponseRedirect(reverse('images'))
 	context = {'image': image,'form': form}
 	return render(request, 'vid_manager/edit_image.html', context)
@@ -743,7 +757,6 @@ def new_image(request, video_id=None):
 @login_required
 def new_video_image(request, video_id):
 	if request.method != 'POST':
-		data={}
 		video = get_object_or_404(Video, id=video_id)
 		data = {'video':video,'actors':video.actors.all(),'tags':video.tags.all()}
 	else:
