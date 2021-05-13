@@ -36,7 +36,7 @@
 	<div class="messages">
 	{% if messages %}
     	{% for message in messages %}
-    	<div class="{% if message.tags %}bg-{{ message.tags }} p-2 mb-3{% endif %}">{{ message }}</div>
+    	<div class="{% if message.tags %}bg-{{ message.tags }}{% endif %} p-2 mb-3">{{ message }}</div>
     	{% endfor %}
 	{% endif %}
 	</div>

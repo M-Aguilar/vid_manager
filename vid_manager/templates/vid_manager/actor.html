@@ -63,7 +63,7 @@
 <div class="messages">
 {% if messages %}
 	{% for message in messages %}
-		<div {% if message.tags %} class="p-1 rounded bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+		<div class="p-1 rounded {% if message.tags %}bg-{{ message.tags }}{% endif %}">{{ message }}</div>
     {% endfor %}
 {% endif %}
 </div>

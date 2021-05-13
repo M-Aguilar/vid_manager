@@ -14,14 +14,14 @@
 
 {% block content %}
 {% load static %}
-<div class="messages list-group">
-{% if messages %}
-    {% for message in messages %}
-    <div class="list-group-item bg-info" {% if message.tags %} class="bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
-    {% endfor %}
-{% endif %}
-</div>
 <div class="container">
+	<div class="messages list-group">
+	{% if messages %}
+		{% for message in messages %}
+		<div class="list-group-item {% if message.tags %} bg-{{ message.tags }}{% endif %}">{{ message }}</div>
+		{% endfor %}
+	{% endif %}
+	</div>
 	<div class="w-100">
 		<a href="{{ image.image.url }}"><img src="{{ image.image.url }}" class="d-block mx-auto" width="100%"></a>
 	</div>

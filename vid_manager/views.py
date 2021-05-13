@@ -684,11 +684,10 @@ def delete_image(request, image_id):
 		image.delete()
 		messages.success(request, "Image ID: {0} Filename: {1} has been deleted.".format(i_id,i_i))
 		ref = request.session.get('ref')
-		if 'actor' in ref:
-			request.session['ref'] = None
+		request.session['ref'] = None
+		if '/actor/' in ref:
 			return HttpResponseRedirect(reverse('actor', args=[ref.split('/')[-1]]))
-		if 'video' in ref:
-			request.session['ref'] = None
+		if '/video/' in ref:
 			return HttpResponseRedirect(reverse('video', args=[ref.split('/')[-1]]))
 		return HttpResponseRedirect(reverse('images'))
 	else:

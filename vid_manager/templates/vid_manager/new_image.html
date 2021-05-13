@@ -14,7 +14,7 @@
 	{% if messages %}
 		<div class="list-group">
     	{% for message in messages %}
-    		<div class="list-group-item bg-info" {% if message.tags %} class="bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    		<div class="list-group-item {% if message.tags %}bg-{{ message.tags }}{% endif %}">{{ message }}</div>
     	{% endfor %}
 		</div>
 	{% endif %}
