@@ -89,13 +89,14 @@
 						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.width }}x{{video.height}}</li>
 					</div>
 					<div>
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.size_neat }}</li>
+						{% load bit_format %}
+						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.size|bit_size }}</li>
 					</div>
 					<div>
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.time }}</li>
+						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.length|time }}</li>
 					</div>
 					<div>
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.b_rate }}</li>
+						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.bitrate|bit_rate }}</li>
 					</div>
 					{% if video.release_date %}
 					<div>

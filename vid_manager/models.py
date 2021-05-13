@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 
-from math import floor
-
 def user_directory_path(instance, filename):
 	try:
 		return '{0}/{1}/{2}'.format('Images', instance.video.id, filename)
@@ -110,19 +108,6 @@ class Video(models.Model):
 	def __str__(self):
 		return self.title
 
-	def size_neat(self):
-		mb = round((self.size * 0.000001), 2)
-		if mb > 1000:
-			return str(round((mb * 0.001),2)) + "GB"
-		else:
-			return str(mb) + "MB"
-
-	def time(self):
-		return '{0:.2g}'.format(floor(self.length/60)) + ':' + '{:02.0f}'.format(self.length%60)
-
-	def b_rate(self):
-		return str(round((self.bitrate * 0.0001), 1)) + "MB/s"
-
 	def path(self):
 		return settings.MEDIA_SERVER + self.file_path[self.file_path.index('videos'):]
 
@@ -139,7 +124,6 @@ class Video(models.Model):
 	def type(self):
 		return 'video'
 
-'''Potentially just make this into the image class with optional video foreign key ....'''
 class Image(models.Model):
 	image = models.ImageField(upload_to=user_directory_path,blank=True)
 	actors = models.ManyToManyField('Actor', related_name='actor_images')
