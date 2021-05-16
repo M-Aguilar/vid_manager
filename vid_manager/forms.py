@@ -36,6 +36,10 @@ class ImageForm(forms.ModelForm):
 		model = Image
 		fields = ['actors','video','image','tags']
 
+		widgets = {
+			'image' : forms.ClearableFileInput(attrs={'multiple':''})
+		}
+
 class EventForm(forms.ModelForm):
 	class Meta:
 		model = Event

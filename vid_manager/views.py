@@ -13,15 +13,16 @@ from django.conf import settings
 from django.db.models import Q
 from django.views.generic import ListView
 
+from django.utils.datastructures import MultiValueDict
+from django.views.generic.edit import FormView
+#from django.forms import formset_factory
+
 #for Ajax rendering. ?
 from django.template.loader import render_to_string
-#NOT USED CURRENTLY
+
 from itertools import chain
-#from django.core.files.images import get_image_dimensions
 #import math
-#from decimal import Decimal 
-#from datetime import datetime as dt
-#from datetime import timedelta
+
 from time import time
 import subprocess
 import mutagen.mp4
@@ -29,6 +30,24 @@ import mutagen.mp4
 from .thumbnail import capture
 from .models import Video, Tag, Actor, Event, Image, Alias
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasForm
+
+class ImageFormView(FormView):
+	form_class = ImageForm
+	template_name = 'new_image.html'
+	success_url = '/images'
+
+	def post(self, request, *args, **kwargs):
+		form_class = self.get_form_class()
+		form = self.get_form(form_class)
+		files = request.FILES.getlist('image')
+		if form.is_valid():
+			for f in files:
+				image = ImageForm(data=request.POST, files=MultiValueDict({'image':[f]}))
+				image.save(commit=False)
+				image.save()
+			return self.form_valid(form)
+		else:
+			return self.form_invalid(form)
 
 #The Goal is to have narrow results when necessary
 #Usually the longer the query the more sepcific the result desired
@@ -740,25 +759,26 @@ def actor_sort(e):
 @login_required
 def new_image(request, video_id=None):
 	if request.method == 'GET':
+		form = ImageForm()
 		if video_id:
 			video = get_object_or_404(Video, id=video_id)
 			data = {'video': video}
-			form = ImageForm(initial=data)
-		else:
-			form = ImageForm()
+			form = form_set(initial=data)
 	else:
 		form = ImageForm(data=request.POST)
-		if request.FILES.get('image',0) == 0:
+		print(request.FILES)
+		print(request.POST)
+		print("# of files: {0}".format(len(request.FILES)))
+		print("# of forms: {0}".format(len(request.POST)))
+		if not request.FILES:
 			messages.error(request, 'No Image attached')
 			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 		if form.is_valid():
-			new_image = form.save(commit=False)
-			new_image.save()
-			new_image.image = request.FILES['image']
-			new_image.save()
-			form.save_m2m()
+			for image in request.FILES['image']:
+				image = form.save(commit=False)
+				image.image = image
 			messages.success(request, 'The Image has been added')
-			return HttpResponseRedirect(reverse('image', args=[new_image.pk]))
+			return HttpResponseRedirect(reverse('index'))
 		else:
 			messages.error(request, 'Something went wrong. Form invalid')
 			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
@@ -789,7 +809,6 @@ def new_actor_image(request, actor_id):
 	form = ImageForm(initial=data)
 	context = {'form':form}
 	return render(request, 'vid_manager/new_image.html', context)
-
 
 '''########################    EVENTS     #########################'''
 

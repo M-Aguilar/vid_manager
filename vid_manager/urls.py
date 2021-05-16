@@ -47,7 +47,7 @@ urlpatterns = [
 	#Images
 	path('image/<image_id>', views.image, name='image'),
 	path('images',views.images, name='images'),
-	path('new_image',views.new_image,name='new_image'),
+	path('new_image',views.ImageFormView.as_view(),name='new_image'),
 	path('<image_id>/edit_image', views.edit_image,name='edit_image'),
 	path('delete/<image_id>', views.delete_image, name='delete_image'),
 	path('<actor_id>/new_actor_image',views.new_actor_image, name='new_actor_image'),
