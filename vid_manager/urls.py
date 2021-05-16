@@ -18,6 +18,7 @@ urlpatterns = [
 	path('new_video/<actor_id>', views.new_video, name='new_video'),
 	path('edit_video/<video_id>', views.edit_video, name='edit_video'),
 	path('delete_video/<video_id>', views.delete_video, name='delete_video'),
+	path('<video_id>/delete_images', views.delete_images, name='delete_images'),
 
 	#Tags
 	path('tag/<tag_id>', views.tag, name='tag'),

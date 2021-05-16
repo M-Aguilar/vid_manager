@@ -4,11 +4,15 @@ register = template.Library()
 
 @register.filter
 def bit_size(br):
-    mb = round((br * 0.000001), 2)
-    if mb > 1000:
-        return str(round((mb * 0.001),2)) + "GB"
+    if br > 1000000000:
+        return str(round((br * 0.000000001),2)) + "GB"
+    elif br > 1000000:
+        return str(round((br * 0.000001), 2)) + "MB"
+    elif br > 1000:
+        return str(round((br * 0.001), 2)) + "KB"
     else:
-        return str(mb) + "MB"
+        return str(br) + "bytes"
+
 @register.filter
 def time(time):
     return '{0:.2g}'.format(round(time/60)) + ':' + '{:02.0f}'.format(time%60,4)

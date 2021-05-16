@@ -6,12 +6,11 @@
 {% block header %}
 	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
 		{% for actor in actors %}
-		<a href="{% url 'actor' actor.id %}">{{ actor }}{% if actor != actors.last %},{% endif %}</a>
+		<a class="text-light" href="{% url 'actor' actor.id %}">{{ actor }}{% if actor != actors.last %},{% endif %}</a>
 		{% endfor %}
-		{% if image.video %} - <a href="{% url 'video' image.video.id %}">{{image.video}}</a>{% endif %}
+		{% if image.video %} - <a class="text-light" href="{% url 'video' image.video.id %}">{{image.video}}</a>{% endif %}
 	</div>
 {% endblock %}
-
 {% block content %}
 {% load static %}
 <div class="container">
@@ -23,7 +22,7 @@
 	{% endif %}
 	</div>
 	<div class="w-100">
-		<a href="{{ image.image.url }}"><img src="{{ image.image.url }}" class="d-block mx-auto" width="100%"></a>
+		<a href="{{ image.image.url }}"><img src="{{ image.image.url }}" class="d-block mx-auto" width="image.image.width "></a>
 	</div>
 	<hr>
 	<div class='d-flex flex-row'>

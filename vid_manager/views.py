@@ -674,6 +674,19 @@ def parse_name(full_name):
 	return (full_name, ' ')
 
 @login_required
+def delete_images(request, video_id):
+	if request.user.is_authenticated and request.user.projector.admin:
+		video = get_object_or_404(Video, id=video_id)
+		if request.user == video.owner:
+			for image in video.image_set.all():
+				image.image.delete()
+				image.delete()
+			messages.success(request, "All images for {0} have been deleted".format(video))
+			return HttpResponseRedirect(reverse('video', args=[video.id]))
+	messages.error(request, 'Permission denied. 🔒')
+	return HttpResponseRedirect(request.META.get('HTTP_REFERRER'))
+
+@login_required
 def delete_image(request, image_id):
 	image = Image.objects.get(id=image_id)
 	if request.user.is_authenticated and request.user.projector.admin and request.method == "POST":

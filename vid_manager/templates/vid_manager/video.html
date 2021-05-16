@@ -49,7 +49,7 @@
 	    	{% endfor %}
 		{% endif %}
 	</div>
-	<video style="width:100%;" preload="metadata" id='vid_player' controls range poster="{% if video.poster %}{{ video.poster.url }}{% elif events.first %}{{events.first.url}}{% endif%}">
+	<video style="width:100%;" preload="metadata" id='vid_player' controls range poster="{% if video.poster %}{{ video.poster.url }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
     	<source src="{{ video.path }}" type="video/mp4">
 	</video>
 	{% if video.event_set.all.count > 0 %}
@@ -78,7 +78,7 @@
 		<div class="d-md-flex flex-row d-block">
 			<div class="list-group flex-row">
 				{% for actor in video.actors.all %}
-				<a href="{% url 'actor' actor.id %}"><div class='p-2 m-2 border border-dark rounded text-center'>{{actor}}</div></a>
+				<a class="text-dark" href="{% url 'actor' actor.id %}"><div class='p-2 m-2 border border-dark rounded text-center'>{{actor}}</div></a>
 				{% empty %}
 					<div class="border border-dark rounded m-2 p-2">No artists have been identified in this video.</div>
 				{% endfor %}
