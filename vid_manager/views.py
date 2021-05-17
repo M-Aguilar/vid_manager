@@ -15,7 +15,6 @@ from django.views.generic import ListView
 
 from django.utils.datastructures import MultiValueDict
 from django.views.generic.edit import FormView
-#from django.forms import formset_factory
 
 #for Ajax rendering. ?
 from django.template.loader import render_to_string
