@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect, Http404, HttpRequest, HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages 
@@ -33,8 +33,8 @@ from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasFor
 
 class ImageFormView(FormView):
 	form_class = ImageForm
-	template_name = 'new_image.html'
-	success_url = '/images'
+	template_name = 'vid_manager/new_image.html'
+	success_url = reverse_lazy('images')
 
 	def post(self, request, *args, **kwargs):
 		form_class = self.get_form_class()
@@ -697,10 +697,11 @@ def delete_images(request, video_id):
 	if request.user.is_authenticated and request.user.projector.admin:
 		video = get_object_or_404(Video, id=video_id)
 		if request.user == video.owner:
+			tot = video.image_set.all().count()
 			for image in video.image_set.all():
 				image.image.delete()
 				image.delete()
-			messages.success(request, "All images for {0} have been deleted".format(video))
+			messages.success(request, "All images for {0} have been deleted. Total: {1}".format(video, tot))
 			return HttpResponseRedirect(reverse('video', args=[video.id]))
 	messages.error(request, 'Permission denied. 🔒')
 	return HttpResponseRedirect(request.META.get('HTTP_REFERRER'))
@@ -756,59 +757,25 @@ def tag_sort(e):
 def actor_sort(e):
 	return e[0].instance.first_name
 
-@login_required
-def new_image(request, video_id=None):
-	if request.method == 'GET':
-		form = ImageForm()
-		if video_id:
-			video = get_object_or_404(Video, id=video_id)
-			data = {'video': video}
-			form = form_set(initial=data)
-	else:
-		form = ImageForm(data=request.POST)
-		print(request.FILES)
-		print(request.POST)
-		print("# of files: {0}".format(len(request.FILES)))
-		print("# of forms: {0}".format(len(request.POST)))
-		if not request.FILES:
-			messages.error(request, 'No Image attached')
-			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-		if form.is_valid():
-			for image in request.FILES['image']:
-				image = form.save(commit=False)
-				image.image = image
-			messages.success(request, 'The Image has been added')
-			return HttpResponseRedirect(reverse('index'))
-		else:
-			messages.error(request, 'Something went wrong. Form invalid')
-			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-	context = {'form':form}
-	return render(request, 'vid_manager/new_image.html', context)
-
 #New Video Image
 @login_required
 def new_video_image(request, video_id):
 	if request.method != 'POST':
 		video = get_object_or_404(Video, id=video_id)
 		data = {'video':video,'actors':video.actors.all(),'tags':video.tags.all()}
-	else:
-		new_image(request)
-	form = ImageForm(initial=data)
-	context = {'form':form}
-	return render(request, 'vid_manager/new_image.html', context)
+		form = ImageForm(initial=data)
+		context = {'form':form}
+		return render(request, 'vid_manager/new_image.html', context)
 
 #New Actor Image
 @login_required
 def new_actor_image(request, actor_id):
 	if request.method == 'GET':
-		data={}
 		actors = get_object_or_404(Actor, id=actor_id)
 		data = {'actors':actors}
-	else:
-		new_image(request)
-	form = ImageForm(initial=data)
-	context = {'form':form}
-	return render(request, 'vid_manager/new_image.html', context)
+		form = ImageForm(initial=data)
+		context = {'form':form}
+		return render(request, 'vid_manager/new_image.html', context)
 
 '''########################    EVENTS     #########################'''
 
