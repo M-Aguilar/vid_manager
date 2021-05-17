@@ -84,6 +84,7 @@ class Alias(ActorBase):
 	class Meta:
 		verbose_name_plural = 'aliases'
 
+VIDEO_SORT_OPTIONS = ['release_date' ,'date_added' ,'title' , 'poster', 'length', 'resolution', 'size', 'actor_num', 'tag_num', 'bitrate', 'image_num']
 #tracking view count would be ideal
 class Video(models.Model):
 	title = models.CharField(max_length=75)
@@ -110,15 +111,6 @@ class Video(models.Model):
 
 	def path(self):
 		return settings.MEDIA_SERVER + self.file_path[self.file_path.index('videos'):]
-
-	def actor_list_url(self):
-		actor_list = None
-		for i in self.actors.all():
-			if not actor_list:
-				actor_list = str(i)
-			else:
-				actor_list = '{0}+{1}'.format(actor_list, str(i))
-		return actor_list
 
 	@property
 	def type(self):

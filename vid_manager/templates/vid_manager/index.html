@@ -13,7 +13,7 @@
 	{% if request.user.is_authenticated and request.user.projector.admin %}
 	<div>Total Added <p>{{ total }}</p></div>
 	{% if request.user.video_set.all.count > 0 %}
-		<a href="{% url 'random_video' %}"><h2>Random Vid</h2></a>
+		<a class="text-dark" href="{% url 'random_video' %}"><h2>Random Vid</h2></a>
 	{% endif %}
 	{% elif request.user.is_authenticated %}
 		<h2>Hello. Not much to do here.</h2>

@@ -28,7 +28,7 @@ import subprocess
 import mutagen.mp4
 
 from .thumbnail import capture
-from .models import Video, Tag, Actor, Event, Image, Alias
+from .models import Video, Tag, Actor, Event, Image, Alias, VIDEO_SORT_OPTIONS
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasForm
 
 class ImageFormView(FormView):
@@ -270,7 +270,7 @@ def videos(request):
 	actors = request.GET.get('actors')
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
-	video_sort = ['release_date' ,'date_added' ,'title' , 'poster', 'length', 'resolution', 'size', 'actor_num', 'tag_num', 'bitrate', 'image_num']
+	video_sort = VIDEO_SORT_OPTIONS
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
 	if request.user.is_authenticated and request.user.projector.admin:
