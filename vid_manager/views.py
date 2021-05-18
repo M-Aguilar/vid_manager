@@ -44,6 +44,8 @@ class ImageFormView(FormView):
 				image = ImageForm(data=request.POST, files=MultiValueDict({'image':[f]}))
 				image.save(commit=False)
 				image.save()
+			if request.POST.get('video'):
+				self.success_url = reverse('video', args=[request.POST.get('video')])
 			return self.form_valid(form)
 		else:
 			return self.form_invalid(form)
