@@ -4,7 +4,6 @@ from django.http import HttpResponseRedirect, Http404, HttpRequest, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages 
 from django.core import serializers #ajax
-from os import stat #video bitrate, length, and size
 from django.core.paginator import Paginator
 from django.db.models import Count, Sum
 import json
@@ -23,8 +22,9 @@ from itertools import chain
 #import math
 
 from time import time
+
+from MediaInfo import MediaInfo
 import subprocess
-import mutagen.mp4
 
 from .thumbnail import capture
 from .models import Video, Tag, Actor, Event, Image, Alias, VIDEO_SORT_OPTIONS
@@ -227,6 +227,8 @@ def auto_add(request, actor_id):
 	for new_vids in new_vidss:
 		new_vids = new_vids[0]
 		title = new_vids.split('/')[-1]
+		if len(title) > 75:
+			title = title[:74]
 		data = {'title': title[:title.index('.')],'actors': [actor],'file_path':new_vids}
 		form = VideoForm(data=data)
 		if form.is_valid():
@@ -249,7 +251,7 @@ def scan(actor):
 
 #Empty Home page
 def index(request):
-	total=0
+	total = 0
 	if request.user.is_authenticated and request.user.projector.admin and Video.objects.filter(owner_id=request.user.id).count() > 0:
 		total = str(round((Video.objects.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
 	context = {'total':total}
@@ -361,26 +363,13 @@ def available_fp(cur=None):
 
 #Takes a video objects. scans and creates/updates video attributes. Video dimmensions/length/size/bitrate
 def update_vid(new_video):
-	try:
-		v = mutagen.mp4.Open(new_video.file_path)
-		seconds = v.info.length
-		b_rate = v.info.bitrate
-	except mutagen.mp4.MP4StreamInfoError:
-		seconds=0
-		b_rate=0
-	fp = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', new_video.file_path])
-	fp = fp.decode('ascii').rstrip()
-	dim = {'width':fp.split('x')[0],'height':fp.split('x')[1]}
-	try:
-		new_video.height = int(dim['height'])
-	except ValueError:
-		new_video.height = int(dim['height'][:dim['height'].index('\n')])
-		print(new_video.height)
-	new_video.width = int(dim['width'])
-	statinfo = stat(new_video.file_path)
-	new_video.length = seconds
-	new_video.bitrate = b_rate
-	new_video.size = statinfo.st_size
+	v = MediaInfo(filename=new_video.file_path, cmd='/usr/bin/mediainfo')
+	info = v.getInfo()
+	new_video.height = info['videoHeight']
+	new_video.width = info['videoWidth']
+	new_video.length = round(float(info['videoDuration']),0)
+	new_video.bitrate = info['bitrate']
+	new_video.size = info['fileSize']
 	new_video.save()
 
 #Takes video id and returns VideoForm instance or varifies and applies POST changes.

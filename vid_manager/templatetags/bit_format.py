@@ -19,4 +19,4 @@ def time(time):
 
 @register.filter
 def bit_rate(br):
-    return str(round((br * 0.0001), 1)) + "MB/s"
+    return str(round((br * 0.000001), 1)) + " mb/s"
