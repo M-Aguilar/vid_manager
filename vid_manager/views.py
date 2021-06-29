@@ -23,7 +23,7 @@ from itertools import chain
 
 from time import time
 
-from MediaInfo import MediaInfo
+from pymediainfo import MediaInfo
 import subprocess
 
 from .thumbnail import capture
@@ -363,13 +363,13 @@ def available_fp(cur=None):
 
 #Takes a video objects. scans and creates/updates video attributes. Video dimmensions/length/size/bitrate
 def update_vid(new_video):
-	v = MediaInfo(filename=new_video.file_path, cmd='/usr/bin/mediainfo')
-	info = v.getInfo()
-	new_video.height = info['videoHeight']
-	new_video.width = info['videoWidth']
-	new_video.length = round(float(info['videoDuration']),0)
-	new_video.bitrate = info['bitrate']
-	new_video.size = info['fileSize']
+	v = MediaInfo.parse(new_video.file_path)
+	info = v.tracks[1]
+	new_video.height = info.height
+	new_video.width = info.width
+	new_video.length = round(float(info.duration/1000),0)
+	new_video.bitrate = info.bit_rate
+	new_video.size = v.tracks[0].file_size
 	new_video.save()
 
 #Takes video id and returns VideoForm instance or varifies and applies POST changes.
