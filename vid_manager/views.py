@@ -253,8 +253,11 @@ def scan(actor):
 def index(request):
 	total = 0
 	if request.user.is_authenticated and request.user.projector.admin and Video.objects.filter(owner_id=request.user.id).count() > 0:
-		total = str(round((Video.objects.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
-	context = {'total':total}
+		vids = Video.objects.filter(owner=request.user)
+		total = str(round((vids.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
+		count = vids.count()	
+		tot_length = round((vids.aggregate(Sum('length'))['length__sum']))
+	context = {'total':total, 'count': count, 'tot_length': tot_length}
 	return render(request, 'vid_manager/index.html', context)
 
 @login_required
@@ -368,7 +371,7 @@ def update_vid(new_video):
 	new_video.height = info.height
 	new_video.width = info.width
 	new_video.length = round(float(info.duration/1000),0)
-	new_video.bitrate = info.bit_rate
+	new_video.bitrate = v.tracks[0].overall_bit_rate
 	new_video.size = v.tracks[0].file_size
 	new_video.save()
 

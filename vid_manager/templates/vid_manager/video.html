@@ -23,14 +23,14 @@
 
 {% block content %}
 {% if video.get_previous_by_date_added %}
-<div style="position:absolute;top:75%; left: 5%;">
+<div style="position:absolute;bottom:10px; left: 5%;">
 	<div>
 		<a class="text-dark" href="{% url 'video' video.get_previous_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-left my-auto' style='font-size: 25px;'></i></a>
 	</div>
 </div>
 {% endif %}
 {% if video.get_next_by_date_added %}
-<div style="position:absolute;top:75%; right: 5%;">
+<div style="position:absolute;bottom: 10px; right: 5%;">
 	<div>
 		<a class="text-dark" href="{% url 'video' video.get_next_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-right my-auto' style='font-size: 25px;'></i></a>
 	</div>
@@ -94,14 +94,14 @@
 				{% for actor in video.actors.all %}
 				<a class="text-dark" href="{% url 'actor' actor.id %}"><div class='p-2 m-2 border border-dark rounded text-center'>{{actor}}</div></a>
 				{% empty %}
-					<div class="border border-dark rounded m-2 p-2">No artists have been identified in this video.</div>
+					<div class="border border-dark rounded m-2 p-2">No artists identified</div>
 				{% endfor %}
+				<div>
+					<li class="list-group-item m-2 p-2 border border-dark rounded"><a class="text-dark" href="{% url 'random_video' %}"><i class="glyphicon glyphicon-random px-3"></i></a></li>
+				</div>
 			</div>
 			<div class="d-flex col justify-content-end">
 				<ul class="list-group flex-row">
-					<div>
-						<li class="list-group-item m-2 p-2 border border-dark rounded"><a class="text-dark" href="{% url 'random_video' %}"><i class='glyphicon glyphicon-random px-3'></i></a></li>
-					</div>
 					<div>
 						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.width }}x{{video.height}}</li>
 					</div>

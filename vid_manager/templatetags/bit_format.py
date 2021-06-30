@@ -14,6 +14,10 @@ def bit_size(br):
         return str(br) + "bytes"
 
 @register.filter
+def hours(time):
+    m = time/60
+    return "{0} Hours".format(m/60)
+@register.filter
 def time(time):
     return '{0:.2g}'.format(round(time/60)) + ':' + '{:02.0f}'.format(time%60,4)
 

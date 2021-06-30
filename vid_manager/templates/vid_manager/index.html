@@ -10,13 +10,30 @@
 
 {% block content %}
 <div class="container">
-	{% if request.user.is_authenticated and request.user.projector.admin %}
-	<div>Total Added <p>{{ total }}</p></div>
-	{% if request.user.video_set.all.count > 0 %}
-		<a class="text-dark" href="{% url 'random_video' %}"><h2>Random Vid</h2></a>
-	{% endif %}
-	{% elif request.user.is_authenticated %}
-		<h2>Hello. Not much to do here.</h2>
+	{% if request.user.is_authenticated and request.user.projector.admin %}	
+		{% if request.user.video_set.all.count > 0 %}
+			<a class="text-dark text-center" href="{% url 'random_video' %}"><h2><i class="glyphicon glyphicon-random"></i></h2></a>
+			<table class="table table-bordered">
+				<tbody>
+					<tr>
+						<th scope="row">Storage Used</th>
+						<td>{{total}}</td>
+					</tr>
+					<tr>
+						<th scope="row">Video Count</th>
+						<td>{{ count }}</td>
+					</tr>
+					<tr>
+						<th scope="row">Total Video Length</th>
+						{% load bit_format %}
+						<td>{{ tot_length|hours }}</td>
+					</tr>
+				</tbody>
+			<table>
+		{% else %}
+			<h2>Hello. Not much to do here.</h2>
+		{% endif %}
+
 	{% else %}
 	<div class="text-dark">
 		<h2>Please <a href="{% url 'login' %}">login</a> or <a href="{% url 'register' %}">register</a></h2>
