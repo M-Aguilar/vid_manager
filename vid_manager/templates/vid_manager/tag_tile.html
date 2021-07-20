@@ -1,12 +1,12 @@
 
-<div class='col-2 border border-dark rounded pr-2 pl-3 py-1'>	
-	<div id="{{ tag.id }}" class="d-block overflow-auto">
+<div class='col-2 p-1'>
+	<div id="{{ tag.id }}" class="overflow-auto d-inline-block w-100 border border-dark rounded pr-2 pl-3 py-0">
 		<a href="{% url 'tag' tag.id %}">
-			<div class="float-left text-dark my-1">{{ tag }}</div>
+			<div class="float-left text-dark mt-2">{{ tag }}</div>
 		</a>
-		<a href="{% url 'remove_tag' tag.id %}" id="remove_tag" class="float-right" value="{{ tag.id }}">
-			<div>
-				<span class="btn btn-xs btn-dark pt-0 pb-1">&times;</span>
+		<a href="{% url 'remove_tag' tag.id %}" id="remove_tag" class="float-right btn btn-xs btn-dark rounded-circle my-1 px-2" value="{{ tag.id }}">
+			<div class="px-1 mb-1">
+				<span>&times;</span>
 			</div>
 		</a>
 	</div>
