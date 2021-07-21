@@ -20,7 +20,7 @@ def hours(time):
 
 @register.filter
 def time(time):
-    return '{0:.2g}'.format(round(time/60)) + ':' + '{:02.0f}'.format(time%60,4)
+    return '{0:.2g}'.format(floor(time/60)) + ':' + '{:02.0f}'.format(time%60,4)
 
 @register.filter
 def bit_rate(br):

@@ -5,12 +5,14 @@
 
 {% block header %}
 	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
-		<h2>{{ video.title }}
-			{% if video.poster %}
-			<div class='float-right'>
-				<a href="{{video.poster.url}}"><i class='glyphicon glyphicon-picture my-auto' style='font-size: 25px;'></i></a>
-			</div>
-			{% endif %}
+		<h2>
+		{% if video.get_previous_by_date_added %}
+		<a class="text-light float-left" href="{% url 'video' video.get_previous_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-left my-auto' style='font-size: 25px;'></i></a>
+		{% endif %}
+		{{ video.title }}
+		{% if video.get_next_by_date_added %}
+		<a class="text-light float-right" href="{% url 'video' video.get_next_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-right'" style='font-size: 25px;'></i></a>
+		{% endif %}
 		</h2>
 	</div>
 	{% load static %}
@@ -22,20 +24,6 @@
 {% endblock %}
 
 {% block content %}
-{% if video.get_previous_by_date_added %}
-<div style="position:absolute;bottom:10px; left: 5%;">
-	<div>
-		<a class="text-dark" href="{% url 'video' video.get_previous_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-left my-auto' style='font-size: 25px;'></i></a>
-	</div>
-</div>
-{% endif %}
-{% if video.get_next_by_date_added %}
-<div style="position:absolute;bottom: 10px; right: 5%;">
-	<div>
-		<a class="text-dark" href="{% url 'video' video.get_next_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-right my-auto' style='font-size: 25px;'></i></a>
-	</div>
-</div>
-{% endif %}
 <div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
@@ -102,6 +90,15 @@
 			</div>
 			<div class="d-flex col justify-content-end">
 				<ul class="list-group flex-row">
+					{% if video.poster %}
+					<div>
+						<a href="{{video.poster.url}}" class="text-dark">
+							<li class="list-group-item m-2 p-2 border border-dark rounded">
+								<i class='glyphicon glyphicon-picture px-1'></i>
+							</li>
+						</a>
+					</div>
+					{% endif %}
 					<div>
 						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.width }}x{{video.height}}</li>
 					</div>
