@@ -18,10 +18,11 @@ class Projector(models.Model):
 	user = models.OneToOneField(User, on_delete=models.CASCADE)
 	admin = models.BooleanField(default=False)
 
-# Create your models here.
+#Tag Model
 class Tag(models.Model):
 	tag_name = models.CharField(max_length=50, unique=True)
 
+	#returns a random image related to the tag. Returns False if non exist
 	def img(self):
 		img = Image.objects.filter(tags=self.id, image__isnull=False).order_by('?').first()
 		if img:
@@ -85,7 +86,7 @@ class Alias(ActorBase):
 		verbose_name_plural = 'aliases'
 
 VIDEO_SORT_OPTIONS = ['release_date' ,'date_added' ,'title' , 'poster', 'length', 'resolution', 'size', 'actor_num', 'tag_num', 'bitrate', 'image_num']
-#tracking view count would be ideal
+
 class Video(models.Model):
 	title = models.CharField(max_length=75)
 	date_added = models.DateTimeField(auto_now_add=True)
