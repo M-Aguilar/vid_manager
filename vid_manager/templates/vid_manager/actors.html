@@ -1,5 +1,4 @@
 {% extends "vid_manager/base.html" %}
-<!--CSSLINE{% load static %}-->
 {% load bootstrap4 %}
 
 {% block title %}Actors{% endblock %}
@@ -124,7 +123,6 @@
 			url: "{% url 'new_actor' %}",
 			data: serializedData,
 			success: function (response) {
-				//TODO make messages disappear if there are more than one. or allow to remove with 'X'
 				$("#actor_form").trigger('reset');
 				$("#id_first_name").focus();
 				var instance = JSON.parse(response["instance"]);
@@ -133,7 +131,7 @@
 				var new_url = "{% url 'actor' 0 %}".replace('0', pk);
 				$('.messages').empty();
 				$('.messages').prepend(`<div class="rounded p-2 mb-3 bg-success">Actor "${fields['first_name']} ${fields['last_name']}"has been added.</div>`);
-				$("#actors .actorrow").prepend(`<div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 ml-auto"><a href="${new_url}" ><div class="preview"><img src="{% static 'vid_manager/blank_image.png'%}" height="auto" width="100%" alt="" class="mx-auto">
+				$("#actors .row").prepend(`<div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 ml-auto"><a href="${new_url}" ><div class="preview"><img src="{% static 'vid_manager/blank_image.png'%}" height="auto" width="100%" alt="" class="mx-auto">
 					<div class="top-left">${fields['first_name']} ${fields['last_name']}</div></div></a></div>`);
 			},
 			error: function (response) {
