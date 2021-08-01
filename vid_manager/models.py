@@ -106,6 +106,7 @@ class Video(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'videos'
+		ordering = ['title']
 
 	def __str__(self):
 		return self.title
