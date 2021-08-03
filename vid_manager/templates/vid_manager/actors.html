@@ -20,6 +20,7 @@
     		{% endfor %}
   		</div>
   	</div>
+	{% if request.user.is_authenticated %}
 	<div class="collapse" id="add_user">
 		<div class="card-body"> 
 		{% buttons %}
@@ -33,6 +34,7 @@
 		{% endbuttons %}
 		</div>
 	</div>
+	{% endif %}
 	<div class="messages">
 	{% if messages %}
     	{% for message in messages %}
