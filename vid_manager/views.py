@@ -23,6 +23,8 @@ from itertools import chain
 
 from time import time
 
+import plotly.graph_objects as go
+
 from pymediainfo import MediaInfo
 import subprocess
 
@@ -251,15 +253,83 @@ def scan(actor):
 
 #Empty Home page
 def index(request):
-	total, count, tot_length, image_count, actor_count = 0, 0, 0, 0, 0
+	total, count, tot_length, image_count, actor_count, graphs = 0, 0, 0, 0, 0, {}
 	if request.user.is_authenticated and request.user.projector.admin and Video.objects.filter(owner_id=request.user.id).count() > 0:
 		vids = Video.objects.filter(owner=request.user)
 		total = str(round((vids.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
-		count = vids.count()	
+		count, image_count, actor_count = vids.count(), Image.objects.all().count(), Actor.objects.all().count()
 		tot_length = vids.aggregate(Sum('length'))['length__sum']
-		image_count = Image.objects.all().count()
-		actor_count = Actor.objects.all().count()
-	context = {'total':total, 'count': count, 'tot_length': tot_length, 'image_count': image_count, 'actor_count': actor_count}
+		res_labels, res_values = [], []
+		colors = ['cyan', 'teal', 'royalblue','darkblue', 'grey']
+		
+		#Res Pie Graph
+		reses = Video.objects.order_by('height').values('height').distinct()
+		for i in reses:
+			res_labels.append("<a href='videos?res={0}'>{0}p</a>".format(i['height']))
+			res_values.append(Video.objects.filter(height=i['height']).count())
+		fig = go.Figure(
+			data=[go.Pie(labels=res_labels, 
+						values=res_values, 
+						textinfo='label+percent', 
+						insidetextorientation='radial',
+						marker=dict(colors=colors, line=dict(color='#000000', width=2)))])
+		fig.update_layout(
+		title={
+			'text': "Video Resolutions",
+			'y':0.9,
+			'x':0.5,
+			'xanchor': 'center',
+			'yanchor': 'top'})
+		res_graph = fig.to_html(full_html=False, default_height=500)
+		graphs['res_graph'] = res_graph
+		
+		#Actor Bar Graph
+		actor_labels, v_720, v_1080, v_1440, v_2160, max_bar_values = [], [], [], [], [], 10
+		actors = Actor.objects.annotate(video_num=Count('videos')).filter(video_num__gt=0).order_by('-video_num')[:max_bar_values]
+		for a in actors:
+			if len(actor_labels) < max_bar_values:
+				actor_labels.append("<a href='actor/{1}'>{0}</a>".format(a.full_name, a.id))
+				v_720.append(a.videos.filter(height=720).count())
+				v_1440.append(a.videos.filter(height=1440).count())
+				v_1080.append(a.videos.filter(height=1080).count())
+				v_2160.append(a.videos.filter(height=2160).count())
+			else:
+				break
+		fig2 = go.Figure(data=[
+			go.Bar(name="720p", x=actor_labels, y=v_720, marker=dict(color=colors[0], line=dict(color='#000000', width=2))),
+			go.Bar(name="1080p", x=actor_labels, y=v_1080, marker=dict(color=colors[1], line=dict(color='#000000', width=2))),
+			go.Bar(name="1440p", x=actor_labels, y=v_1440, marker=dict(color=colors[2], line=dict(color='#000000', width=2))),
+			go.Bar(name="2160p", x=actor_labels, y=v_2160, marker=dict(color=colors[3], line=dict(color='#000000', width=2)))
+			])
+		fig2.update_layout(
+		barmode = "stack",
+		title={
+			'text': "Top {0} Actor Video Count".format(max_bar_values),
+			'y':0.9,
+			'x':0.5,
+			'xanchor': 'center',
+			'yanchor': 'top'})
+		act_graph = fig2.to_html(full_html=False, default_height=500)
+		graphs['act_graph'] = act_graph
+
+		#Tag Bar Graph
+		tag_labels, tag_values = [], []
+		tags = Tag.objects.annotate(video_num=Count('videos')).filter(video_num__gt=0).order_by('-video_num')[:max_bar_values]
+		for tag in tags:
+			tag_labels.append("<a href='tag/{0}'>{1}</a>".format(tag.id, tag))
+			tag_values.append(tag.videos.count())
+		fig3 = go.Figure(data=[go.Bar(x=tag_labels, y=tag_values, marker=dict(color=colors, line=dict(color='#000000', width=2)))])
+		fig3.update_layout(
+		title={
+			'text': "Top {0} Tag Video Count".format(max_bar_values),
+			'y':0.9,
+			'x':0.5,
+			'xanchor': 'center',
+			'yanchor': 'top'})
+		tag_graph = fig3.to_html(full_html=False, default_height=500)
+		graphs['tag_graph'] = tag_graph
+	context = {'total':total, 'count': count, 'tot_length': tot_length, 'image_count': image_count,
+	 			'actor_count': actor_count, 'graphs': graphs}
 	return render(request, 'vid_manager/index.html', context)
 
 @login_required
@@ -303,7 +373,7 @@ def videos(request):
 
 #Handles multiple filter inputs and returns a filtered and sorted list. 
 def fine_filter(user, sort, tag=None, actor=None,res=None):
-	reses = {'ALL':0 , 'HD':720, '1080P':1080,'4K':2160,'UHD':2160,'2K':1440,'1440p':1440,'2160p':2160,'2k':1440,'4k':2160, '1080p':1080}
+	reses = {'ALL':0 , 'HD':720, '1080P':1080,'4K':2160,'UHD':2160,'2K':1440,'1440p':1440,'2160p':2160,'2k':1440,'4k':2160, '1080p':1080,'1080':1080,'720':720, '2160':2160, '1440':1440}
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
 	if not res or res not in reses.keys():

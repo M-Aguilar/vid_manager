@@ -41,7 +41,25 @@
 		{% else %}
 			<h2>Hello. Not much to do here.</h2>
 		{% endif %}
-
+		{% if graphs %}
+		<div>
+			<div>
+			{{ graphs.res_graph|safe }}
+			</div>
+		</div>
+		<div>
+			{{ graphs.act_graph|safe }}
+		</div>
+		<div>
+			{{ graphs.tag_graph|safe }}
+		</div>
+		{% endif %}
+		<style>
+		.js-plotly-plot .plotly svg a {
+			color:black;
+			fill:black;
+		}
+		</style>
 	{% else %}
 	<div class="text-dark">
 		<h2>Please <a href="{% url 'login' %}">login</a> or <a href="{% url 'register' %}">register</a></h2>
