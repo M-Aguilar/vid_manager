@@ -259,14 +259,16 @@ def index(request):
 		total = str(round((vids.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
 		count, image_count, actor_count = vids.count(), Image.objects.all().count(), Actor.objects.all().count()
 		tot_length = vids.aggregate(Sum('length'))['length__sum']
-		res_labels, res_values = [], []
+		res_labels, res_values, res_size_labels, res_size_values = [], [], [], []
 		colors = ['cyan', 'teal', 'royalblue','darkblue', 'grey']
 		
 		#Res Pie Graph
-		reses = Video.objects.order_by('height').values('height').distinct()
+		reses = vids.order_by('height').values('height').distinct()
 		for i in reses:
 			res_labels.append("<a href='videos?res={0}'>{0}p</a>".format(i['height']))
-			res_values.append(Video.objects.filter(height=i['height']).count())
+			res_values.append(vids.filter(height=i['height']).count())
+			res_size_labels.append("<a href='videos?res={0}'>{0}p</a>".format(i['height']))
+			res_size_values.append(round((vids.filter(height=i['height']).aggregate(Sum('size'))['size__sum'] * 0.000000001),2))
 		fig = go.Figure(
 			data=[go.Pie(labels=res_labels, 
 						values=res_values, 
@@ -275,7 +277,7 @@ def index(request):
 						marker=dict(colors=colors, line=dict(color='#000000', width=2)))])
 		fig.update_layout(
 		title={
-			'text': "Video Resolutions",
+			'text': "Video Totals by Resolution",
 			'y':0.9,
 			'x':0.5,
 			'xanchor': 'center',
@@ -283,6 +285,23 @@ def index(request):
 		res_graph = fig.to_html(full_html=False, default_height=500)
 		graphs['res_graph'] = res_graph
 		
+		#Res Total Storage Graph
+		fig1 = go.Figure(
+			data=[go.Pie(labels=res_size_labels, 
+						values=res_size_values, 
+						textinfo='label+percent', 
+						insidetextorientation='radial',
+						marker=dict(colors=colors, line=dict(color='#000000', width=2)))])
+		fig1.update_layout(
+		title={
+			'text': "Video Resolution Storage Totals in GB",
+			'y':0.9,
+			'x':0.5,
+			'xanchor': 'center',
+			'yanchor': 'top'})
+		res_graph_1 = fig1.to_html(full_html=False, default_height=500)
+		graphs['res_graph_1'] = res_graph_1
+
 		#Actor Bar Graph
 		actor_labels, v_720, v_1080, v_1440, v_2160, max_bar_values = [], [], [], [], [], 10
 		actors = Actor.objects.annotate(video_num=Count('videos')).filter(video_num__gt=0).order_by('-video_num')[:max_bar_values]
