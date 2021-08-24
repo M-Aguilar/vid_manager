@@ -91,7 +91,7 @@
 			{% endfor %}
 		</div>
 	</div>
-	<h2>Recently Added <a href="{% url 'videos' %}?actors={{actor}}">Videos ({{ actor.videos.all.count }})</a></h2>
+	<h2>Recently Added <a href="{% url 'videos' %}?actor={{actor}}">Videos ({{ actor.videos.all.count }})</a></h2>
 	<div class="d-inline-block">
 		<div class='row'>
 			{% for video in videos %}
