@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from math import floor
 
 def user_directory_path(instance, filename):
 	try:
