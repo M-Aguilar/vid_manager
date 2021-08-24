@@ -6,7 +6,9 @@
 {% block header %}
 <div>
 	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
-		<h2>{{ actor }} {% for alias in actor.aliases %}/{{alias}}{% empty %}{% endfor %}</h2>
+		<h2>{{ actor }} {% for alias in actor.aliases %}/{{alias}}{% empty %}{% endfor %} 
+		<a class="text-light float-right mr-2" href="{% url 'random_video' %}?actor={{actor}}"><i class="glyphicon glyphicon-random"></i></<i></a>
+		</h2>
 	</div>
 	<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">

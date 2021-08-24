@@ -364,7 +364,7 @@ def video(request, video_id):
 @login_required
 def videos(request):
 	tags = request.GET.getlist('tag')
-	actors = request.GET.getlist('actors')
+	actors = request.GET.getlist('actor')
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
 	video_sort = VIDEO_SORT_OPTIONS
@@ -549,8 +549,20 @@ def delete_video(request, video_id):
 #random video
 @login_required
 def random_video(request):
-    video = Video.objects.all().order_by("?").first()
-    return HttpResponseRedirect(reverse('video', args=[video.id]))
+	tag = request.GET.get('tag')
+	actor = request.GET.get('actor')
+	video = None
+	if actor:
+		name = actor.split()
+		if len(name) > 1:
+			video = Video.objects.filter(actors__first_name=name[0], actors__last_name=name[1:]).order_by("?").first()
+		else:
+			video = Video.objects.filter(actors__first_name=name[0]).order_by("?").first()
+	elif tag:
+		video = Video.objects.filter(tags__tag_name=tag).order_by("?").first()
+	if not video:
+		video = Video.objects.all().order_by("?").first()
+	return HttpResponseRedirect(reverse('video', args=[video.id]))
 
 #========================    TAGS     ==========================
 
