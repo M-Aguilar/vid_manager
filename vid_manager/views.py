@@ -555,7 +555,7 @@ def random_video(request):
 	if actor:
 		name = actor.split()
 		if len(name) > 1:
-			video = Video.objects.filter(actors__first_name=name[0], actors__last_name=name[1:]).order_by("?").first()
+			video = Video.objects.filter(Q(actors__first_name=name[0]) & Q(actors__last_name=' '.join(name[1:]))).order_by("?").first()
 		else:
 			video = Video.objects.filter(actors__first_name=name[0]).order_by("?").first()
 	elif tag:
