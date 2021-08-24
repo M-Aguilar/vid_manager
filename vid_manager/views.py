@@ -304,7 +304,7 @@ def index(request):
 
 		#Actor Bar Graph
 		actor_labels, v_720, v_1080, v_1440, v_2160, max_bar_values = [], [], [], [], [], 10
-		actors = Actor.objects.annotate(video_num=Count('videos')).filter(video_num__gt=0).order_by('-video_num')[:max_bar_values]
+		actors = Actor.objects.filter(videos__in=vids).annotate(video_num=Count('videos')).filter(video_num__gt=0).order_by('-video_num')[:max_bar_values]
 		for a in actors:
 			if len(actor_labels) < max_bar_values:
 				actor_labels.append("<a href='actor/{1}'>{0}</a>".format(a.full_name, a.id))
@@ -333,7 +333,7 @@ def index(request):
 
 		#Tag Bar Graph
 		tag_labels, tag_values = [], []
-		tags = Tag.objects.annotate(video_num=Count('videos')).filter(video_num__gt=0).order_by('-video_num')[:max_bar_values]
+		tags = Tag.objects.filter(videos__in=vids).annotate(video_num=Count('videos')).filter(video_num__gt=0).order_by('-video_num')[:max_bar_values]
 		for tag in tags:
 			tag_labels.append("<a href='tag/{0}'>{1}</a>".format(tag.id, tag))
 			tag_values.append(tag.videos.count())
@@ -371,14 +371,7 @@ def videos(request):
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
 	if request.user.is_authenticated and request.user.projector.admin:
-		if 'actor_num' in sort:
-			videos = Video.objects.annotate(actor_num=Count('actors')).order_by(sort)
-		elif 'tag_num' in sort:
-			videos = Video.objects.annotate(tag_num=Count('tags')).order_by(sort)
-		elif 'image_num' in sort:
-			videos = Video.objects.annotate(image_num=Count('image')).order_by(sort)
-		else:
-			videos = fine_filter(request.user, sort, tags, actors, res)
+		videos = fine_filter(request.user, sort, tags, actors, res)
 	else:
 		if 'actor_num' in sort:
 			videos = Video.objects.annotate(actor_num=Count('actors')).filter(public=True).order_by(sort)
@@ -392,28 +385,75 @@ def videos(request):
 
 #Handles multiple filter inputs and returns a filtered and sorted list. 
 def fine_filter(user, sort, tag=None, actor=None,res=None):
-	reses = {'ALL':0 , 'HD':720, '1080P':1080,'4K':2160,'UHD':2160,'2K':1440,'1440p':1440,'2160p':2160,'2k':1440,'4k':2160, '1080p':1080,'1080':1080,'720':720, '2160':2160, '1440':1440}
+	#TODO Needs to be reworked. The int resolution (1080, 2160) should be the standard reference and there can be various calls to that. (4k, 2160, 2160p)
+	#Remove clutter
+	#Could introduce the use of "<" and ">" for gt or lt. test "<=" and ">=" for lte and gte
+	#Pulled Owner
+	videos = Video.objects.filter(owner=user)
+	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
-	if not res or res not in reses.keys():
-		res = 'ALL'
-	if tag and actor:
-		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(actors__first_name__icontains=actor) & Q(height__gte=reses[res]),owner=user).order_by(sort)
-	elif tag:
-		videos = Video.objects.filter(Q(tags__tag_name__icontains=tag) & Q(height__gte=reses[res]), owner=user).order_by(sort)
-	elif actor:
-		a = actor.split()
-		first_name = a[0]
-		last_name = ''
-		if len(a) > 1 :
-			last_name = ' '.join(a[1:])
-		if last_name:
-			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(actors__last_name__icontains=last_name) & Q(height__gte=reses[res]), owner=user).order_by(sort)
+	if actor:
+		videos = videos.filter(Q(actors__first_name__icontains=actor.first_name) & Q(actors__last_name__icontains=actor.last_name))
+	if tag:
+		videos = videos.filter(Q(tags__tag_name=tag))
+	#This is getting close to satisfactory.
+	#The outlier is input that is not an integer when split by '<=' '<' '>' '>='
+	#Need to handle reses values
+	if res:
+		sym,r = None, 0
+		if 'p' in res or 'P' in res:
+			res = res.lower().split('p')[0]
+		if '<=' in res:
+			sym = '<='
+		elif '>=' in res:
+			sym = '>='
+		elif '<' in res:
+			sym = "<"	
+		elif '>' in res:
+			sym = '>'
+		if sym:
+			res = res_helper(sym, res, reses)
+		try:
+			r = int(res)
+		except ValueError:
+			pass
+		if not isinstance(r, int):
+			videos = videos.filter(Q(height__gte=0))
+		#Did it for this one. Need to modularize and implement
+		elif sym == '<=':
+			videos = videos.filter(Q(height__lte=r))
+		elif sym == '>=':
+			videos = videos.filter(Q(height__gte=r))
+		elif sym == '<':
+			videos = videos.filter(Q(height__lt=r))		
+		elif sym == '>':
+			videos = videos.filter(Q(height__gt=r))
 		else:
-			videos = Video.objects.filter(Q(actors__first_name__icontains=first_name) & Q(height__gte=reses[res]), owner=user).order_by(sort)
-	else:
-		videos = Video.objects.filter(height__gte=reses[res],owner=user).order_by(sort)
+			videos = videos.filter(Q(height=res))
+
+	#Order By
+	if 'actor_num' in sort:
+		videos = videos.annotate(actor_num=Count('actors')).order_by(sort)
+	elif 'tag_num' in sort:
+		videos = videos.annotate(tag_num=Count('tags')).order_by(sort)
+	elif 'image_num' in sort:
+		videos = videos.annotate(image_num=Count('image')).order_by(sort)
+	else: 
+		videos = videos.order_by(sort)
 	return videos
+
+def res_helper(sym, res, reses):
+	r = res.split(sym)[1]
+	found = [True for x in reses.values() if r.upper() in x]
+	if found:
+		r = get_keys_from_value(reses, r.upper())
+		return r[0]
+	return r
+
+def get_keys_from_value(d, val):
+	print("GetKV d: {0} val: {1}".format(d, val))
+	return [k for k, v in d.items() if val in v]
 
 #Takes POST and creates Video or provides empty VideoForm
 @login_required
