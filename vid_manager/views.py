@@ -363,8 +363,8 @@ def video(request, video_id):
 #Paginated videos. Allows for sorting. filtering by resolution, tag, and actor.
 @login_required
 def videos(request):
-	tags = request.GET.get('tag')
-	actors = request.GET.get('actors')
+	tags = request.GET.getlist('tag')
+	actors = request.GET.getlist('actors')
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
 	video_sort = VIDEO_SORT_OPTIONS
@@ -384,22 +384,22 @@ def videos(request):
 	return render(request, 'vid_manager/videos.html', context)
 
 #Handles multiple filter inputs and returns a filtered and sorted list. 
-def fine_filter(user, sort, tag=None, actor=None,res=None):
-	#TODO Needs to be reworked. The int resolution (1080, 2160) should be the standard reference and there can be various calls to that. (4k, 2160, 2160p)
-	#Remove clutter
-	#Could introduce the use of "<" and ">" for gt or lt. test "<=" and ">=" for lte and gte
-	#Pulled Owner
+def fine_filter(user, sort, tags=None, actors=None, res=None):
 	videos = Video.objects.filter(owner=user)
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
-	if actor:
-		videos = videos.filter(Q(actors__first_name__icontains=actor.first_name) & Q(actors__last_name__icontains=actor.last_name))
-	if tag:
-		videos = videos.filter(Q(tags__tag_name=tag))
-	#This is getting close to satisfactory.
-	#The outlier is input that is not an integer when split by '<=' '<' '>' '>='
-	#Need to handle reses values
+	#Hanlde multiple actors separated by +
+	if actors:
+		for a in actors:
+			name = a.split()
+			if len(name) > 1:
+				videos = videos.filter(Q(actors__first_name__icontains=name[0]) & Q(actors__last_name__icontains=name[-1]))
+			else:
+				videos = videos.filter(Q(actors__first_name__icontains=name[0]))
+	if tags:
+		for t in tags:
+			videos = videos.filter(Q(tags__tag_name=t))
 	if res:
 		sym,r = None, 0
 		if 'p' in res or 'P' in res:
