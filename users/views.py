@@ -6,6 +6,7 @@ from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 
 from vid_manager.models import Projector
+from vid_manager.views import new_actor_count
 from django.db.models import Count
 from .models import User
 from .forms import NameForm
@@ -28,7 +29,7 @@ def edit_account(request, username):
 
 def account(request, username):
 	user = User.objects.get(username=username)
-	context = {'user':user}
+	context = {'user':user, 'new_actors': new_actor_count()}
 	return render(request, 'users/account.html', context)
 
 @login_required
