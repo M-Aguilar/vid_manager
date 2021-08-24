@@ -8,15 +8,17 @@
 
 {% block content %}
 {% if object_list.q %}
-<div class="jumbotron pt-4 pb-4">
-  <div class="d-inline-block w-100">
-    <h2 class="display-4 text-center d-block">
-        Search results for <p name='q'>"{{ object_list.q }}"</p>
-    </h2>
-  </div>
+<div class="container">
+    <div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
+        <div class="d-inline-block w-100">
+            <h2 class="display-4 text-center d-block">
+                Search results for <p name='q'>"{{ object_list.q }}"</p>
+            </h2>
+        </div>
+    </div>
 </div>
 <div class="container">
-    <div>
+    <div class="mt-4">
         <div class="d-inline">
             <p class="float-right">{{ object_list.total }} results found.</p>
             <span class="current">
