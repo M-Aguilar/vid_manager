@@ -7,8 +7,21 @@
 	<div class="jumbotron bg-dark text-light display-4 mt-5 pb-3 pt-1 mb-3 text-center">
 		<h2>Edit Video</h2>
 	</div>
-	<div>Date Added: {{ video.date_added }}</div>
-	<div>Bitrate: {{ video.bitrate }}</div>
+	{% load bit_format %}
+	<h4>Video Info</h4>
+	<div class="row">
+		<div class="col-6 col-md-3 col-lg-2">Date Added: {{ video.date_added }}</div>
+		<div class="col-6 col-md-3 col-lg-2">Release Date: {{ video.release_date }}</div>
+		<div class="col-6 col-md-3 col-lg-2">Bitrate: {{ video.bitrate }} ({{ video.bitrate|bit_rate }})</div>
+		<div class="col-6 col-md-3 col-lg-2">Size: {{ video.size }} ({{ video.size|bit_size }})</div>		
+		<div class="col-6 col-md-3 col-lg-2">Length: {{ video.length|time }}</div>
+		<div class="col-6 col-md-3 col-lg-2">Images: {{ video.image_set.count }}</div>
+		<div class="col-6 col-md-3 col-lg-2">Events: {{ video.event_set.count }}</div>
+		<div class="col-6 col-md-3 col-lg-2">Actor #: {{ video.actors.count }}</div>
+		<div class="col-6 col-md-3 col-lg-2">Tag #: {{ video.tags.count }}</div>
+		<div class="col-6 col-md-3 col-lg-2">Width: {{ video.width }}</div>
+		<div class="col-6 col-md-3 col-lg-2">Height: {{ video.height }}</div>
+	</div>
 {% endblock %}
 
 {% block content %}
@@ -33,8 +46,21 @@
 		</form>
 	</div>
 </div>
+<div class="d-flex row mx-4">
+	{% for event in video.event_set.all %}
+	<div class="col-4 col-md-2 p-0">
+		<div class="card mx-1">
+			<div class="card-header">
+				{{ event }} - {{ event.time }}	
+			</div>
+			<div class="card-body p-0">
+				<img src="{{ event.url }}" width="100%" alt='No image'>
+			</div>
+		</div>
+	</div>
+	{% endfor %}
+</div>
 <div class="d-flex row mx-1">
-{% load bit_format %}
 {% for image in video.image_set.all %}
 	<div class="col-4 col-md-2 p-0">
 		<div class="card mx-1">
