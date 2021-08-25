@@ -147,5 +147,7 @@ class Event(models.Model):
 	def time(self):
 		return '{0:.2g}'.format(floor(self.seconds/60)) + ':' + '{:02.0f}'.format(self.seconds%60)
 
+	def __str__(self):
+		return self.name
 	class Meta:
 		verbose_name_plural = 'events'
