@@ -61,6 +61,12 @@ class SearchResultsView(ListView):
 	def get_queryset(self):
     	#searches for query
 		query = self.request.GET.get('q').strip()
+		'''
+		If the length of the query is less than 3 there is a chance that it is the name of an actor. 
+		Using the exists on video title, tag name, and actor name allows to return an exact match. 
+		When an exact match is not found then there should be a more thorough search bringing relavent actors, tags, and videos. 
+		'''
+		print(len(query.split()))
 		actors = self.checkActor(query)
 		tags = self.checkTag(query)
 		if self.request.user.is_authenticated and query not in ['', None]:
@@ -211,7 +217,9 @@ def new_actor_count():
 	exceptions = settings.EXCEPTIONS
 	form=VideoForm()
 	choices = form.fields['file_path'].choices
-	actors = [x.full_name for x in Actor.objects.all()]
+	actors = []
+	for x in Actor.objects.all():
+		actors = actors + x.all_names
 	new_actors = [x[0].split('/')[-2] for x in choices if x[0].split('/')[-2] not in exceptions and x[0].split('/')[-2] not in actors]
 	act_list = []
 	for i in new_actors:
