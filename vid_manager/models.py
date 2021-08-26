@@ -73,6 +73,12 @@ class Actor(ActorBase):
 			return False
 
 	@property
+	def all_names(self):
+		name = self.full_name
+		aliases = [x.full_name for x in self.aliases]
+		return [name] + aliases
+
+	@property
 	def aliases(self):
 		return Alias.objects.filter(actor=self.id)
 	
