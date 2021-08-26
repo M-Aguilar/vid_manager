@@ -13,8 +13,8 @@ def capture(full_path, milli):
     out = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=width,height', '-of', 'csv=p=0:s=x', full_path])
     out = out.decode('ascii').rstrip()
     dem = out.split('x')
-    hidden = full_path[:full_path.index(filename)] + '.' + filename[:filename.index('.mp4')] + '/'
-    if '.' + filename[:filename.index('.mp4')] not in os.listdir(full_path[:full_path.index(filename)]):
+    hidden = '{0}.{1}/'.format(full_path[:full_path.index(filename)], filename[:filename.index('.mp4')])
+    if '.{0}'.format(filename[:filename.index('.mp4')]) not in os.listdir(full_path[:full_path.index(filename)]):
         subprocess.Popen(['mkdir', hidden])
     time = convert_secs(milli)
     name = '{0}{1}.png'.format('img_',str(milli))
