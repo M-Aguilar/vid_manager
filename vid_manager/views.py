@@ -935,3 +935,14 @@ def new_event(request,video_id):
 			messages.error(request, 'Something went wrong. Form invalid')
 	return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
+def delete_event(request, event_id):
+	event = get_object_or_404(Event, id=event_id)
+	if request.is_ajax and request.user.projector.admin and event.video.owner == request.user:
+		temp_event = event
+		pk = event.id
+		event.delete()
+		instance = temp_event
+		instance.pk = pk
+		return JsonResponse({'instance':serializers.serialize('json',[instance,])}, status=200)
+	else:
+		return JsonResponse({"error":""}, status=400)
