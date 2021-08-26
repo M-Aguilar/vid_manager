@@ -61,12 +61,6 @@ class SearchResultsView(ListView):
 	def get_queryset(self):
     	#searches for query
 		query = self.request.GET.get('q').strip()
-		'''
-		If the length of the query is less than 3 there is a chance that it is the name of an actor. 
-		Using the exists on video title, tag name, and actor name allows to return an exact match. 
-		When an exact match is not found then there should be a more thorough search bringing relavent actors, tags, and videos. 
-		'''
-		print(len(query.split()))
 		actors = self.checkActor(query)
 		tags = self.checkTag(query)
 		if self.request.user.is_authenticated and query not in ['', None]:
