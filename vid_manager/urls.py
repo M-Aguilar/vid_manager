@@ -55,6 +55,5 @@ urlpatterns = [
 
 	#Events
 	path('new_event/<video_id>',views.new_event,name='new_event'),
-
-	#TODO: Delete Event.
+	path('delete_event/<event_id>', views.delete_event, name='delete_event'),
 ]
