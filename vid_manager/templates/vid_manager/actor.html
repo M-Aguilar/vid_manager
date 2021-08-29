@@ -76,7 +76,7 @@
 		<div>Last Name: {{ actor.last_name }}</div>
 	</div>
 	<div>
-		<h2><a href="{% url 'images' %}?actors={{actor}}">Images ({{ actor.actor_images.all.count }})</a>
+		<h2><a href="{% url 'images' %}?actor={{actor}}">Images ({{ actor.actor_images.all.count }})</a>
 	</div>
 	<div class="w-100 d-inline-block overflow-hidden pl-5">
 		<div class="row d-block overflow-auto text-center" style="white-space: nowrap;">

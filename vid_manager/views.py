@@ -779,56 +779,39 @@ def image(request, image_id):
 	context = {'image':image,'actors':actors, 'tagform': tag_form}
 	return render(request, 'vid_manager/image.html', context)
 
-#All Images
+#Returns all images sorted by -date_added or checks for filters/sorting inputs
 @login_required
 def images(request):
 	sort = request.GET.get('sort')
 	image_sort = ['actors', 'id', 'tags', 'video', 'video_id', 'tag_num', 'actor_num']
-	tags = request.GET.get('tags')
-	actors = request.GET.get('actors')
+	tags = request.GET.getlist('tag')
+	actors = request.GET.getlist('actor')
 	if not sort or sort.replace('-','') not in image_sort:
 		sort = '-id'
 	if request.user.is_authenticated and request.user.projector.admin:
-		images = None
+		images = Image.objects.filter(video__owner=request.user)
 		if actors:
-			all_actors = return_many(actors)
-			for actor in all_actors:
-				n = parse_name(actor)
-				images = Image.objects.filter(Q(actors__first_name__icontains=n[0]) | Q(actors__last_name__icontains=n[1]))
-		elif tags:
-			all_tags = return_many(tags)
+			for actor in actors:
+				a = actor.split()
+				if len(a) > 1:
+					images = images.filter(Q(actors__first_name=a[0]) & Q(actors__last_name=''.join(a[1:])))
+				else:
+					images = images.filter(Q(actors__first_name__icontains=a[0]))
+		if tags:
 			for tag in tags:
-				images = Image.objects.filter(tags__tag_name__icontains=tag)
-		else:
-			images = Image.objects.all()
+				images = images.filter(tags__tag_name__icontains=tag)
 	else:
 		raise Http404
 	if sort.replace('-','') == 'tag_num':
-		images = Image.objects.annotate(tag_num=Count('tags'))
+		images = images.annotate(tag_num=Count('tags'))
 	elif sort.replace('-','') == 'actor_num':
-		images = Image.objects.annotate(actor_num=Count('actors'))
+		images = images.annotate(actor_num=Count('actors'))
 	images = images.order_by(sort)
 	paginator = Paginator(images, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
 	context = {'images': page_o,'sort_options': image_sort, 'sort':sort,'actors':actors,'tags':tags}
 	return render(request,'vid_manager/images.html',context)
-
-#TODO Not necessary. '+' is not valid. instead use getlist and multiple tag= actor=
-def return_many(names):
-	if '+' in names:
-		all_names = names.split('+')
-	else:
-		all_names = [names]
-	return all_names
-
-def parse_name(full_name):
-	if ' ' in full_name:
-		all_names = full_name.split()
-		if len(all_names) > 2:
-			return (all_names[0], all_names[1:])
-		return (all_names[0], all_names[1])
-	return (full_name, ' ')
 
 @login_required
 def delete_images(request, video_id):
