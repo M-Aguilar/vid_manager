@@ -10,6 +10,7 @@ class VideoForm(forms.ModelForm):
 		widgets = {
 		'title': forms.TextInput(attrs={'placeholder':'Title','autofocus':'autofocus'}),
 		'release_date': forms.DateInput(attrs={'placeholder':'MM-DD-YYYY','format':'%m/%d/%Y'}),
+		'file_path': forms.Select(attrs={'class': 'form-control py-0'}),
 		}
 
 class AliasForm(forms.ModelForm):
