@@ -798,8 +798,7 @@ def images(request):
 		elif tags:
 			all_tags = return_many(tags)
 			for tag in tags:
-				n = parse_name(actor)
-				images = Image.objects.filter(tags__tag_name__icontains=tags)
+				images = Image.objects.filter(tags__tag_name__icontains=tag)
 		else:
 			images = Image.objects.all()
 	else:
@@ -815,6 +814,7 @@ def images(request):
 	context = {'images': page_o,'sort_options': image_sort, 'sort':sort,'actors':actors,'tags':tags}
 	return render(request,'vid_manager/images.html',context)
 
+#TODO Not necessary. '+' is not valid. instead use getlist and multiple tag= actor=
 def return_many(names):
 	if '+' in names:
 		all_names = names.split('+')
