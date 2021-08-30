@@ -103,7 +103,7 @@
 			{% endfor %}
 		</div>
 		{% if actor.videos.all.count > 6 %}
-		<div class="d-md-none d-block text-center"><a href="{% url 'videos' %}?actors={{actor}}" class="btn btn-dark">View More</a></div>
+		<div class="d-md-none d-block text-center"><a href="{% url 'videos' %}?actor={{actor}}" class="btn btn-dark">View More</a></div>
 		{% endif %}
 	</div>
 </div>
