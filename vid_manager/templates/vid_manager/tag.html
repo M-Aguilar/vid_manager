@@ -39,7 +39,7 @@
 			{% csrf_token %}
 			<input type="hidden" name="tag_id" value="{{ tag.id }}"/>
 			{% buttons %}
-			<button name='submit' class="btn btn-dark"><a class='text-light' href="{% url 'delete_tag' tag.id %}">Delete Tag</a></button>
+			<button name='submit' class="btn btn-dark"><a class='text-light' href="{% url 'delete_tag' tag.id %}"><i class=" glyphicon glyphicon-trash"></i></a></button>
 			{% endbuttons %}
 		</form>
 	</div>

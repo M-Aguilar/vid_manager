@@ -145,10 +145,10 @@
 		</div>
 	</div>
 	<div class="my-3">
-		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}">Edit Video</a>
-		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}">Add Image</a>
+		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}"><i class=" glyphicon glyphicon-edit"></i></a>
+		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}"><i class=" glyphicon glyphicon-picture"></i> <i class=" glyphicon glyphicon-plus"></i></a>
 		<a class='btn btn-dark mb-3' href="#add_event" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event">Add Event</a>
-		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole">Delete Video</a>
+		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i></a>
 		<div class="collapse" id="add_event">
 			<div class="card-body"> 
 				<form action="{% url 'new_event' video.id %}" method='post' class="form">

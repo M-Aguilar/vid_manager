@@ -38,10 +38,10 @@
 		{% csrf_token %}
 		{% bootstrap_form form %}
 		{% buttons %}
-			<button name="submit" class="btn btn-dark">save changes</button>
-			<a href="{{ video.path }}" class='btn btn-dark'>Video Source</a>
-			<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark">Add Image</a> 	
-			<a href="{% url 'delete_images' video.id %}" class="btn btn-dark">Delete Images</a>
+			<button name="submit" class="btn btn-dark"><i class="glyphicon glyphicon-floppy-disk"></i></button>
+			<a href="{{ video.path }}" class='btn btn-dark'><i class="glyphicon glyphicon-facetime-video"></i></a>
+			<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark"><i class="glyphicon glyphicon-picture"></i> <i class="glyphicon glyphicon-plus"></i></a> 	
+			<a href="{% url 'delete_images' video.id %}" class="btn btn-dark"><i class="glyphicon glyphicon-trash mr-1"></i> All Images</a>
 		{% endbuttons %}
 		</form>
 	</div>

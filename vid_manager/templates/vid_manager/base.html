@@ -33,14 +33,14 @@
 					<ul class="navbar-nav mt-2 mt-lg-0 md-float-right">
 						{% if user.is_authenticated %}
 						<li class="navitem"><h4><a class="nav-link py-0 d-md-none" href="{% url 'index' %}">VidM</a></h4></li>
-						<li class="navitem"><a class="nav-link" href="{% url  'videos' %}">Videos</a></li>
-						<li class="navitem"><a class="nav-link" href="{% url 'images' %}">Images</a></li>
-						<li class="navitem"><a class="nav-link" href="{% url 'tags' %}">Tags</a></li>
-						<li class="navitem"><a class="nav-link" href="{% url 'actors' %}">Actors</a></li>
-						<li class="navitem"><a class="nav-link" href="{% url 'account' user.username %}" >Settings</a></li>
-						<li class="navitem"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url  'videos' %}"><i class="glyphicon glyphicon-film"></i><p class="d-md-none float-right">Videos</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'images' %}"><i class="glyphicon glyphicon-picture"></i><p class="d-md-none float-right">Images</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'tags' %}"><i class="glyphicon glyphicon-tags"></i><p class="d-md-none float-right">Tags</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'actors' %}"><i class="glyphicon glyphicon-user"></i><p class="d-md-none float-right">Actors</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'account' user.username %}" ><i class="glyphicon glyphicon-cog"></i><p class="d-md-none float-right">Settings</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'logout' %}"><i class="glyphicon glyphicon-log-out"></i><p class="d-md-none float-right">Logout</p></a></li>
 						{% else %}
-						<li class="navitem"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
 						<li class="navitem"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
 						{% endif %}
 						<li class="nav-item m-md-3 search">
@@ -94,6 +94,10 @@
 		div.search-b button {
 			border-radius: 0 15px 15px 0;
 			border-color:var(--blank);
+		}
+
+		.navitem i.glyphicon, .navitem p {
+				font-size: 20px;
 		}
 	</style>
 	<script type="text/javascript" src="{% static 'vid_manager/search.js' %}"></script>

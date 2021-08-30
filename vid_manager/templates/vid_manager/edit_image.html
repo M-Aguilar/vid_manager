@@ -20,7 +20,7 @@
 		{% csrf_token %}
 		{% bootstrap_form form %}
 		{% buttons %}
-			<button name="submit" class="btn btn-dark">save changes</button>
+			<button name="submit" class="btn btn-dark"><i class="glyphicon glyphicon-floppy-disk"></i></button>
 		{% endbuttons %}	
 		</form>
 		{% if user.is_authenticated and user.projector.admin %} 
