@@ -102,7 +102,7 @@
 				No videos have been added yet.
 			{% endfor %}
 		</div>
-		{% if actor.videos.all.count > 6 %}
+		{% if actor.videos.all.count > 8 %}
 		<div class="d-md-none d-block text-center"><a href="{% url 'videos' %}?actor={{actor}}" class="btn btn-dark">View More</a></div>
 		{% endif %}
 	</div>
