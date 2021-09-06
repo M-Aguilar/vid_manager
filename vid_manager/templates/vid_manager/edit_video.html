@@ -10,21 +10,40 @@
 	{% load bit_format %}
 	<h4>Video Info</h4>
 	<div class="row">
-		<div class="col-6 col-md-3 col-lg-2">Date Added: {{ video.date_added }}</div>
-		<div class="col-6 col-md-3 col-lg-2">Release Date: {{ video.release_date }}</div>
-		<div class="col-6 col-md-3 col-lg-2">Bitrate: {{ video.bitrate }} ({{ video.bitrate|bit_rate }})</div>
-		<div class="col-6 col-md-3 col-lg-2">Size: {{ video.size }} ({{ video.size|bit_size }})</div>		
-		<div class="col-6 col-md-3 col-lg-2">Length: {{ video.length|time }}</div>
-		<div class="col-6 col-md-3 col-lg-2">Images: {{ video.image_set.count }}</div>
-		<div class="col-6 col-md-3 col-lg-2">Events: {{ video.event_set.count }}</div>
-		<div class="col-6 col-md-3 col-lg-2">Actor #: {{ video.actors.count }}</div>
-		<div class="col-6 col-md-3 col-lg-2">Tag #: {{ video.tags.count }}</div>
-		<div class="col-6 col-md-3 col-lg-2">Width: {{ video.width }}</div>
-		<div class="col-6 col-md-3 col-lg-2">Height: {{ video.height }}</div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Date Added: {{ video.date_added }}</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Release Date: {{ video.release_date }}</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Bitrate: {{ video.bitrate }} ({{ video.bitrate|bit_rate }})</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Size: {{ video.size }} ({{ video.size|bit_size }})</p></div>		
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Length: {{ video.length|time }}</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Images: {{ video.image_set.count }}</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Events: {{ video.event_set.count }}</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Actor #: {{ video.actors.count }}</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Tag #: {{ video.tags.count }}</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Width: {{ video.width }}</p></div>
+		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Height: {{ video.height }}</p></div>
 	</div>
 {% endblock %}
 
 {% block content %}
+<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modelDeleteImages">Confirm</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Please confirm that you would like to remove this video.
+        	</div>
+        	<div class="modal-footer">
+        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+        		<a href="{% url 'delete_images' video.id %}"><button type="button" class="btn bg-danger">Confirm</button></a>
+        	</div>
+    	</div>
+	</div>
+</div>
 <div class="container">
 	<div class="messages mb-3">
 	{% if messages %}
@@ -41,7 +60,7 @@
 			<button name="submit" class="btn btn-dark"><i class="glyphicon glyphicon-floppy-disk"></i></button>
 			<a href="{{ video.path }}" class='btn btn-dark'><i class="glyphicon glyphicon-facetime-video"></i></a>
 			<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark"><i class="glyphicon glyphicon-picture"></i> <i class="glyphicon glyphicon-plus"></i></a> 	
-			<a href="{% url 'delete_images' video.id %}" class="btn btn-dark"><i class="glyphicon glyphicon-trash mr-1"></i> All Images</a>
+			<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i> All Images</a>
 		{% endbuttons %}
 		</form>
 	</div>
@@ -80,6 +99,14 @@
 {% endfor %}
 </div>
 {% load static %}
+<style>
+input#id_public.form-check-input {
+	left: 0px;
+}
+label.form-check-label {
+	margin-left: 5px;
+}
+</style>
 <script type="text/javascript" src="{% static 'vid_manager/edit_sort.js' %}"></script>
 <script>
 $(".eventrow").on('click', "a#delete_event", function (e) {
