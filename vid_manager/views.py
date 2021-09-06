@@ -363,7 +363,6 @@ def video(request, video_id):
 	return render(request, 'vid_manager/video.html', context)
 
 #Paginated videos. Allows for sorting. filtering by resolution, tag, and actor.
-@login_required
 def videos(request):
 	tags = request.GET.getlist('tag')
 	actors = request.GET.getlist('actor')
@@ -375,10 +374,7 @@ def videos(request):
 	if request.user.is_authenticated and request.user.projector.admin:
 		videos = fine_filter(request.user, sort, tags, actors, res)
 	else:
-		if 'actor_num' in sort:
-			videos = Video.objects.annotate(actor_num=Count('actors')).filter(public=True).order_by(sort)
-		else:
-			videos = Video.objects.filter(public=True).order_by(sort)
+		videos = fine_filter(None, sort, tags, actors, res)
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
@@ -387,7 +383,10 @@ def videos(request):
 
 #Handles multiple filter inputs and returns a filtered and sorted list. 
 def fine_filter(user, sort, tags=None, actors=None, res=None):
-	videos = Video.objects.filter(owner=user)
+	if user:
+		videos = Video.objects.filter(owner=user)
+	else:
+		videos = Video.objects.filter(public=True)
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
@@ -863,10 +862,11 @@ def edit_image(request, image_id):
 		if form.is_valid():
 			form.save()
 			ref = request.session.get('ref')
+			print(ref)
 			request.session['ref'] = None
-			if 'actor' in ref:
+			if ref and 'actor' in ref:
 				return HttpResponseRedirect(reverse('actor', args=[ref.split('/')[-1]]))
-			if 'video' in ref:
+			if ref and 'video' in ref:
 				return HttpResponseRedirect(reverse('video', args=[ref.split('/')[-1]]))
 			return HttpResponseRedirect(reverse('images'))
 	context = {'image': image,'form': form}

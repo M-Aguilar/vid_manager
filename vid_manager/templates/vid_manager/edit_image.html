@@ -10,25 +10,40 @@
 {% endblock %}
 
 {% block content %}
+<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalDeleteVideo">Confirm</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Please confirm that you would like to remove this image.
+        	</div>
+        	<div class="modal-footer">
+        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+        		<form action="{% url 'delete_image' image.id %}" method='post'>
+					{% csrf_token %}
+					<input type="submit" class="btn btn-dark" value="delete">
+				</form>
+        	</div>
+    	</div>
+	</div>
+</div>
 <div class="container">
 	<div>
 		Dimensions: W x H {{ image.image.width }} x {{ image.image.height }}
 		Size: {{ image.image.size }}
+		<button class="btn btn-dark float-right" data-toggle="modal" data-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i></button>
 	</div>
 	<div class="text-dark">
 		<form action="{% url 'edit_image' image.id %}" method='post' enctype="multipart/form-data">
 		{% csrf_token %}
 		{% bootstrap_form form %}
-		{% buttons %}
-			<button name="submit" class="btn btn-dark"><i class="glyphicon glyphicon-floppy-disk"></i></button>
-		{% endbuttons %}	
+			<button name="submit" class="btn btn-dark"><i class="glyphicon glyphicon-floppy-disk"></i></button>	
 		</form>
-		{% if user.is_authenticated and user.projector.admin %} 
-		<form action="{% url 'delete_image' image.id %}" method='post'>
-			{% csrf_token %}
-			<input type="submit" class="btn btn-dark" value="delete">
-		</form>
-        {% endif %}
 	</div>
 </div>
 {% load static %}
