@@ -364,8 +364,8 @@ def video(request, video_id):
 
 #Paginated videos. Allows for sorting. filtering by resolution, tag, and actor.
 def videos(request):
-	tags = request.GET.getlist('tag')
-	actors = request.GET.getlist('actor')
+	tags = list(dict.fromkeys(request.GET.getlist('tag')))
+	actors = list(dict.fromkeys(request.GET.getlist('actor')))
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
 	video_sort = VIDEO_SORT_OPTIONS
@@ -375,10 +375,11 @@ def videos(request):
 		videos = fine_filter(request.user, sort, tags, actors, res)
 	else:
 		videos = fine_filter(None, sort, tags, actors, res)
+	tt = top_tags(videos)
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
-	context = {'videos':page_o, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res}
+	context = {'videos':page_o, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res, 'top_tags': tt}
 	return render(request, 'vid_manager/videos.html', context)
 
 #Handles multiple filter inputs and returns a filtered and sorted list. 
@@ -603,6 +604,20 @@ def tags(request):
 	context = {'tags': page_o, 'new_tag_form': TagForm(),'sort_options':sort_options,'sort':sort}
 	return render(request, 'vid_manager/tags.html', context)
 
+#takes videos and returns the top tags limited by total.
+def top_tags(videos, total=None):
+	top_tags = {}
+	for video in videos:
+		for tag in video.tags.all():
+			if tag not in top_tags.keys():
+				top_tags[tag] = 1
+			else:
+				top_tags[tag] += 1
+	if total and isinstance(total, int):
+		return dict(sorted(top_tags.items(), key=lambda item: item[1], reverse=True)[:total])
+	else: 
+		return dict(sorted(top_tags.items(), key=lambda item: item[1], reverse=True))
+
 #Checks for permissions and deletes tag
 @login_required
 def delete_tag(request, tag_id):
@@ -705,15 +720,12 @@ def actor(request, actor_id):
 	else:
 		actor = get_object_or_404(Actor,id=actor_id)
 		new_videos = scan(actor)
-		images = Image.objects.filter(actors=actor)
-		videos= Video.objects.filter(actors=actor).order_by('-date_added')
+		images = Image.objects.filter(actors=actor)[:10]
+		videos = actor.videos.order_by('-date_added')
+		tt = top_tags(videos, 5)
 	data = {'actor':actor}
 	alias_form = AliasForm(initial=data)
-	context = {'actor':actor, 'videos': videos[:8], 'new_videos': len(new_videos), 'alias_form':alias_form}
-	if len(images) > 10:
-		context['images'] = images[:10]
-	else:
-		context['images'] = images
+	context = {'actor':actor, 'videos': videos[:8], 'new_videos': len(new_videos), 'alias_form':alias_form, 'images': images, 'top_tags': tt}
 	return render(request, 'vid_manager/actor.html', context)
 
 @login_required
