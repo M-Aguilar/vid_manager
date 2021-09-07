@@ -4,6 +4,7 @@
 
 {% block title %}Videos{% endblock %}
 {% block header %}
+<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
 <div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
 	<h2>{% if actors %}{% for actor in actors %}{{ actor }}{% endfor %}{% elif tags %}{% for tag in tags %}{{ tag }}{% endfor %}{% endif %} Videos: {{ videos.paginator.count }}</h3>
 </div>
@@ -68,7 +69,7 @@
 <div class="text-dark">
 	<div class="row mx-1">
 	{% for video in videos %}
-		{% include 'vid_manager/video_preview.html' %}
+		{% include 'vid_manager/videos_preview.html' %}
 	{% empty %}
 	<div class="container">
 		<div class="list-group-item">

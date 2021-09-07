@@ -16,9 +16,13 @@
 		</h2>
 	</div>
 	{% load static %}
+	<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
 	<style>
 		select#tag_form {
 			-webkit-appearance: none;
+		}
+		img.video_image {
+			height:300px;
 		}
 	</style>
 {% endblock %}
@@ -231,6 +235,15 @@
 		<div class='row d-block overflow-auto text-center' style="white-space: nowrap;">
 			{% for image in video.image_set.all %}
 			<a href="{% url 'image' image.id %}"><img src="{{ image.image.url }}" height="300px"></a>
+			{% empty %}
+			{% endfor %}
+		</div>
+	</div>
+	<h4>Related Videos</h4>
+	<div class="w-100 d-inline-block" height="300px">
+		<div class='overflow-auto text-center' style="white-space: nowrap;">
+			{% for video in related_vids %}
+				{% include "vid_manager/related_videos.html" %}
 			{% empty %}
 			{% endfor %}
 		</div>

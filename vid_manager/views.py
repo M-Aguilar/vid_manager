@@ -358,9 +358,22 @@ def video(request, video_id):
 	video = get_object_or_404(Video, id=video_id)
 	if video.owner != request.user and not video.public:
 		raise Http404
+	rel_vid = related_videos(video, 8)
 	eventform = EventForm(initial={'video':video})
-	context = {'video': video, 'eventform': eventform, 'tagform': TagForm()}
+	context = {'video': video, 'eventform': eventform, 'tagform': TagForm(), 'related_vids': rel_vid}
 	return render(request, 'vid_manager/video.html', context)
+
+def related_videos(video, total):
+	videos = Video.objects.none()
+	actors = video.actors.all()
+	for actor in actors:
+		videos = videos | actor.videos.filter(tags__in=video.tags.all()).exclude(id=video.id)
+	videos = videos.distinct()
+	if len(videos) < total:
+		for tag in video.tags.all():
+			videos = videos | tag.videos.filter(tags__in=video.tags.all()).distinct().exclude(id=video.id)
+	videos = videos.distinct()
+	return videos[:total]
 
 #Paginated videos. Allows for sorting. filtering by resolution, tag, and actor.
 def videos(request):

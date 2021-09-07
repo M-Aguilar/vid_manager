@@ -1,13 +1,10 @@
-<div class="mb-2 col-sm-6 col-md-4 col-xl-3 px-1">
-	<a href="{% url 'video' video.id %}">
-		<div class='preview'>
-			{% load bit_format %}
-			<img src="{% if video.poster %}{{ video.poster.url }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image" alt='No image'>
-			<div class="top-left">{{video}}</div>
-			<div class="top-right">{{video.height}}p</div>
-			<div class="bottom-right">{{video.length|time}}</div>
-			<div class="bottom-left">{{video.bitrate|bit_rate}} - {{video.size|bit_size}}</div>
-		</div>
-	</a>
-</div>
-<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
+<a href="{% url 'video' video.id %}">
+	<div class='preview'>
+		{% load bit_format %}
+		<img src="{% if video.poster %}{{ video.poster.url }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image" alt='No image'>
+		<div class="top-left">{{video}}</div>
+		<div class="top-right">{{video.height}}p</div>
+		<div class="bottom-right">{{video.length|time}}</div>
+		<div class="bottom-left">{{video.bitrate|bit_rate}} - {{video.size|bit_size}}</div>
+	</div>
+</a>
