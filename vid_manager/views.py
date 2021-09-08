@@ -388,7 +388,7 @@ def videos(request):
 		videos = fine_filter(request.user, sort, tags, actors, res)
 	else:
 		videos = fine_filter(None, sort, tags, actors, res)
-	tt = top_tags(videos)
+	tt = top_tags(videos, 20)
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
@@ -619,17 +619,11 @@ def tags(request):
 
 #takes videos and returns the top tags limited by total.
 def top_tags(videos, total=None):
-	top_tags = {}
-	for video in videos:
-		for tag in video.tags.all():
-			if tag not in top_tags.keys():
-				top_tags[tag] = 1
-			else:
-				top_tags[tag] += 1
+	top_tags = Tag.objects.annotate(video_num=Count('videos')).filter(videos__in=videos).order_by('video_num')
 	if total and isinstance(total, int):
-		return dict(sorted(top_tags.items(), key=lambda item: item[1], reverse=True)[:total])
+		return top_tags[:total]
 	else: 
-		return dict(sorted(top_tags.items(), key=lambda item: item[1], reverse=True))
+		return top_tags
 
 #Checks for permissions and deletes tag
 @login_required

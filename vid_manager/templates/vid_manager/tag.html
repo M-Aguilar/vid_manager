@@ -4,12 +4,14 @@
 {% block title %}{{tag}}{% endblock %}
 
 {% block header %}
-	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
-		<h2>{{ tag }}<a class="text-light float-right mr-2" href="{% url 'random_video' %}?tag={{tag}}"><i class="glyphicon glyphicon-random"></i></a>
-		</<i>
-	</div>
-{% endblock %}
+<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
+	<h2>{{ tag }}<a class="text-light float-right mr-2" href="{% url 'random_video' %}?tag={{tag}}"><i class="glyphicon glyphicon-random"></i></a>
+	</<i>
+</div>
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
 
+{% endblock %}
 {% block content %}
 <div class="container">
 	<div class="text-dark">
@@ -17,7 +19,7 @@
 		<hr>
 		<div class="row pb-2">
 			{% for video in videos %}
-				{% include 'vid_manager/video_preview.html' %}
+				{% include 'vid_manager/videos_preview.html' %}
 			{% empty %}
 				<p class='col-12'>No videos have been added yet.</p>
 			{% endfor %}

@@ -4,6 +4,8 @@
 {% block title %}{{ actor }}{% endblock %}
 
 {% block header %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
 <div>
 	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
 		<h2>{{ actor }} {% for alias in actor.aliases %}/{{alias}}{% empty %}{% endfor %} 
@@ -103,7 +105,7 @@
 	<div class="d-inline-block">
 		<div class='row'>
 			{% for video in videos %}
-				{% include 'vid_manager/video_preview.html' %}
+				{% include 'vid_manager/videos_preview.html' %}
 			{% empty %}
 				No videos have been added yet.
 			{% endfor %}

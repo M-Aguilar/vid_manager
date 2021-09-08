@@ -62,7 +62,7 @@
 {% endif %}
 <h4 class="ml-2">Top Tags</h4>
 <div class="row mx-2">
-{% for tag, value in top_tags.items %}
+{% for tag in top_tags %}
 	{% include 'vid_manager/tag_tile.html' %}
 {% endfor %}
 </div>
