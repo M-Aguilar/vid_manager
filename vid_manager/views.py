@@ -620,7 +620,7 @@ def tags(request):
 
 #takes videos and returns the top tags limited by total.
 def top_tags(videos, total=None):
-	top_tags = Tag.objects.annotate(video_num=Count('videos')).filter(videos__in=videos).order_by('video_num')
+	top_tags = Tag.objects.annotate(video_num=Count('videos')).filter(videos__in=videos).order_by('-video_num')
 	if total and isinstance(total, int):
 		return top_tags[:total]
 	else: 
