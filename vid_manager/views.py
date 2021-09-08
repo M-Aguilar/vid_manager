@@ -82,6 +82,7 @@ class SearchResultsView(ListView):
 							new_list = Video.objects.exclude(id__in=[x.id for x in o_list if x not in temp and x not in o_list]).filter(tags=tag)
 							temp.append(new_list)
 							o_list = o_list | new_list
+				o_list = o_list.distinct()
 		else:
 			o_list = Video.objects.filter(Q(title__icontains=query), Q(public=True))
 		total = o_list.count() + len(tags) + len(actors)
