@@ -370,7 +370,7 @@ def related_videos(video, total):
 	for actor in actors:
 		videos = videos | actor.videos.filter(tags__in=video.tags.all()).exclude(id=video.id)
 	videos = videos.distinct()
-	if len(videos) < total:
+	if len(videos) <= total:
 		for tag in video.tags.all():
 			videos = videos | tag.videos.filter(tags__in=video.tags.all()).distinct().exclude(id=video.id)
 	videos = videos.distinct()

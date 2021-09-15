@@ -4,7 +4,7 @@
 {% block title %}{{ video.title }}{% endblock %}
 
 {% block header %}
-	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
+	<div class="jumbotron bg-dark text-light p-auto text-center display-4 mt-5 mb-0">
 		<h2>
 		{% if video.get_previous_by_date_added %}
 		<a class="text-light float-left" href="{% url 'video' video.get_previous_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-left my-auto' style='font-size: 25px;'></i></a>
@@ -93,7 +93,7 @@
 					<li class="list-group-item m-2 p-2 border border-dark rounded"><a class="text-dark" href="{% url 'random_video' %}"><i class="glyphicon glyphicon-random px-3"></i></a></li>
 				</div>
 			</div>
-			<div class="d-flex col justify-content-end">
+			<div class="d-flex px-0 col justify-content-end">
 				<ul class="list-group flex-row">
 					{% if video.poster %}
 					<div>
@@ -104,22 +104,22 @@
 						</a>
 					</div>
 					{% endif %}
-					<div>
+					<div clas="col-auto">
 						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.width }}x{{video.height}}</li>
 					</div>
-					<div>
+					<div clas="col-auto">
 						{% load bit_format %}
 						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.size|bit_size }}</li>
 					</div>
-					<div>
+					<div clas="col-auto">
 						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.length|time }}</li>
 					</div>
-					<div>
+					<div clas="col-auto">
 						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.bitrate|bit_rate }}</li>
 					</div>
 					{% if video.release_date %}
-					<div>
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.release_date }}</li>
+					<div clas="col-auto">
+						<li class="list-group-item ml-2 p-2 border border-dark rounded">{{ video.release_date }}</li>
 					</div>
 					{% endif %}
 				</ul>
