@@ -405,7 +405,6 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
-	#Hanlde multiple actors separated by +
 	if actors:
 		for a in actors:
 			name = a.split()
