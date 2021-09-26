@@ -637,7 +637,7 @@ def delete_tag(request, tag_id):
 		t.delete()
 		messages.success(request, "Tag {0} Succesfully Deleted".format(t_copy))
 	else:
-		message.error(request, "Something went wrong")
+		messages.error(request, "Something went wrong")
 	return HttpResponseRedirect(reverse('tags'))
 
 #Removes the tag from video or image without deleting the tag.
