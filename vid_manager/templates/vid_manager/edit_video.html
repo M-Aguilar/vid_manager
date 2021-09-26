@@ -10,17 +10,20 @@
 	{% load bit_format %}
 	<h4>Video Info</h4>
 	<div class="row">
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Date Added: {{ video.date_added }}</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Release Date: {{ video.release_date }}</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Bitrate: {{ video.bitrate }} ({{ video.bitrate|bit_rate }})</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Size: {{ video.size }} ({{ video.size|bit_size }})</p></div>		
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Length: {{ video.length|time }}</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Images: {{ video.image_set.count }}</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Events: {{ video.event_set.count }}</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Actor #: {{ video.actors.count }}</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Tag #: {{ video.tags.count }}</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Width: {{ video.width }}</p></div>
-		<div class="col-6 col-md-3 col-lg-2 px-1"><p class="border py-2 px-3">Height: {{ video.height }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Date Added: {{ video.date_added }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Release Date: {{ video.release_date }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Bitrate: {{ video.bitrate }} ({{ video.bitrate|bit_rate }})</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Size: {{ video.size }} ({{ video.size|bit_size }})</p></div>		
+		<div class="col-auto px-1"><p class="border py-2 px-3">Length: {{ video.length|time }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Images: {{ video.image_set.count }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Events: {{ video.event_set.count }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Actor #: {{ video.actors.count }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Tag #: {{ video.tags.count }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Width: {{ video.width }}</p></div>
+		<div class="col-auto px-1"><p class="border py-2 px-3">Height: {{ video.height }}</p></div>
+		{% if video.poster %}
+		<div class="col-auto px-1"><p class="border py-2 px-3">Poster Dimensions: {{ video.poster.width }}x{{ video.poster.height}}</p></div>
+		{% endif %}
 	</div>
 {% endblock %}
 
@@ -57,10 +60,10 @@
 		{% csrf_token %}
 		{% bootstrap_form form %}
 		{% buttons %}
-			<button name="submit" class="btn btn-dark"><i class="glyphicon glyphicon-floppy-disk"></i></button>
-			<a href="{{ video.path }}" class='btn btn-dark'><i class="glyphicon glyphicon-facetime-video"></i></a>
-			<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark"><i class="glyphicon glyphicon-picture"></i> <i class="glyphicon glyphicon-plus"></i></a> 	
-			<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i> All Images</a>
+			<button name="submit" class="btn btn-dark"><i class="bi-save"></i></button>
+			<a href="{{ video.path }}" class='btn btn-dark'><i class="bi-tv"></i></a>
+			<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark"><i class="bi-image mr-1"></i> <i class="bi-plus"></i></a> 	
+			<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole"><i class="bi-images mr-1"></i> <i class="bi-trash"></i></a>
 		{% endbuttons %}
 		</form>
 	</div>

@@ -4,15 +4,19 @@
 {% block title %}{{ video.title }}{% endblock %}
 
 {% block header %}
-	<div class="jumbotron bg-dark text-light p-auto text-center display-4 mt-5 mb-0">
+	<div class="jumbotron bg-dark text-light p-auto text-center display-4 mt-5 mb-0 pt-2 pb-3">
 		<h2>
-		{% if video.get_previous_by_date_added %}
-		<a class="text-light float-left" href="{% url 'video' video.get_previous_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-left my-auto' style='font-size: 25px;'></i></a>
-		{% endif %}
-		{{ video.title }}
-		{% if video.get_next_by_date_added %}
-		<a class="text-light float-right" href="{% url 'video' video.get_next_by_date_added.id %}"><i class='glyphicon glyphicon-arrow-right'" style='font-size: 25px;'></i></a>
-		{% endif %}
+			<div class="mw-100">
+				<div class="col">
+				{% if video.get_previous_by_date_added %}
+					<a class="text-light float-left" href="{% url 'video' video.get_previous_by_date_added.id %}"><i class='bi-arrow-left-circle my-auto' style='font-size: 25px;'></i></a>
+				{% endif %}
+					{{ video.title }}
+				{% if video.get_next_by_date_added %}
+					<a class="text-light float-right" href="{% url 'video' video.get_next_by_date_added.id %}"><i class='bi-arrow-right-circle' style='font-size: 25px;'></i></a>
+				{% endif %}
+				</div>
+			</div>
 		</h2>
 	</div>
 	{% load static %}
@@ -24,6 +28,9 @@
 		img.video_image {
 			height:300px;
 			width:auto;
+		}
+		.bi {
+			font-size: 17px;
 		}
 	</style>
 {% endblock %}
@@ -90,7 +97,7 @@
 					<div class="border border-dark rounded m-2 p-2">No artists identified</div>
 				{% endfor %}
 				<div>
-					<li class="list-group-item m-2 p-2 border border-dark rounded"><a class="text-dark" href="{% url 'random_video' %}"><i class="glyphicon glyphicon-random px-3"></i></a></li>
+					<li class="list-group-item m-2 p-2 border border-dark rounded"><a class="text-dark" href="{% url 'random_video' %}"><i class="bi-shuffle px-3"></i></a></li>
 				</div>
 			</div>
 			<div class="d-flex px-0 col justify-content-end">
@@ -99,7 +106,7 @@
 					<div>
 						<a href="{{video.poster.url}}" class="text-dark">
 							<li class="list-group-item m-2 p-2 border border-dark rounded">
-								<i class='glyphicon glyphicon-picture px-1'></i>
+								<i class='bi-image px-1'></i>
 							</li>
 						</a>
 					</div>
@@ -150,10 +157,10 @@
 		</div>
 	</div>
 	<div class="my-3">
-		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}"><i class=" glyphicon glyphicon-edit"></i></a>
-		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}"><i class=" glyphicon glyphicon-picture"></i> <i class=" glyphicon glyphicon-plus"></i></a>
-		<a class='btn btn-dark mb-3' href="#add_event" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event">Add Event</a>
-		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i></a>
+		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}"><i class="bi bi-pencil-square"></i></a>
+		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}"><i class="bi bi-image"></i> <i class="bi bi-plus"></i></a>
+		<a class='btn btn-dark mb-3' href="#add_event" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event"><i class="bi bi-calendar-plus mr-1"></i></a>
+		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole"><i class="bi bi-trash mr-1"></i></a>
 		<div class="collapse" id="add_event">
 			<div class="card-body"> 
 				<form action="{% url 'new_event' video.id %}" method='post' class="form">

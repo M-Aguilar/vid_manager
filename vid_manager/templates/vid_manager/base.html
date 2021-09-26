@@ -5,16 +5,16 @@
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Caompatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1 shrink-to-fit=no">
+		<meta name="format-detection" content="telephone=no"/>
 		<title>{% block title %}{% endblock %}</title>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></>
 		<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 		{% load static %}
 	</head>
 	<body>
@@ -22,7 +22,7 @@
 		<!-- Static navbar -->
 			<nav class="navbar navbar-expand-md navbar-dark bg-dark rounded-0 mb-0">
 				<div class='float-left d-none d-md-inline'>
-					<a class="navbar-brand" href="{% url 'index' %}">VidM</a>
+					<a class="navbar-brand" href="{% url 'index' %}">VMan</a>
 				</div>
 				<div class="navbar-header w-100 pb-3 pt-2">
 					<button class="navbar-toggler float-left" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-expanded="false" aria-controls="navbarToggler" aria-label="Toggle navigation">
@@ -32,16 +32,16 @@
 				<div class="collapse navbar-collapse" id="navbarToggler">
 					<ul class="navbar-nav mt-2 mt-lg-0 md-float-right">
 						{% if user.is_authenticated %}
-						<li class="navitem"><h4><a class="nav-link py-0 d-md-none" href="{% url 'index' %}">VidM</a></h4></li>
-						<li class="navitem mr-md-4"><a class="nav-link" href="{% url  'videos' %}"><i class="glyphicon glyphicon-film"></i><p class="d-md-none float-right">Videos</p></a></li>
-						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'images' %}"><i class="glyphicon glyphicon-picture"></i><p class="d-md-none float-right">Images</p></a></li>
-						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'tags' %}"><i class="glyphicon glyphicon-tags"></i><p class="d-md-none float-right">Tags</p></a></li>
-						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'actors' %}"><i class="glyphicon glyphicon-user"></i><p class="d-md-none float-right">Actors</p></a></li>
-						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'account' user.username %}" ><i class="glyphicon glyphicon-cog"></i><p class="d-md-none float-right">Settings</p></a></li>
-						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'logout' %}"><i class="glyphicon glyphicon-log-out"></i><p class="d-md-none float-right">Logout</p></a></li>
+						<li class="navitem"><h4><a class="nav-link py-0 d-md-none" href="{% url 'index' %}">VMan</a></h4></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url  'videos' %}"><i class="bi-film"></i><p class="d-md-none float-right">Videos</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'images' %}"><i class="bi-images"></i><p class="d-md-none float-right">Images</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'tags' %}"><i class="bi-tags"></i><p class="d-md-none float-right">Tags</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'actors' %}"><i class="bi-person"></i><p class="d-md-none float-right">Actors</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'account' user.username %}" ><i class="bi-gear"></i><p class="d-md-none float-right">Settings</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'logout' %}"><i class="bi-box-arrow-right"></i><p class="d-md-none float-right">Logout</p></a></li>
 						{% else %}
-						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
-						<li class="navitem"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'register' %}"><i class="bi-person-plus"></i><p class="d-md-none float-right">Register</p></a></li>
+						<li class="navitem"><a class="nav-link" href="{% url 'login' %}"><i class="bi-box-arrow-in-left"></i>Login</a></li>
 						{% endif %}
 						<li class="nav-item m-md-3 search">
     						<form action="{% url 'search_results' %}" method='get'>
@@ -51,7 +51,7 @@
 			    						<div class="dropdown s_content" id="quick_search_results">{% include 'vid_manager/quick_search_results.html' %}</div>
 									</div>
 		    						<div class='mr-1 search-b'>
-		    							<button class="btn btn-dark" type="submit"><i class="fa fa-search"></i></button>
+		    							<button class="btn btn-dark" type="submit"><i class="bi-search"></i></button>
 									</div>
 								</div>
     						</form>
@@ -96,8 +96,8 @@
 			border-color:var(--blank);
 		}
 
-		.navitem i.glyphicon, .navitem p {
-				font-size: 20px;
+		.navitem i, .navitem p {
+				font-size: 25px;
 		}
 	</style>
 	<script type="text/javascript" src="{% static 'vid_manager/search.js' %}"></script>
