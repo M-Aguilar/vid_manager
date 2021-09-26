@@ -16,6 +16,7 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
 		{% load static %}
+		<link rel="stylesheet" href="{% static 'vid_manager/vman_style.css' %}">
 	</head>
 	<body>
 		<div class="main-container">
@@ -36,7 +37,7 @@
 						<li class="navitem mr-md-4"><a class="nav-link" href="{% url  'videos' %}"><i class="bi-film"></i><p class="d-md-none float-right">Videos</p></a></li>
 						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'images' %}"><i class="bi-images"></i><p class="d-md-none float-right">Images</p></a></li>
 						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'tags' %}"><i class="bi-tags"></i><p class="d-md-none float-right">Tags</p></a></li>
-						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'actors' %}"><i class="bi-person"></i><p class="d-md-none float-right">Actors</p></a></li>
+						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'actors' %}"><i class="bi-people"></i><p class="d-md-none float-right">Actors</p></a></li>
 						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'account' user.username %}" ><i class="bi-gear"></i><p class="d-md-none float-right">Settings</p></a></li>
 						<li class="navitem mr-md-4"><a class="nav-link" href="{% url 'logout' %}"><i class="bi-box-arrow-right"></i><p class="d-md-none float-right">Logout</p></a></li>
 						{% else %}

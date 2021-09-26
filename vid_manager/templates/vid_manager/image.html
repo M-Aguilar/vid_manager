@@ -4,7 +4,7 @@
 {% block title %}Image{% endblock %}
 
 {% block header %}
-	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
+	<div class="jumbotron bg-dark text-light py-3 text-center display-4 mt-5 mb-0">
 		{% for actor in actors %}
 		<a class="text-light" href="{% url 'actor' actor.id %}">{{ actor }}{% if actor != actors.last %},{% endif %}</a>
 		{% endfor %}

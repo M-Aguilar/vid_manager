@@ -9,7 +9,7 @@
 </div>
 <div class="mt-3">
 	<div class="dropdown float-right">
-		<button class="btn btn-dark dropdown-toggle" type="button" id="ddM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-sort"></i></button>
+		<button class="btn btn-dark dropdown-toggle" type="button" id="ddM" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="bi bi-sort-up"></i></button>
 		 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="ddM">
 				{% load deslug clean %}
 			{% for so in sort_options %}
@@ -18,7 +18,7 @@
 	  		{% endfor %}
 			</div>
 	</div>
-	<a class='btn btn-dark' href="#add_tag" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_tag"><i class="glyphicon glyphicon-tag"></i> <i class="glyphicon glyphicon-plus"></i></a>
+	<a class='btn btn-dark' href="#add_tag" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_tag"><i class="bi bi-tag"></i> <i class="bi bi-plus"></i></a>
 </div>
 <div class="collapse" id="add_tag">
 	<div class="card-body"> 
@@ -53,9 +53,9 @@
 {% block content %}
 <div class="text-dark">
 	{% if messages %}
-	<div class="messages mb-3">
+	<div class="container messages mb-3">
     	{% for message in messages %}
-    	<div {% if message.tags %} class="rounded p-1 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    	<div {% if message.tags %} class="rounded px-4 py-3 bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
 	    {% endfor %}
 	</div>
 	{% endif %}
@@ -116,14 +116,14 @@
 			url: "{% url 'new_tag' %}",
 			data: serializedData,
 			success: function (response) {
-				//TODO make messages disappear if there are more than one. or allow to remove with 'X'
+				$(".messages").empty();
 				$("#tag_form").trigger('reset');
 				$("#id_tag_name").focus();
 				var instance = JSON.parse(response["instance"]);
 				var fields = instance[0]["fields"];
 				var pk = instance[0]["pk"];
 				var new_url = "{% url 'tag' 0 %}".replace('0', pk);
-				$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields['tag_name']}"has been added.</div>`);
+				$('.messages').prepend(`<div class="rounded px-4 by-3 bg-success">Tag "${fields['tag_name']}"has been added.</div>`);
 				$("#tags .tagrow").prepend(`<div class="mb-4 col-sm-6 col-md-4 col-lg-3 col-xl-2 pb-3 px-1"><a href="${new_url}"><div class="preview"><img src="{% load static %}{% static 'vid_manager/blank_image.png' %}" height="auto" width="100%" alt=''><div class="top-left">${fields['tag_name']}</div></div></a></div>`);
 			},
 			error: function (response) {

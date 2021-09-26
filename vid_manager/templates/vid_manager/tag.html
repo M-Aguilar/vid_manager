@@ -5,7 +5,7 @@
 
 {% block header %}
 <div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
-	<h2>{{ tag }}<a class="text-light float-right mr-2" href="{% url 'random_video' %}?tag={{tag}}"><i class="glyphicon glyphicon-random"></i></a>
+	<h2>{{ tag }}<a class="text-light float-right mr-2" href="{% url 'random_video' %}?tag={{tag}}"><i class="bi-title bi-shuffle"></i></a>
 	</<i>
 </div>
 {% load static %}
@@ -13,6 +13,31 @@
 
 {% endblock %}
 {% block content %}
+<div class="modal" id="centerconsole" tabindex="-1" role="dialog" aria-labelledby="centerTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="modalDeleteTag">Confirm</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Please confirm that you would like to remove this video.
+        	</div>
+        	<div class="modal-footer">
+        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+				<form action="{% url 'delete_tag' tag.id %}" method="post" class="m-0">
+					{% csrf_token %}
+					<input type="hidden" name="tag_id" value="{{ tag.id }}"/>
+					{% buttons %}
+					<a href="{% url 'delete_tag' tag.id %}"><button name='submit' class="btn bg-danger text-light">Confirm</button></a>
+					{% endbuttons %}
+				</form>
+        	</div>
+    	</div>
+	</div>
+</div>
 <div class="container">
 	<div class="text-dark">
 		<a href="{% url 'videos' %}?tag={{tag}}"><h2>Videos ({{v_tot}})</h2></a>
@@ -37,13 +62,12 @@
 			<p>Nothing here.</p>
 		{% endfor %}
 		</div>
-		<form action="{% url 'delete_tag' tag.id %}" method="post">
-			{% csrf_token %}
-			<input type="hidden" name="tag_id" value="{{ tag.id }}"/>
-			{% buttons %}
-			<button name='submit' class="btn btn-dark"><a class='text-light' href="{% url 'delete_tag' tag.id %}"><i class=" glyphicon glyphicon-trash"></i></a></button>
-			{% endbuttons %}
-		</form>
+		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole"><i class="bi bi-trash mr-1"></i></a>
 	</div>
 </div>
+<style>
+.form-group {
+	margin-bottom: 0;
+}
+</style>
 {% endblock %}
