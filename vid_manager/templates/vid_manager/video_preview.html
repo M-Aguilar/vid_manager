@@ -1,10 +1,24 @@
-<a href="{% url 'video' video.id %}">
+<a class="video-link" href="{% url 'video' video.id %}">
+	{% load bit_format %}
+	{% with color=video.rand_color %}
+	<div class="top-video-row row justify-content-around mx-0 px-2" style="background-color: rgb({% if not video.poster %}{{color}}{% endif %})">
+		<div class="preview-text text-left col px-0">{{video}}</div>
+		<div class="preview-text ml-auto text-right">
+			<div class="col-auto pr-0">{{video.height}}p</div>
+			<div class="col-auto pr-0">{{video.length|time}}</div>
+		</div>
+	</div>
 	<div class='preview'>
-		{% load bit_format %}
-		<img src="{% if video.poster %}{{ video.poster.url }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image" alt='No image'>
-		<div class="top-left">{{video}}</div>
-		<div class="top-right">{{video.height}}p</div>
-		<div class="bottom-right">{{video.length|time}}</div>
+		<img src="{% if video.poster %}{{ video.poster.url }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image align-middle" alt='No image'>
 		<div class="bottom-left">{{video.bitrate|bit_rate}} - {{video.size|bit_size}}</div>
 	</div>
+	<div class="bottom-video-row row mx-0 px-2" style="background-color: rgb({% if not video.poster %}{{color}}{% endif%})">
+		<div class="preview-text text-left col w-50 pl-0">
+			<div class="overflow-auto authors" style="white-space:nowrap">
+				{% for actor in video.actors.all %}<a class="preview-text" href="{% url 'actor' actor.id %}">{{actor}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+			</div>
+		</div>
+		<div class="preview-text col col-auto ml-auto float-right px-0"><i class="bi-tag"></i> {{ video.tags.all.count }} <i class="bi-image"></i> {{ video.image_set.all.count }}</div>
+	</div>
+	{% endwith %}
 </a>
