@@ -12,7 +12,7 @@
 <div class="container">
 	{% if request.user.is_authenticated and request.user.projector.admin %}	
 		{% if request.user.video_set.all.count > 0 %}
-			<a class="text-dark text-center" href="{% url 'random_video' %}"><h2><i class="bi-title bi-shuffle"></i></h2></a>
+			<a class="text-dark text-center" href="{% url 'random_video' %}"><h2><i class="bi-big bi-shuffle"></i></h2></a>
 			<table class="table table-bordered">
 				<tbody>
 					<tr>
