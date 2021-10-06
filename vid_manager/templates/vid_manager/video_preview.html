@@ -18,7 +18,7 @@
 				{% for actor in video.actors.all %}<a class="preview-text" href="{% url 'actor' actor.id %}">{{actor}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
 			</div>
 		</div>
-		<div class="preview-text col col-auto ml-auto float-right px-0"><i class="bi-tag"></i> {{ video.tags.all.count }} <i class="bi-image"></i> {{ video.image_set.all.count }}</div>
+		<div class="preview-text col col-auto ml-auto float-right px-0"><i class="bi-tag"></i> {{ video.tags.all.count }}<a class="preview-text" href="{% url 'images' %}?video={{video.id}}"> <i class="bi-image"></i> {{ video.image_set.all.count }}</a></div>
 	</div>
 	{% endwith %}
 </a>

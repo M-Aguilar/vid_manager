@@ -804,20 +804,28 @@ def images(request):
 	image_sort = ['actors', 'id', 'tags', 'video', 'video_id', 'tag_num', 'actor_num']
 	tags = request.GET.getlist('tag')
 	actors = request.GET.getlist('actor')
+	video = request.GET.get('video')
 	if not sort or sort.replace('-','') not in image_sort:
 		sort = '-id'
 	if request.user.is_authenticated and request.user.projector.admin:
-		images = Image.objects.filter(video__owner=request.user)
-		if actors:
-			for actor in actors:
-				a = actor.split()
-				if len(a) > 1:
-					images = images.filter(Q(actors__first_name=a[0]) & Q(actors__last_name=''.join(a[1:])))
-				else:
-					images = images.filter(Q(actors__first_name__icontains=a[0]))
-		if tags:
-			for tag in tags:
-				images = images.filter(tags__tag_name__icontains=tag)
+		if video:
+			vid = Video.objects.get(id=video)
+			if vid.owner != request.user:
+				raise Http404
+			else:
+				images = vid.image_set.all()
+		else:
+			images = Image.objects.filter(video__owner=request.user)
+			if actors:
+				for actor in actors:
+					a = actor.split()
+					if len(a) > 1:
+						images = images.filter(Q(actors__first_name=a[0]) & Q(actors__last_name=''.join(a[1:])))
+					else:
+						images = images.filter(Q(actors__first_name__icontains=a[0]))
+			if tags:
+				for tag in tags:
+					images = images.filter(tags__tag_name__icontains=tag)
 	else:
 		raise Http404
 	if sort.replace('-','') == 'tag_num':
