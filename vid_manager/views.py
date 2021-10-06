@@ -808,6 +808,7 @@ def images(request):
 	if not sort or sort.replace('-','') not in image_sort:
 		sort = '-id'
 	if request.user.is_authenticated and request.user.projector.admin:
+		vid = Video.objects.none
 		if video:
 			vid = Video.objects.get(id=video)
 			if vid.owner != request.user:
@@ -837,6 +838,8 @@ def images(request):
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
 	context = {'images': page_o,'sort_options': image_sort, 'sort':sort,'actors':actors,'tags':tags}
+	if vid:
+		context['video'] = vid
 	return render(request,'vid_manager/images.html',context)
 
 @login_required

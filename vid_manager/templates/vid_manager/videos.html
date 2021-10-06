@@ -6,7 +6,7 @@
 {% block header %}
 <link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
 <div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
-	<h2>{% if actors %}{% for actor in actors %}{{ actor }}{% endfor %}{% elif tags %}{% for tag in tags %}{{ tag }}{% endfor %}{% endif %} Videos: {{ videos.paginator.count }}</h3>
+	<h2>{% if actors %}{% for actor in actors %}{{ actor }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}{{ tag }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %} Videos: {{ videos.paginator.count }}</h3>
 </div>
 <div class='mt-3'>
 	<a class="btn btn-dark" href="{% url 'new_video' %}"><i class="bi bi-film"></i> <i class="bi-plus"></i></a>
