@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from math import floor
+import random
 
 def user_directory_path(instance, filename):
 	try:
@@ -122,6 +123,14 @@ class Video(models.Model):
 		return settings.MEDIA_SERVER + self.file_path[self.file_path.index('videos'):]
 
 	@property
+	def rand_color(self):
+		cl = list(random.choices(range(256), k=3))
+		clr = []
+		for i in cl:
+			clr.append(str(i))
+		return ','.join(clr)
+
+	@property
 	def type(self):
 		return 'video'
 
@@ -155,5 +164,6 @@ class Event(models.Model):
 
 	def __str__(self):
 		return self.name
+
 	class Meta:
 		verbose_name_plural = 'events'
