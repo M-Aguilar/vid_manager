@@ -60,9 +60,11 @@
 	    	{% endfor %}
 		{% endif %}
 	</div>
-	<video style="width:100%;" preload="metadata" id='vid_player' controls range poster="{% if video.poster %}{{ video.poster.url }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
+	{% with poster=video.postr %}
+	<video style="width:100%;" preload="metadata" id='vid_player' controls range poster="{% if poster %}{{ poster.image.url }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
     	<source src="{{ video.path }}" type="video/mp4">
 	</video>
+	{% endwith %}
 	{% if video.event_set.all.count > 0 %}
 	<div>
 		Events:
