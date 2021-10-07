@@ -96,7 +96,7 @@ class Alias(ActorBase):
 	class Meta:
 		verbose_name_plural = 'aliases'
 
-VIDEO_SORT_OPTIONS = ['release_date' ,'date_added' ,'title' , 'poster', 'length', 'resolution', 'size', 'actor_num', 'tag_num', 'bitrate', 'image_num']
+VIDEO_SORT_OPTIONS = ['release_date' ,'date_added' ,'title', 'length', 'resolution','poster_num', 'size', 'actor_num', 'tag_num', 'bitrate', 'image_num']
 
 class Video(models.Model):
 	title = models.CharField(max_length=75)

@@ -478,7 +478,7 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 	elif 'image_num' in sort:
 		videos = videos.annotate(image_num=Count('images')).order_by(sort)
 	elif 'poster_num' in sort:
-		videos = videos.annotate(psoter_num=Count('images', filter=Q(is_poster=True))).order_by(sort)
+		videos = videos.annotate(poster_num=Count('images', filter=Q(images__is_poster=True))).order_by(sort)
 	else: 
 		videos = videos.order_by(sort)
 	return videos
