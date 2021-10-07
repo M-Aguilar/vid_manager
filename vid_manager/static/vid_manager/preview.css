@@ -29,7 +29,7 @@
   border-top: none;
 }
 
-.preview-text, .preview.text i, .preview-text:hover, .preview-text:link, .preview-text:active, .preview-text:visited {
+div.bottom-left.preview-text, .preview-text, .preview.text i, .preview-text:hover, .preview-text:link, .preview-text:active, .preview-text:visited {
   color: white;
   text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;
   letter-spacing: 1px;
