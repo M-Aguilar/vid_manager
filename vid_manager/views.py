@@ -56,7 +56,14 @@ class ImageFormView(FormView):
 			return self.form_invalid(form)
 
 def check_poster(instance):
-	if instance.image.width >= instance.image.height:
+	if hasattr(instance, 'image_color'):
+		rbg = pull_colors(instance)
+		poster = instance.image_color
+		poster.red = rbg[0]
+		poster.green = rbg[1]
+		poster.blue = rbg[2]
+		poster.save()
+	elif instance.image.width >= instance.image.height:
 		instance.is_poster = True
 		rbg = pull_colors(instance)
 		poster_color = PosterColor(image=instance, red=rbg[0], green=rbg[1],blue=rbg[2])
@@ -416,6 +423,11 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
+	if sort.replace('-','') not in ['title', 'release_date', 'date_added']:
+		if '-' in sort:
+			sort = sort.replace('-','')
+		else:
+			sort = '-{0}'.format(sort)
 	if actors:
 		for a in actors:
 			name = a.split()
@@ -464,7 +476,9 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 	elif 'tag_num' in sort:
 		videos = videos.annotate(tag_num=Count('tags')).order_by(sort)
 	elif 'image_num' in sort:
-		videos = videos.annotate(image_num=Count('image')).order_by(sort)
+		videos = videos.annotate(image_num=Count('images')).order_by(sort)
+	elif 'poster_num' in sort:
+		videos = videos.annotate(psoter_num=Count('images', filter=Q(is_poster=True))).order_by(sort)
 	else: 
 		videos = videos.order_by(sort)
 	return videos
@@ -817,7 +831,7 @@ def pull_colors(img_obj):
 	bw = [(0, 0, 0), (255, 255, 255)]
 	if color in bw:
 		for c in i[1:10]:
-			if c[1][:3] not in bw:
+			if color not in bw and c[1][:3] not in bw:
 				color = c[1][:3]
 	return color
 
@@ -836,12 +850,17 @@ def image(request, image_id):
 @login_required
 def images(request):
 	sort = request.GET.get('sort')
-	image_sort = ['actors', 'id', 'tags', 'video', 'video_id', 'tag_num', 'actor_num']
+	image_sort = ['actors', 'id', 'tags', 'video', 'video_id', 'tag_num', 'actor_num','is_poster']
 	tags = request.GET.getlist('tag')
 	actors = request.GET.getlist('actor')
 	video = request.GET.get('video')
 	if not sort or sort.replace('-','') not in image_sort:
 		sort = '-id'
+	if sort:
+		if '-' in sort:
+			sort = sort.replace('-','')
+		else:
+			sort = '-{0}'.format(sort)
 	if request.user.is_authenticated and request.user.projector.admin:
 		vid = Video.objects.none
 		if video:
@@ -851,7 +870,7 @@ def images(request):
 			else:
 				images = vid.images.all()
 		else:
-			images = Image.objects.filter(video__owner=request.user)
+			images = Image.objects.filter(Q(video__owner=request.user))
 			if actors:
 				for actor in actors:
 					a = actor.split()
