@@ -38,7 +38,7 @@ class ImageForm(forms.ModelForm):
 		fields = ['actors','video','image','tags']
 
 		widgets = {
-			'image' : forms.ClearableFileInput(attrs={'multiple':''}),
+			'image' : forms.FileInput(attrs={'multiple':''}),
 			'video' : forms.Select(attrs={'class': 'form-control py-0'}),
 		}
 
