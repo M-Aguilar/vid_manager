@@ -611,21 +611,31 @@ def tag(request, tag_id=None):
 def tags(request):
 	sort_options = ['tag_name', 'id', 'video_num','image_num']
 	sort = request.GET.get('sort')
+	video = request.GET.get('video')
+	vid = None
 	if not sort or sort.replace('-','') not in sort_options:
 		sort = 'tag_name'
 	if not request.user.projector.admin:
 		raise Http404
+	if video:
+		try:
+			vid = Video.objects.get(id=video)
+			tags=vid.tags.all()
+		except Video.DoesNotExist:
+			tags = Tag.objects.all()
+	else:
+		tags = Tag.objects.all()
 	if sort and sort.replace('-','') == 'video_num':
 		tags = Tag.objects.annotate(video_num=Count('videos'))
 	elif sort and sort.replace('-','') == 'image_num':
 		tags = Tag.objects.annotate(image_num=Count('tag_images'))
-	else:
-		tags = Tag.objects.all()
 	tags = tags.order_by(sort)
 	paginator = Paginator(tags, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
 	context = {'tags': page_o, 'new_tag_form': TagForm(),'sort_options':sort_options,'sort':sort}
+	if vid:
+		context['video'] = vid
 	return render(request, 'vid_manager/tags.html', context)
 
 #takes videos and returns the top tags limited by total.
@@ -839,7 +849,7 @@ def images(request):
 			if vid.owner != request.user:
 				raise Http404
 			else:
-				images = vid.image_set.all()
+				images = vid.images.all()
 		else:
 			images = Image.objects.filter(video__owner=request.user)
 			if actors:
