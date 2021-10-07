@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from math import floor
 import random
+from django.core.validators import MaxValueValidator
+
+from django.db.models.fields import PositiveIntegerField
 
 def user_directory_path(instance, filename):
 	try:
@@ -134,11 +137,16 @@ class Video(models.Model):
 	def type(self):
 		return 'video'
 
+	@property
+	def postr(self):
+		return self.images.filter(is_poster=True).order_by('?').first()
+
 class Image(models.Model):
 	image = models.ImageField(upload_to=user_directory_path,blank=True)
 	actors = models.ManyToManyField('Actor', related_name='actor_images')
-	video = models.ForeignKey(Video, on_delete=models.CASCADE, blank=True,null=True)
+	video = models.ForeignKey(Video, on_delete=models.CASCADE, blank=True,null=True, related_name='images')
 	tags = models.ManyToManyField('Tag', blank=True, related_name='tag_images')
+	is_poster = models.BooleanField(default=False)
 
 	@property
 	def first_actor(self):
@@ -146,6 +154,17 @@ class Image(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'images'
+
+
+class PosterColor(models.Model):
+	image = models.OneToOneField(Image, on_delete=models.CASCADE, related_name='image_color')
+	red = PositiveIntegerField(default=0, validators=[MaxValueValidator(256)])
+	green = PositiveIntegerField(default=0, validators=[MaxValueValidator(256)])
+	blue = PositiveIntegerField(default=0, validators=[MaxValueValidator(256)])
+
+	@property
+	def color(self):
+		return ','.join([str(self.red), str(self.green), str(self.blue)])
 
 class Event(models.Model):
 	name = models.CharField(max_length=50)

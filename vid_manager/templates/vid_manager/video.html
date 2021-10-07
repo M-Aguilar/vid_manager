@@ -238,7 +238,7 @@
 	</script>
 	<div class="w-100 d-inline-block">
 		<div class='row d-block overflow-auto text-center' style="white-space: nowrap;">
-			{% for image in video.image_set.all %}
+			{% for image in video.images.all %}
 			<a href="{% url 'image' image.id %}"><img src="{{ image.image.url }}" height="300px"></a>
 			{% empty %}
 			{% endfor %}

@@ -9,6 +9,8 @@ from django.db.models import Count, Sum
 import json
 from django.conf import settings
 
+from PIL import Image as im
+
 from django.db.models import Q
 from django.views.generic import ListView
 
@@ -29,7 +31,7 @@ from pymediainfo import MediaInfo
 import subprocess
 
 from .thumbnail import capture
-from .models import Video, Tag, Actor, Event, Image, Alias, VIDEO_SORT_OPTIONS
+from .models import Video, Tag, Actor, Event, Image, Alias, PosterColor, VIDEO_SORT_OPTIONS
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasForm
 
 class ImageFormView(FormView):
@@ -45,12 +47,21 @@ class ImageFormView(FormView):
 			for f in files:
 				image = ImageForm(data=request.POST, files=MultiValueDict({'image':[f]}))
 				image.save(commit=False)
-				image.save()
+				img = image.save()
+				check_poster(img)
 			if request.POST.get('video'):
 				self.success_url = reverse('video', args=[request.POST.get('video')])
 			return self.form_valid(form)
 		else:
 			return self.form_invalid(form)
+
+def check_poster(instance):
+	if instance.image.width >= instance.image.height:
+		instance.is_poster = True
+		rbg = pull_colors(instance)
+		poster_color = PosterColor(image=instance, red=rbg[0], green=rbg[1],blue=rbg[2])
+		poster_color.save()
+		instance.save()
 
 #The Goal is to have narrow results when necessary
 #Usually the longer the query the more sepcific the result desired
@@ -786,6 +797,20 @@ def new_actor(request):
 
 '''########################    IMAGES     #########################'''
 
+def pull_colors(img_obj):
+	i = []
+	with im.open(img_obj.image.path) as ifile:
+		t_i = ifile.resize((150,150))
+		i = im.Image.getcolors(t_i, maxcolors=(150*150))
+	i.sort(key=lambda tup: tup[0], reverse=True)
+	color = i[0][1][:3]
+	bw = [(0, 0, 0), (255, 255, 255)]
+	if color in bw:
+		for c in i[1:10]:
+			if c[1][:3] not in bw:
+				color = c[1][:3]
+	return color
+
 @login_required
 def image(request, image_id):
 	request.session['ref'] = request.META.get('HTTP_REFERER')
@@ -890,9 +915,9 @@ def edit_image(request, image_id):
 		#Post data submitted; process data
 		form = ImageForm(instance=image, files=request.FILES, data=request.POST)
 		if form.is_valid():
-			form.save()
+			img = form.save()
+			check_poster(img)
 			ref = request.session.get('ref')
-			print(ref)
 			request.session['ref'] = None
 			if ref and 'actor' in ref:
 				return HttpResponseRedirect(reverse('actor', args=[ref.split('/')[-1]]))

@@ -33,10 +33,22 @@
 	</div>
 </div>
 <div class="container">
+	<div class="row align-items-center">
+		<div class="col-auto">Dimensions: W x H {{ image.image.width }} x {{ image.image.height }}</div>
+		<div class="col-auto">Size: {{ image.image.size }}</div>
+		<div class="col-auto">Is Poster: {{image.is_poster}}</div>
+		{% if image.is_poster %}
+		<div class="col-auto border rounded" style="background-color: rgb({{image.image_color.color}})"><div class="bg-light my-2 border rounded">Color: rgb({{image.image_color.color}})</div></div>
+		{% endif %}		
+		<div class="col-auto ml-auto">
+			<button class="btn btn-dark" data-toggle="modal" data-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i></button>
+		</div>
+	</div>
 	<div>
-		Dimensions: W x H {{ image.image.width }} x {{ image.image.height }}
-		Size: {{ image.image.size }}
-		<button class="btn btn-dark float-right" data-toggle="modal" data-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i></button>
+		<h3>Current Image</h3>
+		<div class="px-5">
+			<img src="{{image.image.url}}" class="mx-auto d-block px-5" width="50%" alt="image">
+		</div>
 	</div>
 	<div class="text-dark">
 		<form action="{% url 'edit_image' image.id %}" method='post' enctype="multipart/form-data">

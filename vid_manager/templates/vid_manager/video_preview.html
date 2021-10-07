@@ -1,7 +1,7 @@
 <a class="video-link" href="{% url 'video' video.id %}">
 	{% load bit_format %}
-	{% with color=video.rand_color %}
-	<div class="top-video-row row justify-content-around mx-0 px-2" style="background-color: rgb({% if not video.poster %}{{color}}{% endif %})">
+	{% with poster=video.postr %}
+	<div class="top-video-row row justify-content-around mx-0 px-2" style="background-color: rgb({% if not poster %}{{video.rand_color}}{% else %}{{poster.image_color.color}}{% endif %})">
 		<div class="preview-text text-left col px-0">{{video}}</div>
 		<div class="ml-auto text-right">
 			<div class="preview-text col-auto pr-0">{{video.height}}p</div>
@@ -9,10 +9,10 @@
 		</div>
 	</div>
 	<div class='preview'>
-		<img src="{% if video.poster %}{{ video.poster.url }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image align-middle" alt='No image'>
-		<div class="bottom-left">{{video.bitrate|bit_rate}} - {{video.size|bit_size}}</div>
+		<img src="{% if poster %}{{ poster.image.url }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image align-middle" alt='No image'>
+		<div class="bottom-left preview-text">{{video.bitrate|bit_rate}} - {{video.size|bit_size}}</div>
 	</div>
-	<div class="bottom-video-row row mx-0 px-2" style="background-color: rgb({% if not video.poster %}{{color}}{% endif%})">
+	<div class="bottom-video-row row mx-0 px-2" style="background-color: rgb({% if not poster %}{{video.rand_color}}{% else %}{{poster.image_color.color}}{% endif%})">
 		<div class="preview-text text-left col w-50 pl-0">
 			{% if video.actors.count > 0 %}
 			<div class="overflow-auto authors" style="white-space:nowrap">
@@ -27,8 +27,8 @@
 			<a class="preview-text" href="{% url 'images' %}?video={{video.id}}"> 
 			{% endif %}
 				<i class="bi-image"></i>
-				{{ video.image_set.all.count }}
-			{% if video.image_set.all.count > 0 %}
+				{{ video.images.count }}
+			{% if video.images.count > 0 %}
 			</a> 
 			{% endif %}
 		</div>
