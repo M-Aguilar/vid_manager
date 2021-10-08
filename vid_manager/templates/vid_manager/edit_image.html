@@ -34,8 +34,9 @@
 </div>
 <div class="container">
 	<div class="row align-items-center">
+		{% load bit_format %}
 		<div class="col-auto">Dimensions: W x H {{ image.image.width }} x {{ image.image.height }}</div>
-		<div class="col-auto">Size: {{ image.image.size }}</div>
+		<div class="col-auto">Size: {{ image.image.size }} ({{ image.image.size|bit_size }})</div>
 		<div class="col-auto">Is Poster: {{image.is_poster}}</div>
 		{% if image.is_poster %}
 		<div class="col-auto border rounded" style="background-color: rgb({{image.image_color.color}})"><div class="bg-light my-2 border rounded">Color: rgb({{image.image_color.color}})</div></div>
