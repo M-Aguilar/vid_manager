@@ -70,11 +70,12 @@ class Actor(ActorBase):
 		ordering = ['first_name']
 
 	def img(self):
-		img = Image.objects.filter(actors=self.id, image__isnull=False).order_by("?").first()
-		if img:
-			return img.image
+		imgs = list(Image.objects.filter(actors=self.id, image__isnull=False))
+		if len(imgs) > 0:
+			img = random.choice(imgs)
 		else:
-			return False
+			img = None
+		return img
 
 	@property
 	def all_names(self):
@@ -139,7 +140,12 @@ class Video(models.Model):
 
 	@property
 	def postr(self):
-		return self.images.filter(is_poster=True).order_by('?').first()
+		imgs = list(self.images.filter(is_poster=True))
+		if len(imgs) > 0:
+			img = random.choice(imgs)
+		else:
+			img = None
+		return img
 
 class Image(models.Model):
 	image = models.ImageField(upload_to=user_directory_path,blank=True)
