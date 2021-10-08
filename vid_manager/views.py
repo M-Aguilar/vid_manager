@@ -475,7 +475,7 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 	elif 'poster_num' in sort:
 		videos = videos.annotate(poster_num=Count('images', filter=Q(images__is_poster=True)))
 	videos = videos.order_by(sort)
-	if sort.replace('-','') in ['title', 'release_date', 'date_added','actor_num','tag_num','image_num']:
+	if sort.replace('-','') in ['title', 'release_date','actor_num','tag_num','image_num']:
 		videos = videos.reverse()
 	return videos
 
