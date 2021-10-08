@@ -73,6 +73,7 @@ class Actor(ActorBase):
 		imgs = list(Image.objects.filter(actors=self.id, image__isnull=False))
 		if len(imgs) > 0:
 			img = random.choice(imgs)
+			img = img.image
 		else:
 			img = None
 		return img
