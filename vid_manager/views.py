@@ -423,11 +423,6 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
-	if sort.replace('-','') not in ['title', 'release_date', 'date_added']:
-		if '-' in sort:
-			sort = sort.replace('-','')
-		else:
-			sort = '-{0}'.format(sort)
 	if actors:
 		for a in actors:
 			name = a.split()
@@ -472,15 +467,16 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 
 	#Order By
 	if 'actor_num' in sort:
-		videos = videos.annotate(actor_num=Count('actors')).order_by(sort)
+		videos = videos.annotate(actor_num=Count('actors'))
 	elif 'tag_num' in sort:
-		videos = videos.annotate(tag_num=Count('tags')).order_by(sort)
+		videos = videos.annotate(tag_num=Count('tags'))
 	elif 'image_num' in sort:
-		videos = videos.annotate(image_num=Count('images')).order_by(sort)
+		videos = videos.annotate(image_num=Count('images'))
 	elif 'poster_num' in sort:
-		videos = videos.annotate(poster_num=Count('images', filter=Q(images__is_poster=True))).order_by(sort)
-	else: 
-		videos = videos.order_by(sort)
+		videos = videos.annotate(poster_num=Count('images', filter=Q(images__is_poster=True)))
+	videos = videos.order_by(sort)
+	if sort.replace('-','') in ['title', 'release_date', 'date_added','actor_num','tag_num','image_num']:
+		videos = videos.reverse()
 	return videos
 
 def res_helper(sym, res, reses):
@@ -856,11 +852,6 @@ def images(request):
 	video = request.GET.get('video')
 	if not sort or sort.replace('-','') not in image_sort:
 		sort = '-id'
-	if sort:
-		if '-' in sort:
-			sort = sort.replace('-','')
-		else:
-			sort = '-{0}'.format(sort)
 	if request.user.is_authenticated and request.user.projector.admin:
 		vid = Video.objects.none
 		if video:
@@ -888,6 +879,8 @@ def images(request):
 	elif sort.replace('-','') == 'actor_num':
 		images = images.annotate(actor_num=Count('actors'))
 	images = images.order_by(sort)
+	if sort.replace('-','') in ['tag_num','actor_num', 'is_poster']:
+		images = images.reverse()
 	paginator = Paginator(images, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
