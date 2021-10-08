@@ -84,9 +84,18 @@
 	{% for actor in actors %}			
 		<div class="mb-4 pb-3 col-sm-6 col-md-4 col-lg-3 col-xl-2 px-1">
 			<a href="{% url 'actor' actor.id %}" >
+				<div class="top-video-row preview-text pl-2" style="background-color: lightgrey">
+					{{ actor }}
+				</div>
 				<div class="preview">
 					<img src="{% if actor.img %}{{ actor.img.url }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
-					<div class="img-top-left">{{ actor }}</div>
+				</div>
+				<div class="bottom-video-row pl-2" style="background-color: lightgrey">
+					<div class="row">
+						<div class="col-auto ml-auto">
+							<a class="preview-text" href="{% url 'images' %}?actor={{actor}}"><i class="bi-image"></i> {{ actor.actor_images.count }} </a>
+							<a class="preview-text" href="{% url 'videos' %}?actor={{actor}}"><i class="bi-film"></i> {{ actor.videos.count }}</div></a>
+					</div>
 				</div>
 			</a>
 		</div>
