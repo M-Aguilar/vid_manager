@@ -29,8 +29,9 @@ class Tag(models.Model):
 
 	#returns a random image related to the tag. Returns False if non exist
 	def img(self):
-		img = Image.objects.filter(tags=self.id, image__isnull=False).order_by('?').first()
-		if img:
+		imgs = list(Image.objects.filter(tags=self.id, image__isnull=False).exclude(is_poster=True))
+		if len(imgs) > 0:
+			img = random.choice(imgs)
 			return img.image
 		else:
 			return False
@@ -70,12 +71,12 @@ class Actor(ActorBase):
 		ordering = ['first_name']
 
 	def img(self):
-		imgs = list(Image.objects.filter(actors=self.id, image__isnull=False))
+		imgs = list(Image.objects.filter(actors=self.id, image__isnull=False).exclude(is_poster=True))
 		if len(imgs) > 0:
 			img = random.choice(imgs)
 			img = img.image
 		else:
-			img = None
+			img = False
 		return img
 
 	@property
