@@ -817,6 +817,7 @@ def new_actor(request):
 
 '''########################    IMAGES     #########################'''
 
+#Returns a single color from the image. The most common color and least grey.
 def pull_colors(img_obj):
 	i = []
 	with im.open(img_obj.image.path) as ifile:
@@ -824,11 +825,12 @@ def pull_colors(img_obj):
 		i = im.Image.getcolors(t_i, maxcolors=(150*150))
 	i.sort(key=lambda tup: tup[0], reverse=True)
 	color = i[0][1][:3]
-	bw = [(0, 0, 0), (255, 255, 255)]
-	if color in bw:
-		for c in i[1:10]:
-			if color not in bw and c[1][:3] not in bw:
-				color = c[1][:3]
+	limit = len(i)
+	if limit > 20:
+		limit=20
+	for c in i[1:limit]:
+		if ((abs(c[1][0]-c[1][1]) + abs(c[1][1]-c[1][2])) > (abs(color[0]-color[1]) + abs(color[1]-color[2]))):
+			color = c[1][:3]
 	return color
 
 @login_required
