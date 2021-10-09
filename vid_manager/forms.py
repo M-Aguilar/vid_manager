@@ -5,7 +5,7 @@ from .models import Video, Actor, Tag, Image, Event, Alias
 class VideoForm(forms.ModelForm):
 	class Meta:
 		model = Video
-		fields = ['title', 'tags','actors','public', 'file_path', 'poster', 'release_date']
+		fields = ['title', 'tags','actors','public', 'file_path', 'release_date']
 		labels = {'title':''}
 		widgets = {
 		'title': forms.TextInput(attrs={'placeholder':'Title','autofocus':'autofocus'}),

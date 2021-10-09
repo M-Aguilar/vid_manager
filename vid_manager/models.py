@@ -110,7 +110,6 @@ class Video(models.Model):
 	actors = models.ManyToManyField('Actor', blank=True, related_name='videos')
 	public = models.BooleanField(default=False)
 	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^\w.*\.mp4$", recursive=True,unique=True)
-	poster = models.ImageField(upload_to=user_directory_path, blank=True, null=True)
 	length = models.PositiveIntegerField()
 	size = models.PositiveBigIntegerField()
 	bitrate = models.PositiveIntegerField()
