@@ -9,6 +9,8 @@ from django.db.models import Count, Sum
 import json
 from django.conf import settings
 
+import random
+
 from PIL import Image as im
 
 from django.db.models import Q
@@ -591,13 +593,20 @@ def random_video(request):
 	if actor:
 		name = actor.split()
 		if len(name) > 1:
-			video = Video.objects.filter(Q(actors__first_name=name[0]) & Q(actors__last_name=' '.join(name[1:]))).order_by("?").first()
+			videos = list(Video.objects.filter(Q(owner=request.user),Q(actors__first_name=name[0]) & Q(actors__last_name=' '.join(name[1:]))))
+			video = random.choice(videos)
 		else:
-			video = Video.objects.filter(actors__first_name=name[0]).order_by("?").first()
+			videos = list(Video.objects.filter(Q(actors__first_name=name[0]) & Q(owner=request.user)))
+			video = random.choice(videos)
 	elif tag:
-		video = Video.objects.filter(tags__tag_name=tag).order_by("?").first()
+		videos = list(Video.objects.filter(Q(tags__tag_name=tag) & Q(owner=request.user)))
+		video = random.choice(videos)
 	if not video:
-		video = Video.objects.all().order_by("?").first()
+		videos = list(Video.objects.filter(owner=request.user))
+		video = random.choice(videos)
+	if not video:
+		messages.error('You have no videos')
+		return HttpResponseRedirect('videos')
 	return HttpResponseRedirect(reverse('video', args=[video.id]))
 
 #========================    TAGS     ==========================
