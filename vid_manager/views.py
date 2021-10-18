@@ -575,9 +575,9 @@ def delete_video(request, video_id):
 		if events.count() >0:
 			for e in events:
 				subprocess.Popen(['sudo','rm', e.file_path])
-		if v.poster:
-			ff = v.poster.open()
-			ff.delete()
+		for i in v.images.all():
+			i.image.delete()
+			i.delete()
 		v.delete()
 		messages.success(request, "Video {0} Succesfully Deleted".format(video_id))
 	else:
