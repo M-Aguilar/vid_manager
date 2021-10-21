@@ -33,7 +33,7 @@ class Tag(models.Model):
 		imgs = list(Image.objects.filter(tags=self.id, image__isnull=False).exclude(is_poster=True))
 		if len(imgs) > 0:
 			img = random.choice(imgs)
-			return img.image
+			return img
 		else:
 			return False
 
@@ -75,7 +75,7 @@ class Actor(ActorBase):
 		imgs = list(Image.objects.filter(actors=self.id, image__isnull=False).exclude(is_poster=True))
 		if len(imgs) > 0:
 			img = random.choice(imgs)
-			img = img.image
+			img = img
 		else:
 			img = False
 		return img
@@ -204,8 +204,8 @@ class Image(models.Model):
 		if settings.DEBUG:
 			return self.image.url
 		else:
-			return settings.MEDIA_SERVER + self.image.url[self.image.url.index('videos'):]
-
+			return settings.MEDIA_SERVER + "videos/"  + self.image.path[self.image.path.index('Images'):]
+	
 	@property
 	def first_actor(self):
 		return self.actors.first().full_name

@@ -88,7 +88,7 @@
 					{{ actor }}
 				</div>
 				<div class="preview">
-					<img src="{% if actor.img %}{{ actor.img.url }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
+					<img src="{% if actor.img %}{{ actor.img.path }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
 				</div>
 				<div class="bottom-video-row pl-2" style="background-color: lightgrey">
 					<div class="row">

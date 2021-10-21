@@ -65,7 +65,7 @@
 				{% if request.user.is_authenticated and request.user.projector.admin %}
 				<a href="{% url 'image' image.id %}">
 				{% endif %}
-				<img src="{{ image.image.url }}" height="auto" width="100%">
+				<img src="{{ image.path }}" height="auto" width="100%">
 				{% if request.user.is_authenticated and request.user.projector.admin %}</a>{% endif %}
 			</div>
 		{% empty %}
