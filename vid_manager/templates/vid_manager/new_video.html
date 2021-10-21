@@ -22,12 +22,51 @@
 		<form action="{% url 'new_video' %}" method='post' class="form" enctype="multipart/form-data">
 			{% csrf_token %}
 			{% bootstrap_form form %}
+			{% bootstrap_form video_source_form %}
+			<div id="add_source" class="w-100 text-right my-2"><i class="bi bi-plus"></i></div>
 			{% buttons %}
 				<button name="submit" class="btn btn-dark">add video</button>
-			{% endbuttons %}	
+			{% endbuttons %}
 		</form>
 	</div>
 </div>
 {% load static %}
+<style>
+	label[for="id_file_path"] {
+		width:100%;
+	}
+</style>
 <script type="text/javascript" src="{% static 'vid_manager/edit_sort.js' %}"></script>
+<script>
+$("select#id_file_path").parent().append(`<div class="col-1 pr-0 text-right"><i class="bi bi-x" onclick='remove(this)'></i></div>`)
+$("select#id_file_path").parent().attr('class','form-group row mx-1')
+
+function remove(r) {
+	if ($("[id='id_file_path']").length > 1) {
+		r.parentNode.parentNode.remove()
+	}
+}
+
+$("#add_source").on('click', function(e) {
+	e.preventDefault();
+	$.ajax({
+		type: 'GET',
+		url: "{% url 'new_video_source' %}",
+		success: function (response) {
+			let d = $("<div class='form-group row mx-2'></div>"),
+				l = $('<label for="id_file_path">File path</label>')
+				rem = $(`<div><i class="bi bi-x" onclick='remove(this)'></i></div>`).addClass("col-1 pr-0 text-right")
+			d.append(l);
+			d.append(response);
+			d.append(rem);
+			let cur = $("#add_source")[0]
+			cur.parentNode.insertBefore(d[0], cur)
+		},
+
+		error: function (response) {
+			alert(response["responseJSON"]["error"]);
+		}
+	})
+})
+</script>
 {% endblock %}

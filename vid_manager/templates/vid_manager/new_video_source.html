@@ -1,0 +1,31 @@
+{% extends "vid_manager/base.html" %}
+{% load bootstrap4 %}
+
+{% block title %}New Video Source{% endblock %}
+
+{% block header %}
+	<div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
+		<h2>New Video Source for {{ video }}</h2>
+	</div>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+	{% if messages %}
+		<div class="list-group">
+    	{% for message in messages %}
+    		<div class="list-group-item bg-info" {% if message.tags %} class="bg-{{ message.tags }}"{% endif %}>{{ message }}</div>
+    	{% endfor %}
+		</div>
+	{% endif %}
+	<div class="text-dark">
+		<form action="{% url 'new_video_source' video.id %}" method='post' class="form">
+			{% csrf_token %}
+			{% bootstrap_form form %}
+			{% buttons %}
+				<button name="submit" class="btn btn-dark">add video source</button>
+			{% endbuttons %}
+		</form>
+	</div>
+</div>
+{% endblock %}

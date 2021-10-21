@@ -4,7 +4,7 @@
 {% block title %}{{ video.title }}{% endblock %}
 
 {% block header %}
-	<div class="jumbotron bg-dark text-light p-auto text-center display-4 mt-5 mb-0 pt-2 pb-3">
+	<div class="jumbotron {% if not video.postr.image_color.color %}bg-dark {% endif %} video-text p-auto text-center display-4 mt-5 mb-0 pt-2 pb-3" style="{% if video.postr.image_color.color %}background-color:rgb({{video.postr.image_color.color}}){% endif%}">
 		<h2>
 			<div class="mw-100">
 				<div class="col">
@@ -19,6 +19,12 @@
 			</div>
 		</h2>
 	</div>
+	<script>window.HELP_IMPROVE_VIDEOJS = false;</script>
+	<script src="https://vjs.zencdn.net/7.15.4/video.min.js"></script>
+	<link href="https://vjs.zencdn.net/7.15.4/video-js.css" rel="stylesheet" />
+	<link href="https://unpkg.com/@videojs/themes@1/dist/city/index.css" rel="stylesheet"/>
+	<link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
+	<script src="https://unpkg.com/@silvermine/videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script>
 	{% load static %}
 	<link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
 	<style>
@@ -29,6 +35,21 @@
 			height:300px;
 			width:auto;
 		}
+
+		div.video-text {
+			color: white;
+			text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;
+			letter-spacing: 2px;
+			text-decoration:none;
+		}
+
+		.video-js .vjs-control-bar { 
+			display: -webkit-box;
+			display: -webkit-flex;
+			display: -ms-flexbox;
+			display: flex;
+		}
+
 	</style>
 {% endblock %}
 
@@ -61,8 +82,10 @@
 		{% endif %}
 	</div>
 	{% with poster=video.postr %}
-	<video style="width:100%;" preload="metadata" id='vid_player' controls range poster="{% if poster %}{{ poster.image.url }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
-    	<source src="{{ video.path }}" type="video/mp4">
+	<video style="width: 100%;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2], "aspectRatio": "16:9"}' controls range poster="{% if poster %}{{ poster.image.url }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
+		{% for sc in video.videosource_set.all %}
+			<source src="{{sc.path}}" type="video/mp4" value="{{sc.id}}" label="{{sc.height}}p" {% if forloop.last %}selected=true{% endif %}>
+		{% endfor %}
 	</video>
 	{% endwith %}
 	{% if video.event_set.all.count > 0 %}
@@ -100,34 +123,7 @@
 				</div>
 			</div>
 			<div class="d-flex px-0 col justify-content-end">
-				<ul class="list-group flex-row">
-					{% if video.poster %}
-					<div>
-						<a href="{{video.poster.url}}" class="text-dark">
-							<li class="list-group-item m-2 p-2 border border-dark rounded">
-								<i class='bi-image px-1'></i>
-							</li>
-						</a>
-					</div>
-					{% endif %}
-					<div clas="col-auto">
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.width }}x{{video.height}}</li>
-					</div>
-					<div clas="col-auto">
-						{% load bit_format %}
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.size|bit_size }}</li>
-					</div>
-					<div clas="col-auto">
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.length|time }}</li>
-					</div>
-					<div clas="col-auto">
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.bitrate|bit_rate }}</li>
-					</div>
-					{% if video.release_date %}
-					<div clas="col-auto">
-						<li class="list-group-item m-2 p-2 border border-dark rounded">{{ video.release_date }}</li>
-					</div>
-					{% endif %}
+				<ul id="info" class="list-group flex-row">
 				</ul>
 			</div>
 		</div>
@@ -155,9 +151,11 @@
 			</div>
 		</div>
 	</div>
+	{% if request.user.is_authenticated and request.user == video.owner and request.user.projector.admin %}
 	<div class="my-3">
 		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}"><i class="bi bi-pencil-square"></i></a>
 		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}"><i class="bi bi-image"></i> <i class="bi bi-plus"></i></a>
+		<a class='btn btn-dark mb-3' href="{% url 'new_video_source' video.id %}"><i class="bi bi-film"></i><i class="bi bi-plus"></i></a>
 		<a class='btn btn-dark mb-3' href="#add_event" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event"><i class="bi bi-calendar-plus mr-1"></i></a>
 		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole"><i class="bi bi-trash mr-1"></i></a>
 		<div class="collapse" id="add_event">
@@ -173,7 +171,35 @@
 		</div>
 	</div>
 	<script type="text/javascript" src="{% static 'vid_manager/tags.js' %}"></script>
+	{% endif %}
 	<script>
+
+		videojs("vid_player", {}, function() {
+			var player = this;
+			player.controlBar.addChild('QualitySelector', {}, this.children_.length);
+		});
+
+		var vid = document.getElementById("vid_player");
+		vid.addEventListener("DOMAttrModified", function(event) {
+			if (event.attrName == "src") {
+			// The `src` attribute changed!
+				let v_url = event.newValue
+				let index = Array.from(event.srcElement.children).find((element) => element.getAttribute('src') === v_url).getAttribute('value')
+				let get_info = "{% url 'video_info' 0 %}".replace('0', index);
+				$.ajax({
+					type: 'GET',
+					url: get_info,
+					success: function(response) {
+						$("#info").empty()
+						$('#info').append(response)
+					},
+					error: function (response) {
+						alert(response["responseJSON"]["error"]);
+					}
+				})
+			}
+		});
+
 		function jump(time) {
 			var myvideo = document.getElementById('vid_player');
 			event.preventDefault();

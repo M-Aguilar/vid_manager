@@ -1,16 +1,23 @@
 from django import forms
 
-from .models import Video, Actor, Tag, Image, Event, Alias
+from .models import Video, Actor, Tag, Image, Event, Alias, VideoSource
+
+class VideoSourceForm(forms.ModelForm):
+	class Meta:
+		model = VideoSource
+		fields = ['file_path']
+		widgets = {
+			'file_path': forms.Select(attrs={'class': 'form-control py-0 col-11'})
+		}
 
 class VideoForm(forms.ModelForm):
 	class Meta:
 		model = Video
-		fields = ['title', 'tags','actors','public', 'file_path', 'release_date']
+		fields = ['title', 'tags','actors','public', 'release_date']
 		labels = {'title':''}
 		widgets = {
 		'title': forms.TextInput(attrs={'placeholder':'Title','autofocus':'autofocus'}),
 		'release_date': forms.DateInput(attrs={'placeholder':'MM-DD-YYYY','format':'%m/%d/%Y'}),
-		'file_path': forms.Select(attrs={'class': 'form-control py-0'}),
 		}
 
 class AliasForm(forms.ModelForm):

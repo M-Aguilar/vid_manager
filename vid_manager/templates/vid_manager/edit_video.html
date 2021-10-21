@@ -12,19 +12,31 @@
 	<div class="row">
 		<div class="col-auto px-1"><p class="border py-2 px-3">Date Added: {{ video.date_added }}</p></div>
 		<div class="col-auto px-1"><p class="border py-2 px-3">Release Date: {{ video.release_date }}</p></div>
-		<div class="col-auto px-1"><p class="border py-2 px-3">Bitrate: {{ video.bitrate }} ({{ video.bitrate|bit_rate }})</p></div>
-		<div class="col-auto px-1"><p class="border py-2 px-3">Size: {{ video.size }} ({{ video.size|bit_size }})</p></div>		
-		<div class="col-auto px-1"><p class="border py-2 px-3">Length: {{ video.length|time }}</p></div>
 		<div class="col-auto px-1"><p class="border py-2 px-3">Images: {{ video.image_set.count }}</p></div>
 		<div class="col-auto px-1"><p class="border py-2 px-3">Events: {{ video.event_set.count }}</p></div>
 		<div class="col-auto px-1"><p class="border py-2 px-3">Actor #: {{ video.actors.count }}</p></div>
 		<div class="col-auto px-1"><p class="border py-2 px-3">Tag #: {{ video.tags.count }}</p></div>
-		<div class="col-auto px-1"><p class="border py-2 px-3">Width: {{ video.width }}</p></div>
-		<div class="col-auto px-1"><p class="border py-2 px-3">Height: {{ video.height }}</p></div>
-		{% if video.poster %}
-		<div class="col-auto px-1"><p class="border py-2 px-3">Poster Dimensions: {{ video.poster.width }}x{{ video.poster.height}}</p></div>
-		{% endif %}
+		<div class="col-auto px-1"><p class="border py-2 px-3">Sources #: {{ video.videosource_set.count }}</p></div>
 	</div>
+	<h5>Sources</h5>
+	<table class="table table-striped table-bordered">
+		<tr>
+			<th>#</th>
+			<th>Size</th>
+			<th>Length</th>
+			<th>Bitrate</th>
+			<th>Dimensions</th>
+		</tr>
+		{% for source in video.videosource_set.all %}
+		<tr>
+			<td>{{ forloop.counter }}</td>
+			<td>{{ source.size }} bytes ({{ source.size|bit_size}})</td>
+			<td>{{ source.length }} sec ({{source.length|time}})</td>
+			<td>{{ source.bitrate }} bit/s ({{source.bitrate|bit_rate}})</td>
+			<td>{{source.width}}x{{source.height}}</td>
+		</tr>
+		{% endfor %}
+	</table>
 {% endblock %}
 
 {% block content %}
@@ -59,9 +71,12 @@
 		<form action="{% url 'edit_video' video.id %}" method='post' enctype="multipart/form-data">
 		{% csrf_token %}
 		{% bootstrap_form form %}
+		{% for video_source in vs_forms %}
+		{% bootstrap_form video_source %}
+		{% endfor %}
+		<div id="add_source" class="w-100 text-right my-2"><i class="bi bi-plus"></i></div>
 		{% buttons %}
 			<button name="submit" class="btn btn-dark"><i class="bi-save"></i></button>
-			<a href="{{ video.path }}" class='btn btn-dark'><i class="bi-tv"></i></a>
 			<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark"><i class="bi-image mr-1"></i> <i class="bi-plus"></i></a> 	
 			<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole"><i class="bi-images mr-1"></i> <i class="bi-trash"></i></a>
 		{% endbuttons %}
@@ -103,15 +118,51 @@
 </div>
 {% load static %}
 <style>
-input#id_public.form-check-input {
-	left: 0px;
-}
-label.form-check-label {
-	margin-left: 5px;
-}
+	input#id_public.form-check-input {
+		left: 0px;
+	}
+	label.form-check-label {
+		margin-left: 5px;
+	}
+	label[for="id_file_path"] {
+		width:100%;
+	}
+
 </style>
 <script type="text/javascript" src="{% static 'vid_manager/edit_sort.js' %}"></script>
 <script>
+
+$("select#id_file_path").parent().append(`<div class="col-1 pr-0 text-right"><i class="bi bi-x" onclick='remove(this)'></i></div>`)
+$("select#id_file_path").parent().attr('class','form-group row mx-1')
+
+function remove(r) {
+	if ($("[id='id_file_path']").length > 1) {
+		r.parentNode.parentNode.remove()
+	}
+}
+
+$("#add_source").on('click', function(e) {
+	e.preventDefault();
+	$.ajax({
+		type: 'GET',
+		url: `{% url 'new_video_source' video.id %}`,
+		success: function (response) {
+			let d = $("<div class='form-group row mx-2'></div>"),
+				l = $('<label for="id_file_path">File path</label>'),
+				rem = $(`<div><i class="bi bi-x" onclick='remove(this)'></i></div>`).addClass("col-1 pr-0 text-right")
+			d.append(l);
+			d.append(response);
+			d.append(rem);
+			let cur = $("#add_source")[0]
+			cur.parentNode.insertBefore(d[0], cur)
+		},
+
+		error: function (response) {
+			alert(response["responseJSON"]["error"]);
+		}
+	})
+})
+
 $(".eventrow").on('click', "a#delete_event", function (e) {
 	e.preventDefault();
 	var new_url = "{% url 'delete_event' 0 %}".replace('0', $(this).attr('value'));

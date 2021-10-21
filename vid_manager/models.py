@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Max
 from django.contrib.auth.models import User
 from django.conf import settings
 from math import floor
@@ -109,10 +110,10 @@ class Video(models.Model):
 	tags = models.ManyToManyField('Tag', blank=True, related_name='videos')
 	actors = models.ManyToManyField('Actor', blank=True, related_name='videos')
 	public = models.BooleanField(default=False)
-	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^\w.*\.mp4$", recursive=True,unique=True)
-	length = models.PositiveIntegerField()
-	size = models.PositiveBigIntegerField()
-	bitrate = models.PositiveIntegerField()
+	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^\w.*\.mp4$", recursive=True,unique=True,null=True)
+	length = models.PositiveIntegerField(null=True)
+	size = models.PositiveBigIntegerField(null=True)
+	bitrate = models.PositiveIntegerField(null=True)
 
 	height = models.PositiveSmallIntegerField(null=True)
 	width = models.PositiveSmallIntegerField(null=True)
@@ -148,9 +149,63 @@ class Video(models.Model):
 			img = None
 		return img
 
+	@property
+	def vlen(self):
+		leng = self.videosource_set.all()
+		leng.aggregate(Max('length'))
+		leng.order_by('-length')
+		leng = leng.first()
+		return leng.length
+
+	@property
+	def min_res(self):
+		mr = self.videosource_set.all()
+		mr.aggregate(Max('height'))
+		mr = mr.order_by('height')
+		mr = mr.first()
+		return mr.height
+	@property
+	def max_res(self):
+		mr = self.videosource_set.all()
+		mr.aggregate(Max('height'))
+		mr = mr.order_by('-height')
+		mr = mr.first()
+		return mr.height
+
+	@property
+	def min_size(self):
+		ms = self.videosource_set.all()
+		ms.aggregate(Max('size'))
+		ms.order_by('size')
+		ms = ms.first()
+		return ms.size
+
+	@property
+	def max_size(self):
+		ms = self.videosource_set.all()
+		ms.aggregate(Max('size'))
+		ms.order_by('-size')
+		ms = ms.first()
+		return ms.size
+
+class VideoSource(models.Model):
+	video = models.ForeignKey(Video, on_delete=models.CASCADE)
+	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^\w.*\.mp4$", recursive=True,unique=True)
+	length = models.PositiveIntegerField()
+	size = models.PositiveBigIntegerField()
+	bitrate = models.PositiveIntegerField()
+	height = models.PositiveSmallIntegerField(null=True)
+	width = models.PositiveSmallIntegerField(null=True)
+
+	def path(self):
+		return settings.MEDIA_SERVER + self.file_path[self.file_path.index('videos'):]
+
+	class Meta:
+		ordering = ['-width']
+
 class Image(models.Model):
 	image = models.ImageField(upload_to=user_directory_path,blank=True)
-	actors = models.ManyToManyField('Actor', related_name='actor_images')
+	actors = models.ManyToManyField('Actor', related_name='actor_images',blank=True)
 	video = models.ForeignKey(Video, on_delete=models.CASCADE, blank=True,null=True, related_name='images')
 	tags = models.ManyToManyField('Tag', blank=True, related_name='tag_images')
 	is_poster = models.BooleanField(default=False)

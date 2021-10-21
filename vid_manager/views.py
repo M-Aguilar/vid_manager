@@ -33,8 +33,8 @@ from pymediainfo import MediaInfo
 import subprocess
 
 from .thumbnail import capture
-from .models import Video, Tag, Actor, Event, Image, Alias, PosterColor, VIDEO_SORT_OPTIONS
-from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasForm
+from .models import Video, Tag, Actor, Event, Image, Alias, PosterColor, VideoSource, VIDEO_SORT_OPTIONS
+from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasForm, VideoSourceForm
 
 class ImageFormView(FormView):
 	form_class = ImageForm
@@ -148,7 +148,8 @@ class SearchResultsView(ListView):
 
 @login_required
 def quick_search_results(request):
-	if request.is_ajax() and request.user.projector.admin:
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax and request.user.projector.admin:
 		q = request.GET.get('q')
 		results = fltr(q)
 		html = render_to_string(template_name='vid_manager/quick_search_results.html', context={'results':results})
@@ -182,7 +183,8 @@ def fltr(q):
 
 #Alias Form Handler. Only found in actor.html
 def new_alias(request):
-	if request.is_ajax and request.method == "POST":
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax and request.method == "POST":
 		form = AliasForm(request.POST)
 		if form.is_valid():
 			first_in = form['first_name'].value()
@@ -230,7 +232,7 @@ def add_actor(actor_name):
 #Returns number of Actors not created based on dir tree.
 def new_actor_count():
 	exceptions = settings.EXCEPTIONS
-	form=VideoForm()
+	form=VideoSourceForm()
 	choices = form.fields['file_path'].choices
 	actors = []
 	for x in Actor.objects.all():
@@ -268,7 +270,7 @@ def auto_add(request, actor_id):
 
 #Returns videos found in actor subdir or contain actor name
 def scan(actor):
-	form = VideoForm()
+	form = VideoSourceForm()
 	choices = form.fields['file_path'].choices
 	actor_videos = [x.file_path for x in Video.objects.filter(actors__isnull=False)]
 	found = [x for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
@@ -286,7 +288,8 @@ def index(request):
 		colors = ['cyan', 'teal', 'royalblue','darkblue', 'grey']
 		
 		#Res Pie Graph
-		reses = vids.order_by('height').values('height').distinct()
+		vid_source = VideoSource.objects.filter(video__owner=request.user)
+		reses = vid_source.order_by('height').values('height').distinct()
 		for i in reses:
 			res_labels.append("<a href='videos?res={0}'>{0}p</a>".format(i['height']))
 			res_values.append(vids.filter(height=i['height']).count())
@@ -324,7 +327,7 @@ def index(request):
 			'yanchor': 'top'})
 		res_graph_1 = fig1.to_html(full_html=False, default_height=500)
 		graphs['res_graph_1'] = res_graph_1
-
+		
 		#Actor Bar Graph
 		actor_labels, v_720, v_1080, v_1440, v_2160, max_bar_values = [], [], [], [], [], 10
 		actors = Actor.objects.filter(videos__in=vids).annotate(video_num=Count('videos')).filter(video_num__gt=0).order_by('-video_num')[:max_bar_values]
@@ -383,6 +386,17 @@ def video(request, video_id):
 	eventform = EventForm(initial={'video':video})
 	context = {'video': video, 'eventform': eventform, 'tagform': TagForm(), 'related_vids': rel_vid}
 	return render(request, 'vid_manager/video.html', context)
+
+@login_required
+def video_info(request, source_id):
+	sc = VideoSource.objects.get(id=source_id)
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if request.user == sc.video.owner and is_ajax:
+		context = {'source': sc}
+		return render(request, 'vid_manager/video_info.html', context)
+	else:
+		return JsonResponse({"error":e}, status=400)
+
 
 def related_videos(video, total):
 	videos = Video.objects.none()
@@ -503,33 +517,38 @@ def new_video(request, actor_id=None):
 			actor = Actor.objects.get(id=actor_id)
 			data = {'actors':actor}
 			form = VideoForm(initial=data)
-			form.fields['file_path'].choices = scan(actor)
+			#form.fields['file_path'].choices = scan(actor)
 		else:
-			form = available_fp()
+			form = VideoForm()
+		vs_form = available_fp()
 	else:
 		form = VideoForm(data=request.POST)
 		if form.is_valid():
 			new_video = form.save(commit=False)
 			new_video.owner = request.user
-			update_vid(new_video)
-			if request.FILES:
-				new_video.poster = request.FILES['poster']
-				new_video.save()
+			new_video.save()
 			form.save_m2m()
+			for sc in request.POST.getlist('file_path'):	
+				if VideoSource.objects.filter(file_path=sc).count() == 0:
+					v_path = VideoSource(video=new_video,file_path=sc)
+					update_vid(v_path)
+				else:
+					messages.error(request, "{0} is already in use".format(sc))
+			#return HttpResponseRedirect(reverse('new_video'))
 			return HttpResponseRedirect(reverse('video', args=[new_video.id]))
 	new_tag_form = TagForm()
 	new_actor_form = ActorForm()
-	context = {'form': form, 'new_actor_form': new_actor_form, 'new_tag_form': new_tag_form}
+	context = {'form': form, 'new_actor_form': new_actor_form, 'new_tag_form': new_tag_form, 'video_source_form': vs_form}
 	return render(request, 'vid_manager/new_video.html', context)
 
 #Returns a blank or existing VideoForm containing filtered file_path choices. Only non-claimed file_paths allowed
 #Provide current video to exclude.
 def available_fp(cur=None):
 	if cur:
-		form = VideoForm(instance=cur)
+		form = VideoSourceForm(instance=cur)
 	else:
-		form = VideoForm()
-	all_fps = [x.file_path for x in Video.objects.all()]
+		form = VideoSourceForm()
+	all_fps = [x.file_path for x in VideoSource.objects.all()]
 	form.fields['file_path'].choices  = [x for x in form.fields['file_path'].choices if ((cur) and cur.file_path in x[0]) or x[0] not in all_fps]
 	return form
 
@@ -548,23 +567,59 @@ def update_vid(new_video):
 @login_required
 def edit_video(request, video_id):
 	video = get_object_or_404(Video, id=video_id)
-	f_path = video.file_path
 	if video.owner != request.user and video.public:
 		raise Http404
 	if request.method != 'POST':
-		form = available_fp(video)
+		form = VideoForm(instance=video)
+		vs_forms = []
+		for vs in video.videosource_set.all():
+			vs_forms.append(available_fp(vs))
 	else:
-		form = VideoForm(instance=video, data=request.POST, files=request.FILES)
-		new_video = form.save(commit=False)
-		if f_path != new_video.file_path:
-			update_vid(new_video)
-		if (request.FILES.get('poster', False) and request.FILES.get('poster') != video.poster):
-			video.poster.delete()
+		form = VideoForm(instance=video, data=request.POST)
 		if form.is_valid():
-			form.save()
+			sources = video.videosource_set.all()
+			s_list = list(sources.values_list('file_path', flat=True))
+			post_source = request.POST.getlist('file_path')
+			for sc in sources:
+				if sc.file_path not in post_source:
+					sc.delete()
+			for ns in post_source:
+				if ns not in s_list:
+					if VideoSource.objects.filter(file_path=ns).count() == 0:
+						source = VideoSource(video=video, file_path=ns)
+						update_vid(source)
+					else:
+						messages.error(request, "{0} is already in use".format(ns))
+			new_video = form.save(commit=False)
+			form.save_m2m()
+			new_video = form.save()
 			return HttpResponseRedirect(reverse('video', args=[video.id]))
-	context = {'video': video,'form': form}
+	context = {'video': video,'form': form, 'vs_forms': vs_forms}
 	return render(request, 'vid_manager/edit_video.html', context)
+
+@login_required
+def new_video_source(request, video_id=None):
+	if video_id:
+		video = get_object_or_404(Video, id=video_id)
+		if video.owner != request.user or not request.user.projector.admin:
+			raise Http404
+	if request.method != 'POST':
+		is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+		if is_ajax:
+			try:
+				form = available_fp()
+				return HttpResponse(form)
+			except Exception as e:
+				return JsonResponse({"error":e}, status=400)
+		form = available_fp()
+	else:
+		form = VideoSourceForm(data=request.POST)
+		new_source = form.save(commit=False)
+		new_source.video = video
+		update_vid(new_source)
+		return HttpResponseRedirect(reverse('video', args=[video.id]))
+	context = {'video': video, 'form': form}
+	return render(request, 'vid_manager/new_video_source.html', context)
 
 #Takes video id and verifies ownerships before deleting video. deletes corresponding poster file. 
 @login_required
@@ -575,6 +630,8 @@ def delete_video(request, video_id):
 		if events.count() >0:
 			for e in events:
 				subprocess.Popen(['sudo','rm', e.file_path])
+		for vs in v.videosource_set.all():
+			vs.delete()
 		for i in v.images.all():
 			i.image.delete()
 			i.delete()
@@ -684,7 +741,8 @@ def delete_tag(request, tag_id):
 @login_required
 def remove_tag(request, tag_id):
 	t = request.META.get('HTTP_REFERER')
-	if request.is_ajax and request.user.projector.admin:
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax and request.user.projector.admin:
 		tag = Tag.objects.get(id=tag_id)
 		if 'video' in t:
 			video = Video.objects.get(id=t[t.index('video')+6:])
@@ -702,7 +760,8 @@ def remove_tag(request, tag_id):
 @login_required
 def new_tag(request):
 	t = request.META.get('HTTP_REFERER')
-	if request.is_ajax and request.method == "POST":
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax and request.method == "POST":
 		form = TagForm(request.POST)
 		try:
 			tag = Tag.objects.get(tag_name=form.data['tag_name'])
@@ -738,6 +797,7 @@ def new_tag(request):
 def tag_results(request):
 	q = request.GET.get('q')
 	t = request.META.get('HTTP_REFERER')
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 	if request.user.projector.admin and q:
 		tags = None
 		if 'video' in t:
@@ -746,7 +806,7 @@ def tag_results(request):
 		if 'image' in t:
 			image = Image.objects.get(id=t[t.index('image')+6:])
 			tags = Tag.objects.filter(tag_name__icontains=q).exclude(id__in=image.tags.all())
-		if request.is_ajax():
+		if is_ajax:
 			html = render_to_string(template_name='vid_manager/tag_results.html', context={'tags':tags})
 			data = {"tag_results_view":html}
 			return JsonResponse(data=data, safe=False)
@@ -812,7 +872,8 @@ def delete_actor(request, actor_id):
 
 @login_required
 def new_actor(request):
-	if request.is_ajax and request.method == "POST":
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax and request.method == "POST":
 		form = ActorForm(request.POST)
 		if form.is_valid():
 			instance = form.save(commit=False)
@@ -1010,7 +1071,8 @@ def new_event(request,video_id):
 
 def delete_event(request, event_id):
 	event = get_object_or_404(Event, id=event_id)
-	if request.is_ajax and request.user.projector.admin and event.video.owner == request.user:
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax and request.user.projector.admin and event.video.owner == request.user:
 		temp_event = event
 		pk = event.id
 		event.delete()

@@ -1,0 +1,19 @@
+{% load bit_format %}
+<div clas="col-auto">
+    <li class="list-group-item m-2 p-2 border border-dark rounded">{{ source.width}}x{{source.height}} </li>
+</div>
+<div clas="col-auto">
+    {% load bit_format %}
+    <li class="list-group-item m-2 p-2 border border-dark rounded">{{source.size|bit_size}}</li>
+</div>
+<div clas="col-auto">
+    <li class="list-group-item m-2 p-2 border border-dark rounded">{{source.length|time}}</li>
+</div>
+<div clas="col-auto">
+    <li class="list-group-item m-2 p-2 border border-dark rounded"> {{source.bitrate|bit_rate}} </li>
+</div>
+{% if source.video.release_date %}
+<div clas="col-auto">
+    <li class="list-group-item m-2 p-2 border border-dark rounded">{{ source.video.release_date }}</li>
+</div>
+{% endif %}
