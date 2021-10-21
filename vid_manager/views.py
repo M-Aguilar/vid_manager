@@ -272,7 +272,7 @@ def auto_add(request, actor_id):
 def scan(actor):
 	form = VideoSourceForm()
 	choices = form.fields['file_path'].choices
-	actor_videos = [x.file_path for x in Video.objects.filter(actors__isnull=False)]
+	actor_videos = [x.file_path for x in VideoSource.objects.filter(video__actors__isnull=False)]
 	found = [x for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
 	return found
 
@@ -281,20 +281,20 @@ def index(request):
 	total, count, tot_length, image_count, actor_count, graphs = 0, 0, 0, 0, 0, {}
 	if request.user.is_authenticated and request.user.projector.admin and Video.objects.filter(owner_id=request.user.id).count() > 0:
 		vids = Video.objects.filter(owner=request.user)
-		total = str(round((vids.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
-		count, image_count, actor_count = vids.count(), Image.objects.all().count(), Actor.objects.all().count()
-		tot_length = vids.aggregate(Sum('length'))['length__sum']
+		vid_source = VideoSource.objects.filter(video__owner=request.user)
+		total = str(round((vid_source.aggregate(Sum('size'))['size__sum'] * 0.000000001),2)) + "GB" 
+		count, image_count, actor_count = vid_source.count(), Image.objects.all().count(), Actor.objects.all().count()
+		tot_length = vid_source.aggregate(Sum('length'))['length__sum']
 		res_labels, res_values, res_size_labels, res_size_values = [], [], [], []
 		colors = ['cyan', 'teal', 'royalblue','darkblue', 'grey']
 		
 		#Res Pie Graph
-		vid_source = VideoSource.objects.filter(video__owner=request.user)
 		reses = vid_source.order_by('height').values('height').distinct()
 		for i in reses:
 			res_labels.append("<a href='videos?res={0}'>{0}p</a>".format(i['height']))
-			res_values.append(vids.filter(height=i['height']).count())
+			res_values.append(vid_source.filter(height=i['height']).count())
 			res_size_labels.append("<a href='videos?res={0}'>{0}p</a>".format(i['height']))
-			res_size_values.append(round((vids.filter(height=i['height']).aggregate(Sum('size'))['size__sum'] * 0.000000001),2))
+			res_size_values.append(round((vid_source.filter(height=i['height']).aggregate(Sum('size'))['size__sum'] * 0.000000001),2))
 		fig = go.Figure(
 			data=[go.Pie(labels=res_labels, 
 						values=res_values, 
@@ -334,10 +334,10 @@ def index(request):
 		for a in actors:
 			if len(actor_labels) < max_bar_values:
 				actor_labels.append("<a href='actor/{1}'>{0}</a>".format(a.full_name, a.id))
-				v_720.append(a.videos.filter(height=720).count())
-				v_1440.append(a.videos.filter(height=1440).count())
-				v_1080.append(a.videos.filter(height=1080).count())
-				v_2160.append(a.videos.filter(height=2160).count())
+				v_720.append(a.videos.filter(videosource__height=720).count())
+				v_1440.append(a.videos.filter(videosource__height=1440).count())
+				v_1080.append(a.videos.filter(videosource__height=1080).count())
+				v_2160.append(a.videos.filter(videosource__height=2160).count())
 			else:
 				break
 		fig2 = go.Figure(data=[
