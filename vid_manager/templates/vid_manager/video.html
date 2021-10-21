@@ -82,7 +82,7 @@
 		{% endif %}
 	</div>
 	{% with poster=video.postr %}
-	<video style="width: 100%;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2], "aspectRatio": "16:9"}' controls range poster="{% if poster %}{{ poster.image.url }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
+	<video style="width: 100%;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% if poster %}{{ poster.path }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
 		{% for sc in video.videosource_set.all %}
 			<source src="{{sc.path}}" type="video/mp4" value="{{sc.id}}" label="{{sc.height}}p" {% if forloop.last %}selected=true{% endif %}>
 		{% endfor %}
@@ -173,7 +173,6 @@
 	<script type="text/javascript" src="{% static 'vid_manager/tags.js' %}"></script>
 	{% endif %}
 	<script>
-
 		videojs("vid_player", {}, function() {
 			var player = this;
 			player.controlBar.addChild('QualitySelector', {}, this.children_.length);
@@ -190,6 +189,8 @@
 					type: 'GET',
 					url: get_info,
 					success: function(response) {
+						let aspect_ratio = response.substring(response.indexOf('*start*')+7,response.indexOf('*end*'))
+						videojs("vid_player").aspectRatio(aspect_ratio)
 						$("#info").empty()
 						$('#info').append(response)
 					},

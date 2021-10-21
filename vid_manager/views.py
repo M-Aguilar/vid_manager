@@ -395,8 +395,7 @@ def video_info(request, source_id):
 		context = {'source': sc}
 		return render(request, 'vid_manager/video_info.html', context)
 	else:
-		return JsonResponse({"error":e}, status=400)
-
+		return JsonResponse({"error": "User/Request Error"}, status=400)
 
 def related_videos(video, total):
 	videos = Video.objects.none()

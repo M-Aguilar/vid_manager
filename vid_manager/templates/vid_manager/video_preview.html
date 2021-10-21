@@ -9,7 +9,7 @@
 		</div>
 	</div>
 	<div class='preview'>
-		<img src="{% if poster %}{{ poster.image.url }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image align-middle" alt='No image'>
+		<img src="{% if poster %}{{ poster.path }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image align-middle" alt='No image'>
 		<div class="bottom-left preview-text">{% if video.videosource_set.count > 1 %}{{ video.min_size|bit_size }}-{% endif %}{{video.max_size|bit_size}}</div><!--video.bitrate|bit_rate - video.size|bit_size-->
 	</div>
 	<div class="bottom-video-row row mx-0 px-2" style="background-color: rgb({% if not poster %}{{rand_color}}{% else %}{{poster.image_color.color}}{% endif %})">

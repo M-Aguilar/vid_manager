@@ -110,13 +110,6 @@ class Video(models.Model):
 	tags = models.ManyToManyField('Tag', blank=True, related_name='videos')
 	actors = models.ManyToManyField('Actor', blank=True, related_name='videos')
 	public = models.BooleanField(default=False)
-	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^\w.*\.mp4$", recursive=True,unique=True,null=True)
-	length = models.PositiveIntegerField(null=True)
-	size = models.PositiveBigIntegerField(null=True)
-	bitrate = models.PositiveIntegerField(null=True)
-
-	height = models.PositiveSmallIntegerField(null=True)
-	width = models.PositiveSmallIntegerField(null=True)
 
 	class Meta:
 		verbose_name_plural = 'videos'
@@ -124,9 +117,6 @@ class Video(models.Model):
 
 	def __str__(self):
 		return self.title
-
-	def path(self):
-		return settings.MEDIA_SERVER + self.file_path[self.file_path.index('videos'):]
 
 	@property
 	def rand_color(self):
@@ -210,13 +200,18 @@ class Image(models.Model):
 	tags = models.ManyToManyField('Tag', blank=True, related_name='tag_images')
 	is_poster = models.BooleanField(default=False)
 
+	def path(self):
+		if settings.DEBUG:
+			return self.image.url
+		else:
+			return settings.MEDIA_SERVER + self.image.url[self.image.url.index('Images'):]
+
 	@property
 	def first_actor(self):
 		return self.actors.first().full_name
 
 	class Meta:
 		verbose_name_plural = 'images'
-
 
 class PosterColor(models.Model):
 	image = models.OneToOneField(Image, on_delete=models.CASCADE, related_name='image_color')

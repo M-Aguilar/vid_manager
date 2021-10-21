@@ -1,6 +1,6 @@
 {% load bit_format %}
 <div clas="col-auto">
-    <li class="list-group-item m-2 p-2 border border-dark rounded">{{ source.width}}x{{source.height}} </li>
+    <li aspect-ratio="*start*{{source.width}}:{{source.height}}*end*" class="list-group-item m-2 p-2 border border-dark rounded">{{ source.width}}x{{source.height}} </li>
 </div>
 <div clas="col-auto">
     {% load bit_format %}
