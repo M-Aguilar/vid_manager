@@ -204,7 +204,7 @@ class Image(models.Model):
 		if settings.DEBUG:
 			return self.image.url
 		else:
-			return settings.MEDIA_SERVER + self.image.url[self.image.url.index('Images'):]
+			return settings.MEDIA_SERVER + self.image.url[self.image.url.index('videos'):]
 
 	@property
 	def first_actor(self):
