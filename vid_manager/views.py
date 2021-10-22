@@ -250,19 +250,20 @@ def auto_add(request, actor_id):
 	if not request.user.is_authenticated:
 		raise Http404
 	actor = Actor.objects.get(id=actor_id)
-	new_vidss = scan(actor)
-	for new_vids in new_vidss:
-		new_vids = new_vids[0]
-		title = new_vids.split('/')[-1]
+	new_vids = scan(actor)
+	for new_vid in new_vids:
+		new_vid = new_vid[0]
+		title = new_vid.split('/')[-1]
+		title = title[:title.index('.mp4')]
 		if len(title) > 75:
 			title = title[:74]
-		data = {'title': title[:title.index('.')],'actors': [actor]}
+		data = {'title': title,'actors': [actor]}
 		form = VideoForm(data=data)
 		if form.is_valid():
 			new_video = form.save(commit=False)
 			new_video.owner = request.user
 			new_video.save()
-			sc = VideoSource(video=new_video, file_path=new_vids)
+			sc = VideoSource(video=new_video, file_path=new_vid)
 			update_vid(sc)
 			form.save_m2m()
 		else:
@@ -469,18 +470,18 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		except ValueError:
 			pass
 		if not isinstance(r, int):
-			videos = videos.filter(Q(height__gte=0))
+			videos = videos.filter(Q(videosource__height__gte=0))
 		#Did it for this one. Need to modularize and implement
 		elif sym == '<=':
-			videos = videos.filter(Q(height__lte=r))
+			videos = videos.filter(Q(videosource__height__lte=r))
 		elif sym == '>=':
-			videos = videos.filter(Q(height__gte=r))
+			videos = videos.filter(Q(videosource__height__gte=r))
 		elif sym == '<':
-			videos = videos.filter(Q(height__lt=r))		
+			videos = videos.filter(Q(videosource__height__lt=r))		
 		elif sym == '>':
-			videos = videos.filter(Q(height__gt=r))
+			videos = videos.filter(Q(videosource__height__gt=r))
 		else:
-			videos = videos.filter(Q(height=res))
+			videos = videos.filter(Q(videosource__height=res))
 
 	#Order By
 	if 'actor_num' in sort:
