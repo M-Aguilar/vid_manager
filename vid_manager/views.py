@@ -272,7 +272,7 @@ def auto_add(request, actor_id):
 def scan(actor):
 	form = VideoSourceForm()
 	choices = form.fields['file_path'].choices
-	actor_videos = [x.file_path for x in VideoSource.objects.filter(video__actors__isnull=False)]
+	actor_videos = [x.file_path for x in VideoSource.objects.all()]
 	found = [x for x in choices if (("/{0}/".format(actor.full_name) in x[0]) or (actor.full_name.replace(" ","") in x[0])) and x[0] not in actor_videos]
 	return found
 
@@ -516,10 +516,11 @@ def new_video(request, actor_id=None):
 			actor = Actor.objects.get(id=actor_id)
 			data = {'actors':actor}
 			form = VideoForm(initial=data)
-			#form.fields['file_path'].choices = scan(actor)
+			vs_form = available_fp()
+			vs_form.fields['file_path'].choices = scan(actor)
 		else:
 			form = VideoForm()
-		vs_form = available_fp()
+			vs_form = available_fp()
 	else:
 		form = VideoForm(data=request.POST)
 		if form.is_valid():
