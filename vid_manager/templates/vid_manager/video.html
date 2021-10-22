@@ -82,7 +82,7 @@
 		{% endif %}
 	</div>
 	{% with poster=video.postr %}
-	<video style="width: 100%;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% if poster %}{{ poster.path }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
+	<video style="width: 100%; max-height: 75vh;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% if poster %}{{ poster.path }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
 		{% for sc in video.videosource_set.all %}
 			<source src="{{sc.path}}" type="video/mp4" value="{{sc.id}}" label="{{sc.height}}p" {% if forloop.last %}selected=true{% endif %}>
 		{% endfor %}
@@ -173,30 +173,40 @@
 	<script type="text/javascript" src="{% static 'vid_manager/tags.js' %}"></script>
 	{% endif %}
 	<script>
+		get_info($("#vid_player")[0].currentSrc)
+
 		videojs("vid_player", {}, function() {
 			var player = this;
 			player.controlBar.addChild('QualitySelector', {}, this.children_.length);
 		});
+
+		function get_info(src) {
+			var get_info = "{% url 'video_info' 0 %}".replace('0', Array.from($("source")).find((element) => element.src === src).getAttribute('value'));
+			$.ajax({
+				type: 'GET',
+				url: get_info,
+				success: function(response) {
+					let aspect_ratio = response.substring(response.indexOf('*start*')+7,response.indexOf('*end*'))
+					let w = parseInt(aspect_ratio.substring(0,aspect_ratio.indexOf(':')))
+					let h = parseInt(aspect_ratio.substring(aspect_ratio.indexOf(':')+1))
+					if (w > h) {
+						videojs("vid_player").aspectRatio(aspect_ratio)
+					}
+					$("#info").empty()
+					$('#info').append(response)
+				},
+				error: function (response) {
+					alert(response["responseJSON"]["error"]);
+				}
+			})
+		}
 
 		function callback(mutationList, observer) {
 		mutationList.forEach( (mutation) => {
 			switch(mutation.type) {
 			case 'attributes':
 				if (mutation.attributeName === 'src') {
-					var get_info = "{% url 'video_info' 0 %}".replace('0', Array.from($("source")).find((element) => element.src === mutation.target.src).getAttribute('value'));
-					$.ajax({
-						type: 'GET',
-						url: get_info,
-						success: function(response) {
-							let aspect_ratio = response.substring(response.indexOf('*start*')+7,response.indexOf('*end*'))
-							videojs("vid_player").aspectRatio(aspect_ratio)
-							$("#info").empty()
-							$('#info').append(response)
-						},
-						error: function (response) {
-							alert(response["responseJSON"]["error"]);
-						}
-					})
+					get_info(mutation.target.src)
 				}
 				break;
 			}
