@@ -37,18 +37,7 @@
 		});
 	</script>
 </div>
-<div class="pagination d-flex justify-content-center">
-	<span class="step-links">
-	{% if videos.has_previous %}
-		<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}{% if actors %}{% for actor in actors %}&actor={{ actor }}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if res %}&res={{res}}{% endif %}">&laquo; first</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}{% for actor in actors %}&actor={{ actor }}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if res %}&res={{res}}{% endif %}">previous</a>
-	{% endif %}
-	{% if videos.has_next %}
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}{% for actor in actors %}&actor={{ actor }}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if res %}&res={{res}}{% endif %}">next</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}{% for actor in actors %}&actor={{ actor }}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if res %}&res={{res}}{% endif %}">last &raquo;</a>
-	{% endif %}
-	</span>
-</div>
+{% include "vid_manager/videos_pagination.html" %}
 {% load static %}
 {% endblock %}
 
@@ -84,16 +73,5 @@
 		Page {{ videos.number }} of {{ videos.paginator.num_pages }}
 	</span>
 </div>
-<div class="pagination d-flex justify-content-center">
-	<span class="step-links">
-		{% if videos.has_previous %}
-			<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}{% if actors %}{% for actor in actors %}&actor={{ actor }}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if res %}&res={{res}}{% endif %}">&laquo; first</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}{% for actor in actors %}&actor={{ actor }}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if res %}&res={{res}}{% endif %}">previous</a>
-		{% endif %}
-		{% if videos.has_next %}
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}{% for actor in actors %}&actor={{ actor }}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if res %}&res={{res}}{% endif %}">next</a>
-			<a class="btn btn-sm btn-dark" href="?page={{ videos.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}{% if actors %}{% for actor in actors %}&actor={{ actor }}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if res %}&res={{res}}{% endif %}">last &raquo;</a>
-		{% endif %}
-	</span>
-</div>
+{% include "vid_manager/videos_pagination.html" %}
 {% endblock %}

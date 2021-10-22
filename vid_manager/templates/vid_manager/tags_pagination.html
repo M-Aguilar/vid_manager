@@ -1,0 +1,12 @@
+<div class="pagination d-flex justify-content-center">
+	<span class="step-links">
+    {% if tags.has_previous %}
+        <a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&{{sort}}{% endif %}">&laquo; first</a>
+        <a class="btn btn-sm btn-dark" href="?page={{ tags.previous_page_number }}{% if sort %}&{{sort}}{% endif %}">previous</a>
+    {% endif %}
+    {% if tags.has_next %}
+        <a class="btn btn-sm btn-dark" href="?page={{ tags.next_page_number }}{% if sort %}&{{sort}}{% endif %}">next</a>
+        <a class="btn btn-sm btn-dark" href="?page={{ tags.paginator.num_pages }}{% if sort %}&{{sort}}{% endif %}">last &raquo;</a>
+    {% endif %}
+	</span>
+</div>

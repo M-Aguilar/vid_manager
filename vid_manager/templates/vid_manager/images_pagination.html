@@ -1,0 +1,12 @@
+<div class="pagination d-flex justify-content-center">
+	<span class="step-links">
+		{% if images.has_previous %}
+			<a class="btn btn-sm btn-dark" href="?page=1{% if actors %}{% for actor in actors %}&actor={{actor}}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ images.previous_page_number }}{% if actors %}{% for actor in actors %}&actor={{actor}}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
+		{% endif %}
+		{% if images.has_next %}
+			<a class="btn btn-sm btn-dark" href="?page={{ images.next_page_number }}{% if actors %}{% for actor in actors %}&actor={{actor}}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if sort %}&sort={{sort}}{% endif %}">next</a>
+			<a class="btn btn-sm btn-dark" href="?page={{ images.paginator.num_pages }}{% if actors %}{% for actor in actors %}&actor={{actor}}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}&tag={{tag}}{% endfor %}{% endif %}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
+		{% endif %}
+	</span>
+</div>

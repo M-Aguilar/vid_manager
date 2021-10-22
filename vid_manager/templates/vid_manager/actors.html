@@ -59,18 +59,7 @@
 		</script>
 	</div>
 </div>
-<div class="pagination d-flex w-100 justify-content-center">
-	<span class="step-links">
-	{% if actors.has_previous %}
-		<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ actors.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
-	{% endif %}
-	{% if actors.has_next %}
-		<a class="btn btn-sm btn-dark" href="?page={{ actors.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ actors.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
-	{% endif %}
-	</span>
-</div>
+{% include "vid_manager/actors_pagination.html" %}
 {% if new_actors > 0 %}
 <div class="float-right">
 	<p>{{ new_actors }} New Actors Found! Add them <a href="{% url 'auto_actor_add' %}">here</a>.</p>
@@ -82,30 +71,14 @@
 <div id="actors">
 	<div class="row mx-1">
 	{% for actor in actors %}			
-		<div class="mb-4 pb-3 col-sm-6 col-md-4 col-lg-3 col-xl-2 px-1">
-			<a href="{% url 'actor' actor.id %}" >
-				<div class="top-video-row preview-text pl-2" style="background-color: lightgrey">
-					{{ actor }}
-				</div>
-				<div class="preview">
-					<img src="{% if actor.img %}{{ actor.img.path }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
-				</div>
-				<div class="bottom-video-row pl-2" style="background-color: lightgrey">
-					<div class="row">
-						<div class="col-auto ml-auto">
-							<a class="preview-text" href="{% url 'images' %}?actor={{actor}}"><i class="bi-image"></i> {{ actor.actor_images.count }} </a>
-							<a class="preview-text" href="{% url 'videos' %}?actor={{actor}}"><i class="bi-film"></i> {{ actor.videos.count }}</div></a>
-					</div>
-				</div>
-			</a>
-		</div>
-		{% empty %}
-			<div class='container'>
-				<div class="list-group-item">
-					No Actors have been added yet.
-				</div>
+		{% include "vid_manager/actor_tile.html" %}
+	{% empty %}
+		<div class='container'>
+			<div class="list-group-item">
+				No Actors have been added yet.
 			</div>
-		{% endfor %}
+		</div>
+	{% endfor %}
 	</div>
 </div>
 <div class="d-flex justify-content-center mt-4">
@@ -113,18 +86,7 @@
 		Page {{ actors.number }} of {{ actors.paginator.num_pages }}
 	</span>
 </div>
-<div class="pagination d-flex justify-content-center">
-	<span class="step-links">
-	{% if actors.has_previous %}
-		<a class="btn btn-sm btn-dark" href="?page=1{% if sort %}&sort={{sort}}{% endif %}">&laquo; first</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ actors.previous_page_number }}{% if sort %}&sort={{sort}}{% endif %}">previous</a>
-	{% endif %}
-	{% if actors.has_next %}
-		<a class="btn btn-sm btn-dark" href="?page={{ actors.next_page_number }}{% if sort %}&sort={{sort}}{% endif %}">next</a>
-		<a class="btn btn-sm btn-dark" href="?page={{ actors.paginator.num_pages }}{% if sort %}&sort={{sort}}{% endif %}">last &raquo;</a>
-	{% endif %}
-	</span>
-</div>
+{% include "vid_manager/actors_pagination.html" %}
 <link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
 <script>
 	$("#actor_form").submit(function (e) {
@@ -143,7 +105,7 @@
 				var new_url = "{% url 'actor' 0 %}".replace('0', pk);
 				$('.messages').empty();
 				$('.messages').prepend(`<div class="rounded p-2 mb-3 bg-success">Actor "${fields['first_name']} ${fields['last_name']}"has been added.</div>`);
-				$("#actors .row").prepend(`<div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 ml-auto"><a href="${new_url}" ><div class="preview"><img src="{% static 'vid_manager/blank_image.png'%}" height="auto" width="100%" alt="" class="mx-auto">
+				$("#actors .row").prepend(`<div class="mb-4 pb-3 col-sm-6 col-md-4 col-lg-3 col-xl-2 px-1"><a href="${new_url}" ><div class="preview"><img src="{% static 'vid_manager/blank_image.png'%}" height="auto" width="100%" alt="" class="mx-auto">
 					<div class="top-left">${fields['first_name']} ${fields['last_name']}</div></div></a></div>`);
 			},
 			error: function (response) {
