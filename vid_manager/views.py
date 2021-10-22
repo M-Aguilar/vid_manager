@@ -256,12 +256,14 @@ def auto_add(request, actor_id):
 		title = new_vids.split('/')[-1]
 		if len(title) > 75:
 			title = title[:74]
-		data = {'title': title[:title.index('.')],'actors': [actor],'file_path':new_vids}
+		data = {'title': title[:title.index('.')],'actors': [actor]}
 		form = VideoForm(data=data)
 		if form.is_valid():
 			new_video = form.save(commit=False)
 			new_video.owner = request.user
-			update_vid(new_video)
+			new_video.save()
+			sc = VideoSource(video=new_video, file_path=new_vids)
+			update_vid(sc)
 			form.save_m2m()
 		else:
 			messages.error(request,form.errors)
