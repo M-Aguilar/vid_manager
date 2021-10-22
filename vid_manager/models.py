@@ -166,7 +166,7 @@ class Video(models.Model):
 	def min_size(self):
 		ms = self.videosource_set.all()
 		ms.aggregate(Max('size'))
-		ms.order_by('size')
+		ms = ms.order_by('size')
 		ms = ms.first()
 		return ms.size
 
@@ -174,7 +174,7 @@ class Video(models.Model):
 	def max_size(self):
 		ms = self.videosource_set.all()
 		ms.aggregate(Max('size'))
-		ms.order_by('-size')
+		ms = ms.order_by('-size')
 		ms = ms.first()
 		return ms.size
 
