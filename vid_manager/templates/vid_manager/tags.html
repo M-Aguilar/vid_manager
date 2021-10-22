@@ -52,14 +52,7 @@
 		<div class="tagrow row mx-1">
 			{% load static %}
 			{% for tag in tags %}
-			<div class="mb-4 col-sm-6 col-md-4 col-lg-3 col-xl-2 pb-3 px-1">
-				<a href="{% url 'tag' tag.id %}">
-					<div class="preview">
-						<img src="{% if tag.img %}{{ tag.img.path }}{% else %}{% static 'vid_manager/blank_image.png' %}{% endif %}" height="auto" width="100%" alt=''>
-						<div class="img-top-left">{{ tag }}</div>
-					</div>
-				</a>
-			</div>
+				{% include 'vid_manager/tags_tile.html' %}
 			{% empty %}
 			<div class='container'>
 				<div class="list-group-item">
@@ -102,8 +95,16 @@
 				var pk = instance[0]["pk"];
 				var new_url = "{% url 'tag' 0 %}".replace('0', pk);
 				$('.messages').prepend(`<div class="rounded px-4 by-3 bg-success">Tag "${fields['tag_name']}"has been added.</div>`);
-				$("#tags .tagrow").prepend(`<div class="mb-4 col-sm-6 col-md-4 col-lg-3 col-xl-2 pb-3 px-1"><a href="${new_url}"><div class="preview"><img src="{% load static %}{% static 'vid_manager/blank_image.png' %}" height="auto" width="100%" alt=''><div class="top-left">${fields['tag_name']}</div></div></a></div>`);
-			},
+				$.ajax({
+					type: 'GET',
+					url: "{% url 'tags_tile' 0 %}".replace('0', pk),
+					success: function (response) {
+						$(".tagrow").prepend(response);
+					},
+					error: function (response) {
+						alert(response["responseJSON"]["error"]);
+					}
+				});			},
 			error: function (response) {
 				alert(response["responseJSON"]["error"]);
 			}

@@ -817,8 +817,20 @@ def tag_tile(request, tag_id):
 	tag = get_object_or_404(Tag, id=tag_id)
 	return render(request, 'vid_manager/tag_tile.html', {'tag':tag})
 
+def tags_tile(request, tag_id):
+	tag = get_object_or_404(Tag, id=tag_id)
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax and request.method != "POST" and request.user.projector.admin:
+		return render(request, 'vid_manager/tags_tile.html', {'tag':tag})
 
 '''########################    ACTOR     #########################'''
+
+@login_required
+def actor_tile(request, actor_id):
+	actor = get_object_or_404(Actor, id=actor_id)
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax and request.method != "POST" and request.user.projector.admin:
+		return render(request, 'vid_manager/actor_tile.html', {'actor': actor})
 
 @login_required
 def actor(request, actor_id):

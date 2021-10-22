@@ -33,6 +33,7 @@ urlpatterns = [
 	path('tag_results', views.tag_results, name="tag_results"),
 	path('image/tag_tile/<tag_id>', views.tag_tile, name='tag_tile'),
 	path('video/tag_tile/<tag_id>', views.tag_tile, name='tag_tile'),
+	path('<tag_id>/tags_tile', views.tags_tile, name="tags_tile"),
 
 	#Actor
 	path('actor/<actor_id>', views.actor, name='actor'),
@@ -40,7 +41,7 @@ urlpatterns = [
 	path('actors', views.actors, name='actors'),
 	path('<actor_id>/delete', views.delete_actor, name='delete_actor'),
 	path('new_alias', views.new_alias, name='new_alias'),
-
+	path('<actor_id>/actor_tile', views.actor_tile, name="actor_tile"),
 	#Auto Add Actor Videos
 	path('<actor_id>/auto_add', views.auto_add, name='auto_add'),
 
