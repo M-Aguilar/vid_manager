@@ -178,28 +178,36 @@
 			player.controlBar.addChild('QualitySelector', {}, this.children_.length);
 		});
 
-		var vid = document.getElementById("vid_player");
-		vid.addEventListener("DOMAttrModified", function(event) {
-			if (event.attrName == "src") {
-			// The `src` attribute changed!
-				let v_url = event.newValue
-				let index = Array.from(event.srcElement.children).find((element) => element.getAttribute('src') === v_url).getAttribute('value')
-				let get_info = "{% url 'video_info' 0 %}".replace('0', index);
-				$.ajax({
-					type: 'GET',
-					url: get_info,
-					success: function(response) {
-						let aspect_ratio = response.substring(response.indexOf('*start*')+7,response.indexOf('*end*'))
-						videojs("vid_player").aspectRatio(aspect_ratio)
-						$("#info").empty()
-						$('#info').append(response)
-					},
-					error: function (response) {
-						alert(response["responseJSON"]["error"]);
-					}
-				})
+		function callback(mutationList, observer) {
+		mutationList.forEach( (mutation) => {
+			switch(mutation.type) {
+			case 'attributes':
+				if (mutation.attributeName === 'src') {
+					var get_info = "{% url 'video_info' 0 %}".replace('0', Array.from($("source")).find((element) => element.src === mutation.target.src).getAttribute('value'));
+					$.ajax({
+						type: 'GET',
+						url: get_info,
+						success: function(response) {
+							let aspect_ratio = response.substring(response.indexOf('*start*')+7,response.indexOf('*end*'))
+							videojs("vid_player").aspectRatio(aspect_ratio)
+							$("#info").empty()
+							$('#info').append(response)
+						},
+						error: function (response) {
+							alert(response["responseJSON"]["error"]);
+						}
+					})
+				}
+				break;
 			}
 		});
+		}
+
+		const observerOptions = {
+  			attributes: true
+		}
+		const observer = new MutationObserver(callback);
+		observer.observe($('#vid_player')[0].firstChild, observerOptions);
 
 		function jump(time) {
 			var myvideo = document.getElementById('vid_player');
