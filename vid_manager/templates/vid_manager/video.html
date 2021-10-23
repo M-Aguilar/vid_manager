@@ -170,15 +170,31 @@
 			</div>
 		</div>
 	</div>
+	<div id="console"></div>
 	<script type="text/javascript" src="{% static 'vid_manager/tags.js' %}"></script>
 	{% endif %}
 	<script>
-		get_info($("#vid_player")[0].currentSrc)
+		//log(document.querySelector('video'))
+		//get_info($("#vid_player")[0].currentSrc)
 
 		videojs("vid_player", {}, function() {
 			var player = this;
 			player.controlBar.addChild('QualitySelector', {}, this.children_.length);
 		});
+		
+		get_info(Array.from($("source"))[Array.from($("source")).length -1].src)
+		
+		function log(text) {
+			$("#console").empty()	
+			if (typeof(text)=== 'object' ){
+				for(var key in text) {
+					var t = 'key: ' + key + '\n' + 'value: ' + text[key];
+					$("#console").append(`<p>${t}</p>`)
+				}
+			} else {
+				$("#console").append(`<p>${text}</p>`)
+			}
+		}
 
 		function get_info(src) {
 			var get_info = "{% url 'video_info' 0 %}".replace('0', Array.from($("source")).find((element) => element.src === src).getAttribute('value'));
@@ -200,24 +216,6 @@
 				}
 			})
 		}
-
-		function callback(mutationList, observer) {
-		mutationList.forEach( (mutation) => {
-			switch(mutation.type) {
-			case 'attributes':
-				if (mutation.attributeName === 'src') {
-					get_info(mutation.target.src)
-				}
-				break;
-			}
-		});
-		}
-
-		const observerOptions = {
-  			attributes: true
-		}
-		const observer = new MutationObserver(callback);
-		observer.observe($('#vid_player')[0].firstChild, observerOptions);
 
 		function jump(time) {
 			var myvideo = document.getElementById('vid_player');
