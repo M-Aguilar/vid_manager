@@ -534,7 +534,11 @@ def new_video(request, actor_id=None):
 			for sc in request.POST.getlist('file_path'):	
 				if VideoSource.objects.filter(file_path=sc).count() == 0:
 					v_path = VideoSource(video=new_video,file_path=sc)
-					update_vid(v_path)
+					uv = update_vid(v_path)
+					if not uv:
+						messages.error(request, "Invalid filename: {0}".format(sc))
+						new_video.delete()
+						return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 				else:
 					messages.error(request, "{0} is already in use".format(sc))
 			#return HttpResponseRedirect(reverse('new_video'))
@@ -557,14 +561,18 @@ def available_fp(cur=None):
 
 #Takes a video objects. scans and creates/updates video attributes. Video dimmensions/length/size/bitrate
 def update_vid(new_video):
-	v = MediaInfo.parse(new_video.file_path)
-	info = v.tracks[1]
-	new_video.height = info.height
-	new_video.width = info.width
-	new_video.length = round(float(info.duration/1000),0)
-	new_video.bitrate = v.tracks[0].overall_bit_rate
-	new_video.size = v.tracks[0].file_size
-	new_video.save()
+	try:
+		v = MediaInfo.parse(new_video.file_path)
+		info = v.tracks[1]
+		new_video.height = info.height
+		new_video.width = info.width
+		new_video.length = round(float(info.duration/1000),0)
+		new_video.bitrate = v.tracks[0].overall_bit_rate
+		new_video.size = v.tracks[0].file_size
+		new_video.save()
+		return True
+	except FileNotFoundError:
+		return False
 
 #Takes video id and returns VideoForm instance or varifies and applies POST changes.
 @login_required
