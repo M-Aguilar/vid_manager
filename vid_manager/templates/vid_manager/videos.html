@@ -42,13 +42,15 @@
 {% endblock %}
 
 {% block content %}
-{% if messages %}
-	<ul class="messages">
-   	{% for message in messages %}
-    	<li {% if message.tags %} class="bg-{{ message.tags }}"{% endif %}>{{ message }}</li>
-   	{% endfor %}
-	</ul>
-{% endif %}
+<div class="container">
+	<div class="messages list-group">
+		{% if messages %}
+    		{% for message in messages %}
+    		<div class="list-group-item {% if message.tags %}bg-{{ message.tags }}{% endif %}">{{ message }}</div>
+	    	{% endfor %}
+		{% endif %}
+	</div>
+</div>
 <h4 class="ml-2">Top Tags</h4>
 <div class="row mx-2">
 {% for tag in top_tags %}
