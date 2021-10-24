@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages 
 from django.core import serializers #ajax
 from django.core.paginator import Paginator
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Max
 import json
 from django.conf import settings
 
@@ -492,8 +492,18 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		videos = videos.annotate(image_num=Count('images'))
 	elif 'poster_num' in sort:
 		videos = videos.annotate(poster_num=Count('images', filter=Q(images__is_poster=True)))
+	elif 'source_num' in sort:
+		videos = videos.annotate(source_num=Count('videosource'))
+	elif 'length' in sort:
+		videos = videos.annotate(length=Max('videosource__length'))
+	elif 'size' in sort:
+		videos = videos.annotate(size=Max('videosource__size'))
+	elif 'bitrate' in sort:
+		videos = videos.annotate(bitrate=Max('videosource__bitrate'))
+	elif 'height' in sort:
+		videos = videos.annotate(height=Max('videosource__height'))
 	videos = videos.order_by(sort)
-	if sort.replace('-','') in ['title', 'release_date','actor_num','tag_num','image_num']:
+	if sort.replace('-','') in ['title', 'release_date','actor_num','tag_num','image_num', 'source_num','length','size', 'bitrate','height']:
 		videos = videos.reverse()
 	return videos
 
