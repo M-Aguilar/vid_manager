@@ -999,8 +999,8 @@ def delete_images(request, video_id):
 	if request.user.is_authenticated and request.user.projector.admin:
 		video = get_object_or_404(Video, id=video_id)
 		if request.user == video.owner:
-			tot = video.image_set.all().count()
-			for image in video.image_set.all():
+			tot = video.images.all().count()
+			for image in video.images.all():
 				image.image.delete()
 				image.delete()
 			messages.success(request, "All images for {0} have been deleted. Total: {1}".format(video, tot))
