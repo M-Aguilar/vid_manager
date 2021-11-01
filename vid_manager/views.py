@@ -36,6 +36,7 @@ from .thumbnail import capture
 from .models import Video, Tag, Actor, Event, Image, Alias, PosterColor, VideoSource, VIDEO_SORT_OPTIONS
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasForm, VideoSourceForm
 
+#Image Form that allows for multiple image upload
 class ImageFormView(FormView):
 	form_class = ImageForm
 	template_name = 'vid_manager/new_image.html'
@@ -57,6 +58,7 @@ class ImageFormView(FormView):
 		else:
 			return self.form_invalid(form)
 
+#Associates a ImageColor model with a horizontal Image objects. Updates color if association exists
 def check_poster(instance):
 	if hasattr(instance, 'image_color'):
 		rbg = pull_colors(instance)
@@ -72,8 +74,7 @@ def check_poster(instance):
 		poster_color.save()
 		instance.save()
 
-#The Goal is to have narrow results when necessary
-#Usually the longer the query the more sepcific the result desired
+#Returns search results of a given query
 class SearchResultsView(ListView):
 	model = Video
 	template_name = 'vid_manager/search_results.html'
@@ -146,6 +147,8 @@ class SearchResultsView(ListView):
 			else:
 				return False
 
+
+#Populates the search bar with results before submitting form
 @login_required
 def quick_search_results(request):
 	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
