@@ -328,7 +328,7 @@ def index(request):
 			'x':0.5,
 			'xanchor': 'center',
 			'yanchor': 'top'})
-		res_graph_1 = fig1.to_html(full_html=False, default_height=500)
+		res_graph_1 = fig1.to_html(full_html=False, default_height=500, include_plotlyjs=False)
 		graphs['res_graph_1'] = res_graph_1
 		
 		#Actor Bar Graph
@@ -357,7 +357,7 @@ def index(request):
 			'x':0.5,
 			'xanchor': 'center',
 			'yanchor': 'top'})
-		act_graph = fig2.to_html(full_html=False, default_height=500)
+		act_graph = fig2.to_html(full_html=False, default_height=500,include_plotlyjs=False)
 		graphs['act_graph'] = act_graph
 
 		#Tag Bar Graph
@@ -374,7 +374,7 @@ def index(request):
 			'x':0.5,
 			'xanchor': 'center',
 			'yanchor': 'top'})
-		tag_graph = fig3.to_html(full_html=False, default_height=500)
+		tag_graph = fig3.to_html(full_html=False, default_height=500, include_plotlyjs=False)
 		graphs['tag_graph'] = tag_graph
 	context = {'total':total, 'count': count, 'tot_length': tot_length, 'image_count': image_count,
 	 			'actor_count': actor_count, 'graphs': graphs}
