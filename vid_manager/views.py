@@ -27,6 +27,7 @@ from itertools import chain
 
 from time import time
 
+#Graph generator in index.html
 import plotly.graph_objects as go
 
 from pymediainfo import MediaInfo
@@ -417,18 +418,27 @@ def related_videos(video, total):
 
 #Paginated videos. Allows for sorting. filtering by resolution, tag, and actor.
 def videos(request):
+	#Check for valid filter queries
 	tags = list(dict.fromkeys(request.GET.getlist('tag')))
 	actors = list(dict.fromkeys(request.GET.getlist('actor')))
 	sort = request.GET.get('sort')
 	res = request.GET.get('res')
+
+	#check against valid sort options and set a default if invalid
 	video_sort = VIDEO_SORT_OPTIONS
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
+	
+	#if user is logged in filter through own videos, otherwise only consider public videos
 	if request.user.is_authenticated and request.user.projector.admin:
 		videos = fine_filter(request.user, sort, tags, actors, res)
 	else:
 		videos = fine_filter(None, sort, tags, actors, res)
+	
+	#return top 20 tags found in video list
 	tt = top_tags(videos, 20)
+
+	#pagination
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
@@ -437,13 +447,21 @@ def videos(request):
 
 #Handles multiple filter inputs and returns a filtered and sorted list. 
 def fine_filter(user, sort, tags=None, actors=None, res=None):
+
+	#filter videos by username or public depending on call
 	if user:
 		videos = Video.objects.filter(owner=user)
 	else:
 		videos = Video.objects.filter(public=True)
+	
+	#the values in reses are valid sorting options for resolutions. They keys are checked against video height
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
+	
+	#resolution is currently guaged by video height.
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
+
+	#Filters videos by actor names provided
 	if actors:
 		for a in actors:
 			name = a.split()
@@ -451,9 +469,14 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 				videos = videos.filter(Q(actors__first_name__icontains=name[0]) & Q(actors__last_name__icontains=name[-1]))
 			else:
 				videos = videos.filter(Q(actors__first_name__icontains=name[0]))
+
+	#Filters videos by tag names provided
 	if tags:
 		for t in tags:
 			videos = videos.filter(Q(tags__tag_name=t))
+
+	#Filters by resolution(height). Inputs ending in p (e.g. 1080p) are valid.
+	#> < => =< are valid. = is the default
 	if res:
 		sym,r = None, 0
 		if 'p' in res or 'P' in res:
@@ -467,14 +490,16 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		elif '>' in res:
 			sym = '>'
 		if sym:
-			res = res_helper(sym, res, reses)
+			#helper for handling other valid inputs
+			r = res_helper(sym, res, reses)
 		try:
 			r = int(res)
 		except ValueError:
 			pass
+
+		#if input is not valid after striping of 'P' and conditionals then return all valid video regardless of resolution
 		if not isinstance(r, int):
 			videos = videos.filter(Q(videosource__height__gte=0))
-		#Did it for this one. Need to modularize and implement
 		elif sym == '<=':
 			videos = videos.filter(Q(videosource__height__lte=r))
 		elif sym == '>=':
@@ -510,6 +535,7 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		videos = videos.reverse()
 	return videos
 
+#Checks for valid keywords such as "FHD" or "UHD"
 def res_helper(sym, res, reses):
 	r = res.split(sym)[1]
 	found = [True for x in reses.values() if r.upper() in x]
@@ -518,8 +544,8 @@ def res_helper(sym, res, reses):
 		return r[0]
 	return r
 
+#returns key value in dict: d for provided value: val
 def get_keys_from_value(d, val):
-	print("GetKV d: {0} val: {1}".format(d, val))
 	return [k for k, v in d.items() if val in v]
 
 #Takes POST and creates Video or provides empty VideoForm
@@ -621,6 +647,7 @@ def edit_video(request, video_id):
 	context = {'video': video,'form': form, 'vs_forms': vs_forms}
 	return render(request, 'vid_manager/edit_video.html', context)
 
+#Returns full page for adding videosource or just the form when in new_video page allowing for multiple source during video creation
 @login_required
 def new_video_source(request, video_id=None):
 	if video_id:
@@ -628,6 +655,7 @@ def new_video_source(request, video_id=None):
 		if video.owner != request.user or not request.user.projector.admin:
 			raise Http404
 	if request.method != 'POST':
+		#Checks if ajax request is made and returns form to be rendered in new_video page
 		is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 		if is_ajax:
 			try:
@@ -779,8 +807,8 @@ def remove_tag(request, tag_id):
 	else:
 		return JsonResponse({"error":""}, status=400)
 
-#Creates a new tag if requested tag does not exists.
-#Otherwise tag is ammended to the referring objects tag list
+#creates a new tag if requested tag does not exists.
+#otherwise tag is ammended to the referring objects tag list
 @login_required
 def new_tag(request):
 	t = request.META.get('HTTP_REFERER')
@@ -816,7 +844,7 @@ def new_tag(request):
 				return JsonResponse(form.error, status=400)
 	return JsonResponse({"error":""}, status=400)
 
-#Returns JSON list of tags matching q
+#returns JSON list of tags matching q
 @login_required
 def tag_results(request):
 	q = request.GET.get('q')
@@ -837,10 +865,12 @@ def tag_results(request):
 		else:
 			return JsonResponse({"error":""}, status=400)
 
+#returns tag_tile found in video.html and image.html generated after quick adding a new tag
 def tag_tile(request, tag_id):
 	tag = get_object_or_404(Tag, id=tag_id)
 	return render(request, 'vid_manager/tag_tile.html', {'tag':tag})
 
+#returns tags_tiles that are found in the tags page. Generated after adding a new tag
 def tags_tile(request, tag_id):
 	tag = get_object_or_404(Tag, id=tag_id)
 	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -849,6 +879,7 @@ def tags_tile(request, tag_id):
 
 '''########################    ACTOR     #########################'''
 
+#returns actor_tiles that are found in actors.html. Generated after adding a new actor.
 @login_required
 def actor_tile(request, actor_id):
 	actor = get_object_or_404(Actor, id=actor_id)
@@ -856,6 +887,7 @@ def actor_tile(request, actor_id):
 	if is_ajax and request.method != "POST" and request.user.projector.admin:
 		return render(request, 'vid_manager/actor_tile.html', {'actor': actor})
 
+#Individual actor page. Shows max 10 images, max 8 videos and top 5 tags in all actor videos.
 @login_required
 def actor(request, actor_id):
 	if not request.user.projector.admin:
@@ -871,6 +903,7 @@ def actor(request, actor_id):
 	context = {'actor':actor, 'videos': videos[:8], 'new_videos': len(new_videos), 'alias_form':alias_form, 'images': images, 'top_tags': tt}
 	return render(request, 'vid_manager/actor.html', context)
 
+#page for viewing all actors. By default actors are sorted by first name. 
 @login_required
 def actors(request):
 	sort = request.GET.get('sort')
@@ -893,6 +926,7 @@ def actors(request):
 	context = {'actors': page_o, 'form': form, 'new_actors':len(new_actor_count()),'total':total,'sort':sort,'sort_options': actor_sort}
 	return render(request, 'vid_manager/actors.html', context)
 
+#deletes actors as well as all associated images
 @login_required
 def delete_actor(request, actor_id):
 	if request.method == "POST" and request.user.projector.admin:
@@ -906,6 +940,7 @@ def delete_actor(request, actor_id):
 	messages.error(request, "An error occured.")
 	return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
+#creates new actors
 @login_required
 def new_actor(request):
 	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -939,6 +974,7 @@ def pull_colors(img_obj):
 			color = c[1][:3]
 	return color
 
+#page for viewing individual an image
 @login_required
 def image(request, image_id):
 	request.session['ref'] = request.META.get('HTTP_REFERER')
@@ -997,6 +1033,7 @@ def images(request):
 		context['video'] = vid
 	return render(request,'vid_manager/images.html',context)
 
+#function for deleting all images related to a specified video
 @login_required
 def delete_images(request, video_id):
 	if request.user.is_authenticated and request.user.projector.admin:
@@ -1011,11 +1048,11 @@ def delete_images(request, video_id):
 	messages.error(request, 'Permission denied. 🔒')
 	return HttpResponseRedirect(request.META.get('HTTP_REFERRER'))
 
+#function for deleting an individual image
 @login_required
 def delete_image(request, image_id):
 	image = Image.objects.get(id=image_id)
 	if request.user.is_authenticated and request.user.projector.admin and request.method == "POST":
-		context = {'image': image}
 		i_id = image.id
 		i_i = image.image.name
 		image.image.delete()
@@ -1057,13 +1094,7 @@ def edit_image(request, image_id):
 	context = {'image': image,'form': form}
 	return render(request, 'vid_manager/edit_image.html', context)
 
-def tag_sort(e):
-	return e[0].instance.tag_name
-
-def actor_sort(e):
-	return e[0].instance.first_name
-
-#New Video Image
+#form page for adding adding video images. Could be combined with ImageView
 @login_required
 def new_video_image(request, video_id):
 	if request.method != 'POST':
@@ -1073,7 +1104,7 @@ def new_video_image(request, video_id):
 		context = {'form':form}
 		return render(request, 'vid_manager/new_image.html', context)
 
-#New Actor Image
+#form page for adding actor images
 @login_required
 def new_actor_image(request, actor_id):
 	if request.method == 'GET':
