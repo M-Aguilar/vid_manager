@@ -50,12 +50,14 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				Please confirm that you would like to remove this video.
+				Please confirm that you would like to remove all video images.
         	</div>
         	<div class="modal-footer">
-        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
-        		<a href="{% url 'delete_images' video.id %}"><button type="button" class="btn bg-danger">Confirm</button></a>
-        	</div>
+        		<div>
+					<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+        			<a href="{% url 'delete_images' video.id %}"><button type="button" class="btn bg-danger">Confirm</button></a>
+				</div>
+			</div>
     	</div>
 	</div>
 </div>

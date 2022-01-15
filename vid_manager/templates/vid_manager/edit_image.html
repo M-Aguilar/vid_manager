@@ -23,12 +23,12 @@
 				Please confirm that you would like to remove this image.
         	</div>
         	<div class="modal-footer">
-        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
-        		<form action="{% url 'delete_image' image.id %}" method='post'>
+				<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+				<form action="{% url 'delete_image' image.id %}" method='post'>
 					{% csrf_token %}
-					<input type="submit" class="btn btn-dark" value="delete">
-				</form>
-        	</div>
+					<input type="submit" class="btn btn-danger mt-1" value="delete">
+				</form>				
+			</div>
     	</div>
 	</div>
 </div>
