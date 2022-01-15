@@ -84,21 +84,21 @@
     </span>
 </div>
 {% else %}
-<div class="jumbotron pt-4 pb-4">
-  <div class="d-inline-block w-100">
-    <h2 class="display-4 text-center d-block">
-        Searching for something?
-    </h2>
-  </div>
+<div class="container">
+    <div class="jumbotron pt-4 pb-4">
+        <h2 class="display-4 text-center">
+            Searching for something?
+        </h2>
+    </div>
 </div>
 <div class="container">
     <form action="{% url 'search_results' %}" method='get'>
-        <div class="form-row">
+        <div class="form-row search-f mb-5">
             <div class='col p-0'>
-                <input name="q" class="form-control jumbotron" type="search" placeholder="Search" aria-label="Search" autofocus>
+                <input name="q" class="form-control h-100" type="search" placeholder="Search" aria-label="Search" autofocus style="font-size: 30px;">
             </div>
-            <div class='search-b'>
-                <button class="btn btn-dark jumbotron" type="submit"><i class="fa fa-search"></i></button>
+            <div>
+                <button class="btn btn-dark search-b h-100" type="submit"><i class="bi-b bi-search"></i></button>
             </div>
         </div>
     </form>
