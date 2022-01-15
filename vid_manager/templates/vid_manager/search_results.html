@@ -44,24 +44,10 @@
     <div class="row">
         {% for actor in object_list.actors %}
         {% load static %}
-        <div class="mb-4 pb-1 col-md-3 col-lg-2 col-sm-5 offset-sm-4 mx-auto">
-            <a href="{% url 'actor' actor.id %}" >
-                <div class="preview">
-                    <img src="{% if actor.img %}{{ actor.img.url }}{% else %}{% static 'vid_manager/blank_image.png'%}{% endif %}" height="auto" width="100%" alt="" class="mx-auto">
-                    <div class="img-top-left">{{ actor }}</div>
-                </div>
-            </a>
-        </div>
+            {% include "vid_manager/actor_tile.html" %}
         {% endfor %}  
         {% for tag in object_list.tags %}
-        <div class="col-sm-6 col-md-4 col-lg-2 pb-3">
-            <a href="{% url 'tag' tag.id %}">
-                <div class="preview">
-                    <img src="{% if tag.img %}{{ tag.img.url }}{% else %}{% static 'vid_manager/blank_image.png' %}{% endif %}" height="auto" width="100%" alt=''>
-                    <div class="img-top-left">{{ tag }}</div>
-                </div>
-            </a>
-        </div>
+            {% include "vid_manager/tags_tile.html" %}
         {% empty %}
         {% endfor %}
     </div>

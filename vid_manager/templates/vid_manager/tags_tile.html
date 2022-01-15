@@ -1,9 +1,18 @@
 {% load static %}
 <div class="mb-4 col-sm-6 col-md-4 col-lg-3 col-xl-2 pb-3 px-1">
     <a href="{% url 'tag' tag.id %}">
+        <div class="top-video-row preview-text pl-2" style="background-color: lightgrey">
+            {{ tag }}
+        </div>
         <div class="preview">
             <img src="{% if tag.img %}{{ tag.img.path }}{% else %}{% static 'vid_manager/blank_image.png' %}{% endif %}" height="auto" width="100%" alt=''>
-            <div class="img-top-left">{{ tag }}</div>
+        </div>
+        <div class="bottom-video-row pl-2" style="background-color: lightgrey">
+            <div class="row">
+                <div class="col-auto ml-auto">
+                    <a class="preview-text" href="{% url 'images' %}?actor={{tag}}"><i class="bi-image"></i> {{ tag.tag_images.count }} </a>
+                    <a class="preview-text" href="{% url 'videos' %}?actor={{tag}}"><i class="bi-film"></i> {{ tag.videos.count }}</div></a>
+            </div>
         </div>
     </a>
 </div>
