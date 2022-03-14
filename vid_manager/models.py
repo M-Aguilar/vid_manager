@@ -103,7 +103,7 @@ class Alias(ActorBase):
 VIDEO_SORT_OPTIONS = ['release_date' ,'date_added' ,'title', 'length', 'resolution','poster_num', 'size', 'actor_num', 'tag_num', 'bitrate', 'image_num', 'source_num']
 
 class Video(models.Model):
-	title = models.CharField(max_length=75)
+	title = models.CharField(max_length=100)
 	date_added = models.DateTimeField(auto_now_add=True)
 	release_date = models.DateField(blank=True,null=True)
 	owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -180,7 +180,7 @@ class Video(models.Model):
 
 class VideoSource(models.Model):
 	video = models.ForeignKey(Video, on_delete=models.CASCADE)
-	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^\w.*\.mp4$", recursive=True,unique=True)
+	file_path = models.FilePathField(path='{0}/videos/'.format(settings.MEDIA_ROOT), match="^\w.*\.mp4$", recursive=True, unique=True, max_length=200)
 	length = models.PositiveIntegerField()
 	size = models.PositiveBigIntegerField()
 	bitrate = models.PositiveIntegerField()
