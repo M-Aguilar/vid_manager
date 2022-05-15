@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container" style="padding-bottom: 10%">
 	{% if messages %}
 		<div class="list-group">
     	{% for message in messages %}
@@ -50,6 +50,7 @@
 </style>
 <script type="text/javascript" src="{% static 'vid_manager/edit_sort.js' %}"></script>
 <script>
+
 $("select#id_file_path").parent().append(`<div class="col-1 pr-0 text-right"><i class="bi bi-x" onclick='remove(this)'></i></div>`)
 $("select#id_file_path").parent().attr('class','form-group row mx-1')
 
@@ -60,14 +61,19 @@ function remove(r) {
 }
 
 var video = $('video');
-var source = $('video > source');
-var media_server = $('#vid_player > source')[0].src + 'videos/';
+var source = $('video > source')[0].src;
+var media_server = source + 'videos/';
 
-$('#vid_player > source')[0].src = media_server + $('#id_file_path option:selected')[0].innerHTML;
+function new_url() {
+	return media_server + $('select#id_file_path option:selected')[0].innerHTML.replace(' ', '%20')
+}
+
+document.body.onload = function() {$('video')[0].src = new_url()}
 
 $('#id_file_path').on('change', function(e) {
+	video = $('video');
 	video.trigger('pause');
-  	video[0].src = media_server + $('#id_file_path option:selected')[0].innerHTML;
+  	video[0].src = new_url();
   	video[0].load();
 	video[0].play();
 })
