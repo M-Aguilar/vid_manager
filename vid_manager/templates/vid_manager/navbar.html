@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark rounded-0 mb-0">
     <div class='float-left d-none d-md-inline'>
-        <a class="navbar-brand" href="{% url 'index' %}">VMan</a>
+        {% load static %}
+        <a class="navbar-brand p-1" href="{% url 'index' %}"><img height="50px" src="{% static 'vid_manager/VMSVG.svg' %}"></a>
     </div>
     <div class="navbar-header w-100 pb-3 pt-2">
         <button class="navbar-toggler float-left" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-expanded="false" aria-controls="navbarToggler" aria-label="Toggle navigation">
@@ -10,7 +11,7 @@
     <div class="collapse navbar-collapse" id="navbarToggler">
         <ul class="navbar-nav mt-0 md-float-right">
             {% if user.is_authenticated %}
-            <li class="navitem"><h4><a class="nav-link py-0 d-md-none" href="{% url 'index' %}">VMan</a></h4></li>
+            <li class="navitem"><h4><a class="nav-link py-0 d-md-none" href="{% url 'index' %}"><img height="50px" src="{% static 'vid_manager/VMSVG.svg' %}"></a></h4></li>
             <li class="navitem mr-md-4"><a class="nav-link" href="{% url  'videos' %}"><i class="bi-film"></i><p class="d-md-none float-right">Videos</p></a></li>
             <li class="navitem mr-md-4"><a class="nav-link" href="{% url 'images' %}"><i class="bi-images"></i><p class="d-md-none float-right">Images</p></a></li>
             <li class="navitem mr-md-4"><a class="nav-link" href="{% url 'tags' %}"><i class="bi-tags"></i><p class="d-md-none float-right">Tags</p></a></li>
