@@ -38,7 +38,7 @@
 	<div>
 		<video style="width: 100%; max-height: 75vh;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% load static %}{% static 'vid_manager/blank_poster.png' %}">
 			{% load ms %}
-			<source src="{{ 'get' | media_server }}" type="video/mp4">
+			<source src="/" type="video/mp4">
 		</video>
 	</div>
 </div>
@@ -60,15 +60,16 @@ function remove(r) {
 	}
 }
 
-var video = $('video');
-var source = $('video > source')[0].src;
-var media_server = source + 'videos/';
+var media_server = "{{ 'get' | media_server }}" + 'videos/';
+$('video > source')[0].src = new_url();
 
 function new_url() {
-	return media_server + $('select#id_file_path option:selected')[0].innerHTML.replace(' ', '%20')
+	return media_server + $('select#id_file_path option:selected')[0].innerHTML;
 }
 
-document.body.onload = function() {$('video')[0].src = new_url()}
+document.body.onload = function() {
+	$('video')[0].src = new_url();
+}
 
 $('#id_file_path').on('change', function(e) {
 	video = $('video');
