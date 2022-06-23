@@ -45,7 +45,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modelDeleteImages">Confirm</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
@@ -54,7 +54,7 @@
         	</div>
         	<div class="modal-footer">
         		<div>
-					<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+					<button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
         			<a href="{% url 'delete_images' video.id %}"><button type="button" class="btn bg-danger">Confirm</button></a>
 				</div>
 			</div>
@@ -80,7 +80,7 @@
 		{% buttons %}
 			<button name="submit" class="btn btn-dark"><i class="bi-save"></i></button>
 			<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark"><i class="bi-image mr-1"></i> <i class="bi-plus"></i></a> 	
-			<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole"><i class="bi-images mr-1"></i> <i class="bi-trash"></i></a>
+			<a href="" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#centerconsole"><i class="bi-images mr-1"></i> <i class="bi-trash"></i></a>
 		{% endbuttons %}
 		</form>
 	</div>
