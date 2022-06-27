@@ -229,9 +229,10 @@ def add_actor(actor_name):
 	elif len(i) == 2:
 		data={'first_name': i[0], 'last_name': i[1]}
 	else:
-		data={'first_name': i[0], 'last_name': ' '.join(i[1:])}
+		data={'first_name': ' '.join(i[0:len(i)-1]), 'last_name': i[-1]}
 	form = ActorForm(data=data)
 	new_actor = form.save()
+	return new_actor.id
 
 #Returns number of Actors not created based on dir tree.
 def new_actor_count():
@@ -942,7 +943,7 @@ def delete_actor(request, actor_id):
 
 #creates new actors
 @login_required
-def new_actor(request):
+def new_actor(request, actor_name=""):
 	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 	if is_ajax and request.method == "POST":
 		form = ActorForm(request.POST)
@@ -953,6 +954,9 @@ def new_actor(request):
 			return JsonResponse({"instance":serialized},status=200)
 		else:
 			return JsonResponse({"error": "That name is already in use"}, status=400)
+	else:
+		aid = add_actor(actor_name)
+		return HttpResponseRedirect(reverse('actor', args=[aid]))
 	return JsonResponse({"error":""}, status=400)
 
 

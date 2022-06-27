@@ -34,7 +34,7 @@ Account
 			</div>
 			<div>
 			{% for actor in new_actors %}
-			{{ actor }}{% if not forloop.last %},{% endif %}
+			<a href="{% url 'new_actor' actor %}">{{ actor }}</a>{% if not forloop.last %},{% endif %}
 			{% endfor %}
 			</div>
 			{% endif %}

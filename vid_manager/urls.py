@@ -37,6 +37,7 @@ urlpatterns = [
 
 	#Actor
 	path('actor/<actor_id>', views.actor, name='actor'),
+	path('new_actor/<actor_name>', views.new_actor, name='new_actor'),
 	path('new_actor', views.new_actor, name='new_actor'),
 	path('actors', views.actors, name='actors'),
 	path('<actor_id>/delete', views.delete_actor, name='delete_actor'),
