@@ -18,7 +18,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modalDeleteTag">Confirm</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
@@ -26,7 +26,7 @@
 				Please confirm that you would like to remove this video.
         	</div>
         	<div class="modal-footer">
-        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+        		<button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
 				<form action="{% url 'delete_tag' tag.id %}" method="post" class="m-0">
 					{% csrf_token %}
 					<input type="hidden" name="tag_id" value="{{ tag.id }}"/>
@@ -62,7 +62,7 @@
 			<p>Nothing here.</p>
 		{% endfor %}
 		</div>
-		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole"><i class="bi bi-trash mr-1"></i></a>
+		<a href="" class="btn btn-dark mb-3" data-bs-toggle="modal" data-bs-target="#centerconsole"><i class="bi bi-trash mr-1"></i></a>
 	</div>
 </div>
 <style>

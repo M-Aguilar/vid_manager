@@ -15,7 +15,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modalDeleteImage">Confirm</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
@@ -23,7 +23,7 @@
 				Please confirm that you would like to remove this image.
         	</div>
         	<div class="modal-footer">
-				<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
 				<form action="{% url 'delete_image' image.id %}" method='post'>
 					{% csrf_token %}
 					<input type="submit" class="btn btn-danger mt-1" value="delete">
@@ -43,7 +43,7 @@
 		<div class="col-auto border rounded" style="background-color: rgb({{image.image_color.color}})"><div class="bg-light my-2 border rounded">Color: rgb({{image.image_color.color}})</div></div>
 		{% endif %}		
 		<div class="col-auto ml-auto">
-			<button class="btn btn-dark" data-toggle="modal" data-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i></button>
+			<button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#centerconsole"><i class="glyphicon glyphicon-trash mr-1"></i></button>
 		</div>
 	</div>
 	<div>

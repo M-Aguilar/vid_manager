@@ -17,7 +17,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modalDeleteVideo">Confirm</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 					<span class="text-theme" aria-hidden="true">&times;</span>
 				</button>
 			</div>
@@ -25,7 +25,7 @@
 				Please confirm that you would like to remove this Actor.
         	</div>
         	<div class="modal-footer">
-        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+        		<button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
         		<form action="{% url 'delete_actor' actor.id %}" method="post">
         			{% csrf_token %}
         			<input type="submit" class="btn bg-danger btn-dark" value="Delete">
@@ -38,8 +38,8 @@
 <div class="mt-3">
 	<a href="{% url 'new_actor_image' actor.id %}" class="btn btn-dark"><i class="bi bi-image"></i> <i class="bi bi-plus"></i></a>
 	<a href="{% url 'new_video' actor.id %}" class="btn btn-dark"><i class="bi bi-film"></i> <i class="bi bi-plus"></i></a>
-	<a class='btn btn-dark' href="#add_alias" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_alias"><i class="bi bi-person-plus"></i></a>
-	<a href="" class="btn btn-dark" data-toggle="modal" data-target="#centerconsole"><i class="bi bi-trash"></i></a>
+	<a class='btn btn-dark' href="#add_alias" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_alias"><i class="bi bi-person-plus"></i></a>
+	<a href="" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#centerconsole"><i class="bi bi-trash"></i></a>
 	<div class="collapse" id="add_alias">
 		<div class="card-body"> 
 			<form id="alias_form" action="{% url 'new_alias' %}" method='post' class="form">

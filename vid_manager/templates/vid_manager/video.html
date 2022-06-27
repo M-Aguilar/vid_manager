@@ -59,7 +59,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="modalDeleteVideo">Confirm</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
@@ -68,7 +68,7 @@
         	</div>
         	<div class="modal-footer">
 				<div>
-	        		<button type="button" class="btn btn-dark" data-dismiss="modal">Cancel</button>
+	        		<button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
     	    		<a href="{% url 'delete_video' video.id %}"><button type="button" class="btn bg-danger">Confirm</button></a>
 				</div>
 			</div>
@@ -158,8 +158,8 @@
 		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}"><i class="bi bi-pencil-square"></i></a>
 		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}"><i class="bi bi-image"></i> <i class="bi bi-plus"></i></a>
 		<a class='btn btn-dark mb-3' href="{% url 'new_video_source' video.id %}"><i class="bi bi-film"></i><i class="bi bi-plus"></i></a>
-		<a class='btn btn-dark mb-3' href="#add_event" data-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event"><i class="bi bi-calendar-plus mr-1"></i></a>
-		<a href="" class="btn btn-dark mb-3" data-toggle="modal" data-target="#centerconsole"><i class="bi bi-trash mr-1"></i></a>
+		<a class='btn btn-dark mb-3' href="#add_event" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event"><i class="bi bi-calendar-plus mr-1"></i></a>
+		<a href="" class="btn btn-dark mb-3" data-bs-toggle="modal" data-bs-target="#centerconsole"><i class="bi bi-trash mr-1"></i></a>
 		<div class="collapse" id="add_event">
 			<div class="card-body"> 
 				<form action="{% url 'new_event' video.id %}" method='post' class="form">
