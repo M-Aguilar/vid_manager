@@ -25,7 +25,7 @@ from django.template.loader import render_to_string
 from itertools import chain
 #import math
 
-from time import time
+import time
 
 #Graph generator in index.html
 import plotly.graph_objects as go
@@ -254,27 +254,32 @@ def new_actor_count():
 def auto_add(request, actor_id):
 	if not request.user.is_authenticated:
 		raise Http404
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 	actor = Actor.objects.get(id=actor_id)
 	new_vids = scan(actor)
-	for new_vid in new_vids:
-		new_vid = new_vid[0]
-		title = new_vid.split('/')[-1]
-		title = title[:title.index('.mp4')]
-		if len(title) > 75:
-			title = title[:74]
-		data = {'title': title,'actors': [actor]}
-		form = VideoForm(data=data)
-		if form.is_valid():
-			new_video = form.save(commit=False)
-			new_video.owner = request.user
-			new_video.save()
-			sc = VideoSource(video=new_video, file_path=new_vid)
-			update_vid(sc)
-			form.save_m2m()
-		else:
-			messages.error(request,form.errors)
-			return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-	return HttpResponseRedirect(reverse('video', args=[new_video.id]))
+	if is_ajax:
+		data = {"actor": actor.id, "new_vids":len(new_vids)}
+		return JsonResponse(data=data, safe=False)
+	else:
+		for new_vid in new_vids:
+			new_vid = new_vid[0]
+			title = new_vid.split('/')[-1]
+			title = title[:title.index('.mp4')]
+			if len(title) > 75:
+				title = title[:74]
+			data = {'title': title,'actors': [actor]}
+			form = VideoForm(data=data)
+			if form.is_valid():
+				new_video = form.save(commit=False)
+				new_video.owner = request.user
+				new_video.save()
+				sc = VideoSource(video=new_video, file_path=new_vid)
+				update_vid(sc)
+				form.save_m2m()
+			else:
+				messages.error(request,form.errors)
+				return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+		return HttpResponseRedirect(reverse('video', args=[new_video.id]))
 
 #Returns videos found in actor subdir or contain actor name
 def scan(actor):
@@ -384,6 +389,15 @@ def index(request):
 	context = {'total':total, 'count': count, 'tot_length': tot_length, 'image_count': image_count,
 	 			'actor_count': actor_count, 'graphs': graphs}
 	return render(request, 'vid_manager/index.html', context)
+
+@login_required
+def manager(request):
+	if not request.user.projector.admin or not request.user.is_authenticated:
+		raise Http404
+	else:
+		videos = Video.objects.filter(owner=request.user, videosource__isnull=True)
+		context = {'videos': videos}
+		return render(request, 'vid_manager/manager.html', context)
 
 @login_required
 def video(request, video_id):

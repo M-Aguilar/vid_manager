@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
 	#Home Page
 	path('',views.index, name='index'),
+	path('manager', views.manager, name='manager'),
 
 	#Search
 	path('search/', views.SearchResultsView.as_view(), name='search_results'),
