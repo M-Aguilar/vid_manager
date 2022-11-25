@@ -84,7 +84,7 @@
 		{% endif %}
 	</div>
 	{% with poster=video.postr %}
-	<video style="width: 100%; max-height: 75vh;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% if poster %}{{ poster.path }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
+	<video style="width: 100%; max-height: 75vh;" playsinline preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% if poster %}{{ poster.path }}{% elif events.first %}{{events.first.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}">
 		{% for sc in video.videosource_set.all %}
 			<source src="{{sc.path}}" type="video/mp4" value="{{sc.id}}" label="{{sc.height}}p" {% if forloop.last %}selected=true{% endif %}>
 		{% endfor %}
