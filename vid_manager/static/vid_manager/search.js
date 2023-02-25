@@ -1,7 +1,7 @@
-const ui_in = $("#search");
+let ui_in = $("#search");
 const result_list = $("#quick_search_results");
 
-var is_local = '';
+let is_local = '';
 
 if ($(location).attr('href').includes('local_site')) {
 	is_local = '/local_site'

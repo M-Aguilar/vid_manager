@@ -1,12 +1,12 @@
 const ui = $("#id_tag_name");
 const tag_list = $("#tag_results");
-var is_local = '';
+let ifis_local = '';
 
 if ($(location).attr('href').includes('local_site')) {
-	is_local = '/local_site';
+	ifis_local = '/local_site';
 }
 
-const endpoint = is_local.concat('/tag_results');
+const endpoint = ifis_local.concat('/tag_results');
 const d_lay = 700;
 let scheduled = false;
 let sub = true;
