@@ -36,7 +36,7 @@ function sched_submit() {
 $(".s_content").off();
 
 ui.on('keyup', function () {
-	const tag_in = {
+	let tag_in = {
 		q: $(this).val()
 	}
 

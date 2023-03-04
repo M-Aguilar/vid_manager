@@ -1,7 +1,7 @@
 var appleWebKit = navigator.userAgent.includes("AppleWebKit/6")
 var vid = document.querySelector('video')
 
-const observerOptions = {
+var observerOptions = {
         attributes: true
 };
 

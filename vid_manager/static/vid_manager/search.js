@@ -1,4 +1,4 @@
-let ui_in = $("#search");
+const ui_in = $("#search");
 const result_list = $("#quick_search_results");
 
 let is_local = '';
