@@ -186,6 +186,7 @@ class VideoSource(models.Model):
 	bitrate = models.PositiveIntegerField()
 	height = models.PositiveSmallIntegerField(null=True)
 	width = models.PositiveSmallIntegerField(null=True)
+	framerate = models.DecimalField(max_digits=5, decimal_places=3)
 
 	def path(self):
 		return settings.MEDIA_SERVER + self.file_path[self.file_path.index('videos'):]

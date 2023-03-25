@@ -399,9 +399,12 @@ def manager(request):
 		context = {'videos': videos}
 		return render(request, 'vid_manager/manager.html', context)
 
-@login_required
+
 def video(request, video_id):
 	video = get_object_or_404(Video, id=video_id)
+	if not request.user.is_authenticated:
+		print(('login?{0}').format(request.path))
+		return HttpResponseRedirect(reverse('login') + '?next={0}'.format(request.path))
 	if video.owner != request.user and not video.public:
 		raise Http404
 	rel_vid = related_videos(video, 8)
@@ -623,6 +626,7 @@ def update_vid(new_video):
 		new_video.length = round(float(info.duration/1000),0)
 		new_video.bitrate = v.tracks[0].overall_bit_rate
 		new_video.size = v.tracks[0].file_size
+		new_video.framerate = info.frame_rate
 		new_video.save()
 		return True
 	except FileNotFoundError:
@@ -865,7 +869,7 @@ def tag_results(request):
 	q = request.GET.get('q')
 	t = request.META.get('HTTP_REFERER')
 	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-	if request.user.projector.admin and q:
+	if request.user.projector.admin and q and is_ajax:
 		tags = None
 		if 'video' in t:
 			video = Video.objects.get(id=t[t.index('video')+6:])
