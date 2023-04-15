@@ -13,7 +13,7 @@
     <li class="list-group-item m-2 p-2 border border-dark rounded"> {{source.bitrate|bit_rate}} </li>
 </div>
 <div clas="col-auto">
-    <li class="list-group-item m-2 p-2 border border-dark rounded"> {{source.framerate}} fps</li>
+    <li class="list-group-item m-2 p-2 border border-dark rounded"> {{source.framerate.normalize }} fps</li>
 </div>
 {% if source.video.release_date %}
 <div clas="col-auto">
