@@ -24,6 +24,7 @@ urlpatterns = [
 	path('new_video_source', views.new_video_source, name='new_video_source'),
 	path('<source_id>/video_info', views.video_info, name='video_info'),
 	path('new_video_info', views.new_video_info, name='new_video_info'),
+    path('<video_id>/add_star', views.add_star, name="add_star"),
 
 	#Tags
 	path('tag/<tag_id>', views.tag, name='tag'),

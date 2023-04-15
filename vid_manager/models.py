@@ -102,6 +102,7 @@ class Alias(ActorBase):
 
 VIDEO_SORT_OPTIONS = ['release_date' ,'date_added' ,'title', 'length', 'resolution','poster_num', 'size', 'actor_num', 'tag_num', 'bitrate', 'image_num', 'source_num']
 
+
 class Video(models.Model):
 	title = models.CharField(max_length=100)
 	date_added = models.DateTimeField(auto_now_add=True)
@@ -177,6 +178,14 @@ class Video(models.Model):
 		ms = ms.order_by('-size')
 		ms = ms.first()
 		return ms.size
+
+class Star(models.Model):
+	date_added = models.DateTimeField(auto_now_add=True)
+	owner = models.ForeignKey(User, on_delete=models.CASCADE)
+	video = models.ForeignKey(Video, on_delete=models.CASCADE)
+	
+	class Meta:
+		verbose_name_plural = 'stars'
 
 class VideoSource(models.Model):
 	video = models.ForeignKey(Video, on_delete=models.CASCADE)

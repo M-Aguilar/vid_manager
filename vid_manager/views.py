@@ -34,7 +34,7 @@ from pymediainfo import MediaInfo
 import subprocess
 
 from .thumbnail import capture
-from .models import Video, Tag, Actor, Event, Image, Alias, PosterColor, VideoSource, VIDEO_SORT_OPTIONS
+from .models import Video, Tag, Actor, Event, Image, Alias, PosterColor, VideoSource, Star, VIDEO_SORT_OPTIONS
 from .forms import VideoForm, TagForm, ActorForm, EventForm, ImageForm, AliasForm, VideoSourceForm
 
 #Image Form that allows for multiple image upload
@@ -413,6 +413,17 @@ def video(request, video_id):
 	eventform = EventForm(initial={'video':video})
 	context = {'video': video, 'eventform': eventform, 'tagform': TagForm(), 'related_vids': rel_vid}
 	return render(request, 'vid_manager/video.html', context)
+
+@login_required
+def add_star(request, video_id):
+	video = Video.objects.get(id=video_id)
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if video.owner == request.user and is_ajax:
+		star = Star(owner=request.user, video=video)
+		star.save()
+		return HttpResponse(video.star_set.count())
+	else:
+		return JsonResponse({"error": "User/Request Error"}, status=400)
 
 @login_required
 def new_video_info(request):
