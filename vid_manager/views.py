@@ -274,7 +274,9 @@ def auto_add(request, actor_id):
 				new_video.owner = request.user
 				new_video.save()
 				sc = VideoSource(video=new_video, file_path=new_vid)
-				update_vid(sc)
+				nv = update_vid(sc)
+				if nv:
+					nv.save()
 				form.save_m2m()
 			else:
 				messages.error(request,form.errors)
@@ -411,6 +413,19 @@ def video(request, video_id):
 	eventform = EventForm(initial={'video':video})
 	context = {'video': video, 'eventform': eventform, 'tagform': TagForm(), 'related_vids': rel_vid}
 	return render(request, 'vid_manager/video.html', context)
+
+@login_required
+def new_video_info(request):
+	new_video = VideoSourceForm()
+	new_video.save(commit=False)
+	new_video.file_path = list(request.GET.keys())[0]
+	nv = update_vid(new_video)
+	is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+	if is_ajax:
+		context = {'source': nv}
+		return render(request, 'vid_manager/video_info.html', context)
+	else:
+		return JsonResponse({"error": "User/Request Error"}, status=400)
 
 @login_required
 def video_info(request, source_id):
@@ -592,6 +607,8 @@ def new_video(request, actor_id=None):
 				if VideoSource.objects.filter(file_path=sc).count() == 0:
 					v_path = VideoSource(video=new_video,file_path=sc)
 					uv = update_vid(v_path)
+					if uv:
+						uv.save()
 					if not uv:
 						messages.error(request, "Invalid filename: {0}".format(sc))
 						new_video.delete()
@@ -627,8 +644,7 @@ def update_vid(new_video):
 		new_video.bitrate = v.tracks[0].overall_bit_rate
 		new_video.size = v.tracks[0].file_size
 		new_video.framerate = info.frame_rate
-		new_video.save()
-		return True
+		return new_video
 	except FileNotFoundError:
 		return False
 
@@ -656,7 +672,9 @@ def edit_video(request, video_id):
 				if ns not in s_list:
 					if VideoSource.objects.filter(file_path=ns).count() == 0:
 						source = VideoSource(video=video, file_path=ns)
-						update_vid(source)
+						new_video = update_vid(source)
+						if new_video:
+							new_video.save()
 					else:
 						messages.error(request, "{0} is already in use".format(ns))
 			new_video = form.save(commit=False)
@@ -687,7 +705,9 @@ def new_video_source(request, video_id=None):
 		form = VideoSourceForm(data=request.POST)
 		new_source = form.save(commit=False)
 		new_source.video = video
-		update_vid(new_source)
+		new_video = update_vid(new_source)
+		if new_video:
+			new_video.save()
 		return HttpResponseRedirect(reverse('video', args=[video.id]))
 	context = {'video': video, 'form': form}
 	return render(request, 'vid_manager/new_video_source.html', context)

@@ -36,9 +36,15 @@
 		</form>
 	</div>
 	<div>
+		<div class="d-md-flex flex-row d-block">
+			<div class="d-flex px-0 col justify-content-end">
+				<ul id="info" class="list-group flex-row">
+				</ul>
+			</div>
+		</div>
 		<video style="width: 100%; max-height: 75vh;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% load static %}{% static 'vid_manager/blank_poster.png' %}">
 			{% load ms %}
-			<source src="/" type="video/mp4">
+			<source id='videosource' src="/" type="video/mp4">
 		</video>
 	</div>
 </div>
@@ -63,21 +69,42 @@ function remove(r) {
 var media_server = "{{ 'get' | media_server }}" + 'videos/';
 $('video > source')[0].src = new_url();
 
-function new_url() {
-	return media_server + $('select#id_file_path option:selected')[0].innerHTML;
+document.body.onload = function() {
+	v = $('video')[0]
+	v.src = new_url();
+	get_info();
 }
 
-document.body.onload = function() {
-	$('video')[0].src = new_url();
+function new_url() {
+	return media_server + $('select#id_file_path option:selected')[0].innerHTML;
 }
 
 $('#id_file_path').on('change', function(e) {
 	video = $('video');
 	video.trigger('pause');
   	video[0].src = new_url();
-  	video[0].load();
+	e.preventDefault();
+	get_info();
+	video[0].load();
 	video[0].play();
 })
+
+function get_info() {
+	var new_vurl = "{% url 'new_video_info' %}";
+	$.ajax({
+		type: 'GET',
+		url: new_vurl,
+		data: $('select#id_file_path option:selected')[0].value,
+		success: function (response) {
+			$('#info').empty();
+			$('#info').append(response);
+		},
+
+		error: function (response) {
+			alert(response["responseJSON"]["error"]);
+		}
+	})
+}
 
 $("#add_source").on('click', function(e) {
 	e.preventDefault();
