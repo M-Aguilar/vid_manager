@@ -654,7 +654,7 @@ def update_vid(new_video):
 		new_video.length = round(float(info.duration/1000),0)
 		new_video.bitrate = v.tracks[0].overall_bit_rate
 		new_video.size = v.tracks[0].file_size
-		new_video.framerate = info.frame_rate
+		#new_video.framerate = info.frame_rate
 		return new_video
 	except FileNotFoundError:
 		return False
