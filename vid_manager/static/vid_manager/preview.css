@@ -6,11 +6,12 @@
 .authors::-webkit-scrollbar {
   display: none;
 }
+
+
 .preview {
   position: relative;
   text-align: center;
   color: white;
-  font-size: 15px;
   border-right: 1px solid slategrey;
   border-left: 1px solid slategrey;
 }
@@ -31,7 +32,9 @@
 
 div.bottom-left.preview-text, .preview-text, .preview.text i, .preview-text:hover, .preview-text:link, .preview-text:active, .preview-text:visited {
   color: white;
-  text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;
+  font-weight:900;
+  font-size:20px;
+	-webkit-text-stroke: 1px black;
   letter-spacing: 1px;
   text-decoration:none;
 }
@@ -49,15 +52,4 @@ img.video_image {
   position: absolute;
   bottom: 4px;
   left: 8px;
-}
-
-.img-top-left {
-  position: absolute;
-  text-align: left;
-  width: 75%;
-  top: 4px;
-  left: 8px;
-  letter-spacing: 1px;
-  color:white;
-  text-shadow: 1px 0 0 #000, 0 -1px 0 #000, 0 1px 0 #000, -1px 0 0 #000;
 }

@@ -698,10 +698,12 @@ def edit_video(request, video_id):
 #Returns full page for adding videosource or just the form when in new_video page allowing for multiple source during video creation
 @login_required
 def new_video_source(request, video_id=None):
+	#Checks if video exists.
 	if video_id:
 		video = get_object_or_404(Video, id=video_id)
 		if video.owner != request.user or not request.user.projector.admin:
 			raise Http404
+	#Check not POST
 	if request.method != 'POST':
 		#Checks if ajax request is made and returns form to be rendered in new_video page
 		is_ajax = request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
@@ -711,14 +713,17 @@ def new_video_source(request, video_id=None):
 				return HttpResponse(form)
 			except Exception as e:
 				return JsonResponse({"error":e}, status=400)
+		#Form = basic page
 		form = available_fp()
 	else:
+		#Submit new video object.
 		form = VideoSourceForm(data=request.POST)
 		new_source = form.save(commit=False)
 		new_source.video = video
 		new_video = update_vid(new_source)
 		if new_video:
 			new_video.save()
+		#return page and new object id
 		return HttpResponseRedirect(reverse('video', args=[video.id]))
 	context = {'video': video, 'form': form}
 	return render(request, 'vid_manager/new_video_source.html', context)
@@ -779,9 +784,9 @@ def tag(request, tag_id=None):
 	if not request.user.projector.admin:
 		raise Http404
 	else:
-		videos = Video.objects.filter(tags=tag_id)
-		images = Image.objects.filter(tags=tag_id)
-	context = {'tag' : tag, 'videos': videos[:6], 'images': images[:6], 'v_tot':videos.count(), 'i_tot':images.count()}
+		videos = Video.objects.filter(tags=tag_id)[:6]
+		images = Image.objects.filter(tags=tag_id)[:6]
+	context = {'tag' : tag, 'videos': videos, 'images': images, 'v_tot':videos.count(), 'i_tot':images.count()}
 	return render(request, 'vid_manager/tag.html', context)	
 
 #Returns Paginated list of all Tags and empty TagForm
@@ -1136,7 +1141,7 @@ def edit_image(request, image_id):
 		form = ImageForm(instance=image, files=request.FILES, data=request.POST)
 		if form.is_valid():
 			img = form.save()
-			check_poster(img)
+			check_poster(img) #questionable
 			ref = request.session.get('ref')
 			request.session['ref'] = None
 			if ref and 'actor' in ref:

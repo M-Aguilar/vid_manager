@@ -57,7 +57,7 @@
 <div>
 	{% if request.user.is_authenticated and request.user.projector.admin %}
 		{% if new_videos > 0 %}
-			<div><p>You have {{ new_videos }} new video{% if new_videos == 1 %}{% else %}'s{% endif %}! Add them <a href="{% url 'auto_add' actor.id %}">here</a>.</p></div>
+			<div><p><a class="btn btn-dark btn-sm" href="{% url 'auto_add' actor.id %}">Add {{ new_videos }} new video{% if new_videos > 1 %}s{% endif %}</a></p></div>
 		{% endif %}
 	{% endif %}
 </div>
