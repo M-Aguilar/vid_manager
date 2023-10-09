@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from math import floor
 import random
+import time
 from django.core.validators import MaxValueValidator
 
 from django.db.models.fields import PositiveIntegerField
@@ -133,9 +134,9 @@ class Video(models.Model):
 
 	@property
 	def postr(self):
-		imgs = list(self.images.filter(is_poster=True))
+		imgs = self.images.filter(is_poster=True)
 		if len(imgs) > 0:
-			img = random.choice(imgs)
+			img = imgs.order_by('?')[0]
 		else:
 			img = None
 		return img
@@ -155,6 +156,7 @@ class Video(models.Model):
 		mr = mr.order_by('height')
 		mr = mr.first()
 		return mr.height
+	
 	@property
 	def max_res(self):
 		mr = self.videosource_set.all()

@@ -462,6 +462,7 @@ def related_videos(video, total):
 
 #Paginated videos. Allows for sorting. filtering by resolution, tag, and actor.
 def videos(request):
+
 	#Check for valid filter queries
 	tags = list(dict.fromkeys(request.GET.getlist('tag')))
 	actors = list(dict.fromkeys(request.GET.getlist('actor')))
@@ -472,32 +473,30 @@ def videos(request):
 	video_sort = VIDEO_SORT_OPTIONS
 	if not sort or sort.replace('-','').lower() not in video_sort:
 		sort = '-date_added'
-	
-	#if user is logged in filter through own videos, otherwise only consider public videos
-	if request.user.is_authenticated and request.user.projector.admin:
-		videos = fine_filter(request.user, sort, tags, actors, res)
-	else:
-		videos = fine_filter(None, sort, tags, actors, res)
+
+	videos = fine_filter(request.user, sort, tags, actors, res)
 	
 	#return top 20 tags found in video list
 	tt = top_tags(videos, 20)
-
 	#pagination
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
+
 	context = {'videos':page_o, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res, 'top_tags': tt}
 	return render(request, 'vid_manager/videos.html', context)
 
+def timr(start, title):
+	print('{1}: {0}'.format((time.time()-start)*100, title))
+
 #Handles multiple filter inputs and returns a filtered and sorted list. 
 def fine_filter(user, sort, tags=None, actors=None, res=None):
-
 	#filter videos by username or public depending on call
-	if user:
-		videos = Video.objects.filter(owner=user)
+	if user.id:
+		videos = user.video_set.all()
 	else:
 		videos = Video.objects.filter(public=True)
-	
+
 	#the values in reses are valid sorting options for resolutions. They keys are checked against video height
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	
@@ -574,7 +573,8 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		videos = videos.annotate(bitrate=Max('videosource__bitrate'))
 	elif 'height' in sort:
 		videos = videos.annotate(height=Max('videosource__height'))
-	videos = videos.order_by(sort)
+	else:
+		videos = videos.order_by(sort)
 	if sort.replace('-','') in ['title', 'release_date','actor_num','tag_num','image_num', 'source_num','length','size', 'bitrate','height']:
 		videos = videos.reverse()
 	return videos
