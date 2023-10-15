@@ -305,11 +305,23 @@ def index(request):
 		
 		#Res Pie Graph
 		reses = vid_source.order_by('height').values('height').distinct()
-		for i in reses:
-			res_labels.append("<a href='videos?res={0}'>{0}p</a>".format(i['height']))
-			res_values.append(vid_source.filter(height=i['height']).count())
-			res_size_labels.append("<a href='videos?res={0}'>{0}p</a>".format(i['height']))
-			res_size_values.append(round((vid_source.filter(height=i['height']).aggregate(Sum('size'))['size__sum'] * 0.000000001),2))
+		other = {}
+		other_size = 0
+		for idx, i in enumerate(reses):
+			v_count = vid_source.filter(height=i['height']).count()
+			h = i['height']
+			if v_count/count > .05:
+				res_labels.append("<a href='videos?res={0}'>{0}p</a>".format(h))
+				res_values.append(v_count)
+				res_size_labels.append("<a href='videos?res={0}'>{0}p</a>".format(h))
+				res_size_values.append(round((vid_source.filter(height=h).aggregate(Sum('size'))['size__sum'] * 0.000000001),2))
+			else:
+				other[h] = v_count
+				other_size += round((vid_source.filter(height=h).aggregate(Sum('size'))['size__sum'] * 0.000000001),2)
+		res_labels.append("other")
+		res_values.append(sum(other.values()))
+		res_size_labels.append('other')
+		res_size_values.append(other_size)
 		fig = go.Figure(
 			data=[go.Pie(labels=res_labels, 
 						values=res_values, 
