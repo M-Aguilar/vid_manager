@@ -487,15 +487,13 @@ def videos(request):
 		sort = '-date_added'
 
 	videos = fine_filter(request.user, sort, tags, actors, res)
-	
-	#return top 20 tags found in video list
-	tt = top_tags(videos, 20)
+
 	#pagination
 	paginator = Paginator(videos, 24)
 	page_num = request.GET.get('page')
 	page_o = paginator.get_page(page_num)
 
-	context = {'videos':page_o, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res, 'top_tags': tt}
+	context = {'videos':page_o, 'sort': sort, 'sort_options': video_sort, 'actors': actors,'tags': tags, 'res':res}
 	return render(request, 'vid_manager/videos.html', context)
 
 def timr(start, title):
@@ -833,14 +831,6 @@ def tags(request):
 		context['video'] = vid
 	return render(request, 'vid_manager/tags.html', context)
 
-#takes videos and returns the top tags limited by total.
-def top_tags(videos, total=None):
-	top_tags = Tag.objects.annotate(video_num=Count('videos')).filter(videos__in=videos).order_by('-video_num')
-	if total and isinstance(total, int):
-		return top_tags[:total]
-	else: 
-		return top_tags
-
 #Checks for permissions and deletes tag
 @login_required
 def delete_tag(request, tag_id):
@@ -964,10 +954,9 @@ def actor(request, actor_id):
 		new_videos = scan(actor)
 		images = Image.objects.filter(actors=actor)[:10]
 		videos = actor.videos.order_by('-date_added')
-		tt = top_tags(videos, 5)
 	data = {'actor':actor}
 	alias_form = AliasForm(initial=data)
-	context = {'actor':actor, 'videos': videos[:8], 'new_videos': len(new_videos), 'alias_form':alias_form, 'images': images, 'top_tags': tt}
+	context = {'actor':actor, 'videos': videos[:8], 'new_videos': len(new_videos), 'alias_form':alias_form, 'images': images}
 	return render(request, 'vid_manager/actor.html', context)
 
 #page for viewing all actors. By default actors are sorted by first name. 

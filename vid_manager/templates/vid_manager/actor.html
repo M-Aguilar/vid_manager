@@ -77,12 +77,6 @@
 		<div>First Name: {{ actor.first_name }}</div>
 		<div>Last Name: {{ actor.last_name }}</div>
 	</div>
-	<h4>Top Video Tags</h4>
-	<div class="top_tags row">
-		{% for tag, value in top_tags.items %}
-			{% include "vid_manager/tag_tile.html" %}
-		{% endfor %}
-	</div>
 	<div>
 		<h2><a href="{% url 'images' %}?actor={{actor}}">Images ({{ actor.actor_images.all.count }})</a>
 	</div>

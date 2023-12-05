@@ -52,12 +52,6 @@
 		{% endif %}
 	</div>
 </div>
-<h4 class="ml-2">Top Tags</h4>
-<div class="row mx-2">
-{% for tag in top_tags %}
-	{% include 'vid_manager/tag_tile.html' %}
-{% endfor %}
-</div>
 <div class="text-dark">
 	<div class="row mx-1 align-items-stretch">
 	{% for video in videos %}
