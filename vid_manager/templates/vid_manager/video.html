@@ -4,7 +4,7 @@
 {% block title %}{{ video.title }}{% endblock %}
 
 {% block header %}
-	<div class="jumbotron {% if not video.postr.image_color.color %}bg-dark {% endif %} video-text p-auto text-center display-4 mt-5 mb-0 pt-2 pb-3" style="{% if video.postr.image_color.color %}background-color:rgb({{video.postr.image_color.color}}){% endif%}">
+	<div class="jumbotron {% if not video.postr.image_color.color %}bg-dark {% endif %} video-text p-auto text-center display-4 mt-5 mb-0 pt-2 pb-3" style="{% if video.postr.image_color.color %} background-color:rgb({{video.postr.image_color.color}}){% endif %}">
 		<h2>
 			<div class="mw-100">
 				<div class="col">
@@ -162,7 +162,9 @@
 	<div class="my-3">
 		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}"><i class="bi bi-pencil-square"></i></a>
 		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}"><i class="bi bi-image"></i> <i class="bi bi-plus"></i></a>
-		<a class='btn btn-dark mb-3' href="{% url 'new_video_source' video.id %}"><i class="bi bi-film"></i><i class="bi bi-plus"></i></a>
+		{% for sc in video.videosource_set.all %}
+		<a class='btn btn-dark mb-3' href="{{sc.path}}"><i class="bi bi-film"> {% if video.videosource_set.all.count > 1 %}{{ forloop.counter }}{% endif %}</i></a>		
+		{% endfor %}
 		<a class='btn btn-dark mb-3' href="#add_event" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="add_event"><i class="bi bi-calendar-plus mr-1"></i></a>
 		<a href="" class="btn btn-dark mb-3" data-bs-toggle="modal" data-bs-target="#centerconsole"><i class="bi bi-trash mr-1"></i></a>
 		<div class="collapse" id="add_event">

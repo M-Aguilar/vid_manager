@@ -2,7 +2,7 @@
 <!--CSSLINE{% load static %}-->
 {% load bootstrap4 %}
 
-{% block title %}{{ actors }} {{ tags }} {{ reses }}Videos{% endblock %}
+{% block title %}{% if actors %}{% for actor in actors %}{{ actor }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}{{ tag }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %} Videos{% endblock %}
 
 {% block header %}
 <link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
