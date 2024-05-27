@@ -4,12 +4,10 @@
 		<a href="{% if actor %}{% url 'videos' %}?actor={{actor}}&tag={{tag}}{% elif videos %}{% url 'videos' %}?tag={{tag}}{% if tags %}{% for t in tags %}{% if t != tag %}&tag={{t}}{% endif %}{% endfor %}{% endif %}{% if actors %}{% for actor in actors %}&actor={{actor}}{% endfor %}{% endif %}{% else %}{% url 'tag' tag.id %}{% endif %}">
 			<div class="{% if actor %}text-center{% else %}float-left{% endif %} text-dark m-2">{{ tag }}{% if actor %} ({{ value }}) {% endif %}</div>
 		</a>
-		{% if video or image %}
 		<a href="{% url 'remove_tag' tag.id %}" id="remove_tag" class="float-right btn btn-xs btn-dark rounded-circle my-1 px-2 ml-3" value="{{ tag.id }}">
 			<div class="px-1 mb-1">
 				<span>&times;</span>
 			</div>
 		</a>
-		{% endif %}
 	</div>
 </div>
