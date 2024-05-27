@@ -291,8 +291,9 @@
 					var fields = instance[0]["fields"];
 					var pk = instance[0]["pk"];
 					if ($("#tags .tagrow #0".replace('0',pk)).length < 1) {
+						/* Pretty certain this is unecessary.
 						var new_url = "{% url 'tag' 0 %}".replace('0', pk);
-						var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);
+						var rm_tag = "{% url 'remove_tag' 0 %}".replace('0', pk);*/
 						$(".messages").empty();
 						$('.messages').prepend(`<div class="rounded p-1 bg-success">Tag "${fields["tag_name"]||""}" has been added.</div>`);
 						$.get('tag_tile/'.concat(pk.toString()), function(result) {
