@@ -1,3 +1,5 @@
+
+/*Add scrolling inside of video preview keeping the scroll bar invisible next two functions*/
 .authors {
   -ms-overflow-style: none;
   scrollbar-width: none; 
@@ -7,13 +9,16 @@
   display: none;
 }
 
-
 .preview {
   position: relative;
   text-align: center;
   color: white;
   border-right: 1px solid slategrey;
   border-left: 1px solid slategrey;
+}
+
+div.related-vids {
+  width: 500px;
 }
 
 .top-video-row {
@@ -30,21 +35,18 @@
   border-top: none;
 }
 
-div.bottom-left.preview-text, .preview-text, .preview.text i, .preview-text:hover, .preview-text:link, .preview-text:active, .preview-text:visited {
+.preview-text, a.preview-text:link, a.preview-text:visited, a.preview-text:hover {
   color: white;
   font-weight:900;
   font-size:20px;
+  word-break: break-word;
 	-webkit-text-stroke: 1px black;
   letter-spacing: 1px;
   text-decoration:none;
 }
 
- a:hover, a.video-link {
-  text-decoration: none;
-}
-img.video_image {
-    height:auto;
-    width:100%;
+div.videos-size img {
+  width: 100%;
 }
 
 .bottom-left {

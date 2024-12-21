@@ -1,35 +1,37 @@
-<a class="video-link" href="{% url 'video' video.id %}">
-	{% load bit_format %}
-	{% with poster=video.postr rand_color=video.rand_color %}
-	<div class="top-video-row row justify-content-around mx-0 px-2" style="background-color: rgb({% if not poster %}{{rand_color}}{% else %}{{poster.image_color.color}}{% endif %})">
-		<div class="preview-text text-left col px-0">{{video}}</div>
-		<div class="ml-auto text-right">
-			<div class="preview-text col-auto pr-0">{% if video.videosource_set.count > 1 %}{{ video.min_res }}p - {% endif %}{{ video.max_res }}p</div>
-			<div class="preview-text col-auto pr-0">{{ video.vlen|time }}</div>
-		</div>
-	</div>
-	<div class='preview'>
-		<img src="{% if poster %}{{ poster.path }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="video_image align-middle" alt='No image'>
-		<div class="bottom-left preview-text">{% if video.videosource_set.count > 1 %}{{ video.min_size|bit_size }}-{% endif %}{{video.max_size|bit_size}}</div>
-	</div>
-	<div class="bottom-video-row row mx-0 px-2" style="background-color: rgb({% if not poster %}{{rand_color}}{% else %}{{poster.image_color.color}}{% endif %})">
-		<div class="preview-text text-left col w-50 pl-0">
-			{% if video.actors.count > 0 %}
-			<div class="overflow-auto authors" style="white-space:nowrap">
-				{% for actor in video.actors.all %}<a class="preview-text" href="{% url 'actor' actor.id %}">{{actor}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+<div>
+	<a class="video-link" style="color:transparent;" href="{% url 'video' video.id %}">
+		{% load bit_format %}
+		{% with poster=video.postr rand_color=video.rand_color %}
+		<div class="top-video-row row justify-content-around mx-0 px-2" style="background-color: rgb({% if not poster %}{{rand_color}}{% else %}{{poster.image_color.color}}{% endif %})">
+			<div class="preview-text text-left col-auto px-0 text-wrap">{{video}}</div>
+			<div class="ml-auto text-right">
+				<div class="preview-text col-auto pr-0">{% if video.videosource_set.count > 1 %}{{ video.min_res }}p - {% endif %}{{ video.max_res }}p</div>
+				<div class="preview-text col-auto pr-0">{{ video.vlen|time }}</div>
 			</div>
-			{% endif %}
 		</div>
-		<div class="col col-auto ml-auto float-right px-0">
-			<a class="preview-text" href="{% url 'tags' %}?video={{video.id}}">
-			<i class="bi-tag"></i>
-				{{ video.tags.count }}
-			</a>
-			<a class="preview-text" href="{% url 'images' %}?video={{video.id}}"> 
-				<i class="bi-image"></i>
-				{{ video.images.count }}
-			</a> 
+		<div class='preview'>
+			<img src="{% if poster %}{{ poster.path }}{% elif video.has_events %}{{video.event.url}}{% else %}{% load static %}{% static 'vid_manager/blank_poster.png' %}{% endif %}" class="img-fluid" alt='No image'>
+			<div class="bottom-left preview-text">{% if video.videosource_set.count > 1 %}{{ video.min_size|bit_size }}-{% endif %}{{video.max_size|bit_size}}</div>
 		</div>
-	</div>
-	{% endwith %}
-</a>
+		<div class="overflow-auto bottom-video-row row mx-0 px-2" style="background-color: rgb({% if not poster %}{{rand_color}}{% else %}{{poster.image_color.color}}{% endif %})">
+			<div class="text-left col w-50 pl-0">
+				{% if video.actors.count > 0 %}
+				<div class="overflow-auto authors preview-text" style="white-space:nowrap">
+					{% for actor in video.actors.all %}<a class="preview-text" href="{% url 'actor' actor.id %}">{{actor}}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+				</div>
+				{% endif %}
+			</div>
+			<div id="txt" class="col col-auto ml-auto float-right px-0">
+				<a class="preview-text" href="{% url 'tags' %}?video={{video.id}}">
+					<i class="bi-tag"></i>
+					{{ video.tags.count }}
+				</a>
+				<a class="preview-text" href="{% url 'images' %}?video={{video.id}}"> 
+					<i class="bi-image"></i>
+					{{ video.images.count }}
+				</a> 
+			</div>
+		</div>
+		{% endwith %}
+	</a>
+</div>

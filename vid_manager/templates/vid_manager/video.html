@@ -319,8 +319,8 @@
 		</div>
 	</div>
 	<h4>Related Videos</h4>
-	<div class="w-100 d-inline-block" height="300px">
-		<div class='overflow-auto text-center' style="white-space: nowrap;">
+	<div class="overflow-auto" style="height: auto;">
+		<div style="white-space: nowrap;">
 			{% for video in related_vids %}
 				{% include "vid_manager/related_videos.html" %}
 			{% empty %}
