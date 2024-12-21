@@ -1,6 +1,6 @@
 {% extends "vid_manager/base.html" %}
 <!--CSSLINE{% load static %}-->
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 {% block title %}{% if actors %}{% for actor in actors %}{{ actor }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% if tags %}{% for tag in tags %}{{ tag }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %} Videos{% endblock %}
 

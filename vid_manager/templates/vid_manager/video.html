@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 {% block title %}{{ video.title }}{% endblock %}
 
@@ -172,9 +172,7 @@
 				<form action="{% url 'new_event' video.id %}" method='post' class="form">
 					{% csrf_token %}
 					{% bootstrap_form eventform %}
-					{% buttons %}
-						<button name="submit" class="btn btn-dark">Submit</button>
-					{% endbuttons %}	
+					{% bootstrap_button button_type="submit" content="Submit" button_class="btn btn-dark" %}
 				</form>
 			</div>
 		</div>

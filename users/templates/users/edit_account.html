@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load bootstrap4%}
+{% load django_bootstrap5%}
 
 {% block title %}
 Edit Account
@@ -18,9 +18,7 @@ Edit Account
 			<form method="post" action="{% url 'edit_account' request.user.username %}">
 		    {% csrf_token %}
 	    	{% bootstrap_form form %}
-	    	{% buttons %}
-	    		<button name="submit" class="btn btn-dark">save changes</button>
-	    	{% endbuttons %}
+	    	{% bootstrap_button button_type="submit" content="Save" button_class="btn btn-dark" %}
 			</form>
 		</div>
 	</div>

@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 {% block title %}New Image{% endblock %}
 
@@ -22,9 +22,7 @@
 		<form action="{% url 'new_image' %}" method='post' class="form" enctype="multipart/form-data">
 			{% csrf_token %}
 			{% bootstrap_form form %}
-			{% buttons %}
-				<button name="submit" class="btn btn-dark">add image</button>
-			{% endbuttons %}
+			{% bootstrap_button button_type="submit" content="Add Image" button_class="btn btn-dark" %}
 		</form>
 	</div>
 </div>

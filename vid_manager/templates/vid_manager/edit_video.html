@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 {% block title %}Edit {{video.title}}{% endblock %}
 
@@ -77,11 +77,9 @@
 		{% bootstrap_form video_source %}
 		{% endfor %}
 		<div id="add_source" class="w-100 text-right my-2"><i class="bi bi-plus"></i></div>
-		{% buttons %}
-			<button name="submit" class="btn btn-dark"><i class="bi-save"></i></button>
-			<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark"><i class="bi-image mr-1"></i> <i class="bi-plus"></i></a> 	
-			<a href="" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#centerconsole"><i class="bi-images mr-1"></i> <i class="bi-trash"></i></a>
-		{% endbuttons %}
+		{% bootstrap_button button_type="submit" button_class="btn btn-dark" content="Submit" %}
+		<a href="{% url 'new_video_image' video.id %}" class="btn btn-dark"><i class="bi-image mr-1"></i> <i class="bi-plus"></i></a> 
+		<a href="" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#centerconsole"><i class="bi-images mr-1"></i> <i class="bi-trash"></i></a>
 		</form>
 	</div>
 </div>

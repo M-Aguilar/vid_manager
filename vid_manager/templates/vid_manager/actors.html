@@ -1,6 +1,6 @@
 {% extends "vid_manager/base.html" %}
 {% load static %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 {% block title %}Actors{% endblock %}
 {% block header %}
@@ -23,15 +23,11 @@
 	{% if request.user.is_authenticated %}
 	<div class="collapse" id="add_user">
 		<div class="card-body"> 
-		{% buttons %}
 			<form id="actor_form" action="{% url 'new_actor' %}" method='post' class="form">
 				{% csrf_token %}
 				{% bootstrap_form form %}
-				{% buttons %}
-					<button name="submit" class="btn btn-dark">Submit</button>
-				{% endbuttons %}	
+				{% bootstrap_button button_type="submit" content="Submit" button_class="btn btn-dark" %}
 			</form>
-		{% endbuttons %}
 		</div>
 	</div>
 	{% endif %}

@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load bootstrap4 %}
+{% load django_bootstrap5 %}
 
 {% block title %}New Video{% endblock %}
 
@@ -30,9 +30,7 @@
 			{% bootstrap_form form %}
 			{% bootstrap_form video_source_form %}
 			<div id="add_source" class="w-100 text-right my-2"><i class="bi bi-plus"></i></div>
-			{% buttons %}
-				<button name="submit" class="btn btn-dark">add video</button>
-			{% endbuttons %}
+			{% bootstrap_button button_type="submit" button_class="btn btn-dark" content="Add Video" %}
 		</form>
 	</div>
 	<div>
@@ -51,7 +49,17 @@
 	</div>
 </div>
 {% load static %}
+
 <style>
+	input#id_public.form-check-input {
+		left: 0px;
+	}
+	label.form-check-label {
+		margin-left: 5px;
+	}
+	label[for="id_file_path"] {
+		width:100%;
+	}
 	label[for="id_file_path"] {
 		width:100%;
 	}
