@@ -42,10 +42,12 @@
 				</ul>
 			</div>
 		</div>
-		<video style="width: 100%; max-height: 75vh;" preload="metadata" id='vid_player' class="video-js vjs-big-play-centered" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% load static %}{% static 'vid_manager/blank_poster.png' %}">
-			{% load ms %}
-			<source id='videosource' src="/" type="video/mp4">
-		</video>
+		<div class="embed-responsive embed-responsive-16by9">
+			<video preload="metadata" playsinline id='vid_player' class="video-js vjs-big-play-centered embed-responsive-item" data-setup='{"playbackRates": [1, 1.5, 2]}' controls range poster="{% load static %}{% static 'vid_manager/blank_poster.png' %}">
+				{% load ms %}
+				<source id='videosource' src="/" type="video/mp4">
+			</video>
+		</div>
 	</div>
 </div>
 {% load static %}

@@ -161,7 +161,7 @@
 	{% if request.user.is_authenticated and request.user == video.owner and request.user.projector.admin %}
 	<div class="my-3">
 		<a class="btn btn-dark mb-3" href="{% url 'edit_video' video.id %}"><i class="bi bi-pencil-square"></i></a>
-		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}"><i class="bi bi-image"></i> <i class="bi bi-plus"></i></a>
+		<a class="btn btn-dark mb-3" href="{% url 'new_video_image' video.id %}"><i class="bi bi-image"></i><i class="bi bi-plus"></i></a>
 		{% for sc in video.videosource_set.all %}
 		<a class='btn btn-dark mb-3' href="{{sc.path}}"><i class="bi bi-film"> {% if video.videosource_set.all.count > 1 %}{{ forloop.counter }}{% endif %}</i></a>		
 		{% endfor %}
