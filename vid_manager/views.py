@@ -479,8 +479,8 @@ def videos(request):
 	tags = list(dict.fromkeys(request.GET.getlist('tag')))
 	actors = list(dict.fromkeys(request.GET.getlist('actor')))
 	sort = request.GET.get('sort')
+	print(sort)
 	res = request.GET.get('res')
-
 	#check against valid sort options and set a default if invalid
 	video_sort = VIDEO_SORT_OPTIONS
 	if not sort or sort.replace('-','').lower() not in video_sort:
@@ -500,6 +500,7 @@ def timr(start, title):
 	print('{1}: {0}'.format((time.time()-start)*100, title))
 
 #Handles multiple filter inputs and returns a filtered and sorted list. 
+#I need to grab the filter options from the videos themselves. They should not be preset.
 def fine_filter(user, sort, tags=None, actors=None, res=None):
 	#filter videos by username or public depending on call
 	if user.id:
@@ -507,6 +508,7 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 	else:
 		videos = Video.objects.filter(public=True)
 
+	#Needs to be redone to include complete resolutions
 	#the values in reses are valid sorting options for resolutions. They keys are checked against video height
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	
@@ -583,8 +585,7 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		videos = videos.annotate(bitrate=Max('videosource__bitrate'))
 	elif 'height' in sort:
 		videos = videos.annotate(height=Max('videosource__height'))
-	else:
-		videos = videos.order_by(sort)
+	videos = videos.order_by(sort)
 	if sort.replace('-','') in ['title', 'release_date','actor_num','tag_num','image_num', 'source_num','length','size', 'bitrate','height']:
 		videos = videos.reverse()
 	return videos
@@ -651,7 +652,8 @@ def available_fp(cur=None):
 	else:
 		form = VideoSourceForm()
 	all_fps = [x.file_path for x in VideoSource.objects.all()]
-	form.fields['file_path'].choices  = [x for x in form.fields['file_path'].choices if ((cur) and cur.file_path in x[0]) or x[0] not in all_fps]
+	choices = form.fields['file_path'].choices
+	form.fields['file_path'].choices = [x for x in choices if ((cur) and cur.file_path in x[0]) or x[0] not in all_fps]
 	return form
 
 #Takes a video objects. scans and creates/updates video attributes. Video dimmensions/length/size/bitrate
@@ -788,15 +790,18 @@ def random_video(request):
 #Takes tag id and returns <=6 images and videos and total of each.
 @login_required
 def tag(request, tag_id=None):
+
 	if not tag_id:
 		tag_id = request.GET.get('pk')
 	tag = get_object_or_404(Tag, id=tag_id)
 	if not request.user.projector.admin:
 		raise Http404
 	else:
+		v_tot = Video.objects.filter(tags=tag_id).count()
+		i_tot = Image.objects.filter(tags=tag_id).count()
 		videos = Video.objects.filter(tags=tag_id)[:6]
 		images = Image.objects.filter(tags=tag_id)[:6]
-	context = {'tag' : tag, 'videos': videos, 'images': images, 'v_tot':videos.count(), 'i_tot':images.count()}
+	context = {'tag' : tag, 'videos': videos, 'images': images, 'v_tot': v_tot, 'i_tot':i_tot}
 	return render(request, 'vid_manager/tag.html', context)	
 
 #Returns Paginated list of all Tags and empty TagForm
@@ -838,10 +843,9 @@ def delete_tag(request, tag_id):
 		raise Http404
 	if request.user.is_authenticated:
 		t = get_object_or_404(Tag, id=tag_id)
-		context = {'tag_id': t.id, 'tag_name': t.tag_name}
 		t_copy=t
 		t.delete()
-		messages.success(request, "Tag {0} Succesfully Deleted".format(t_copy))
+		messages.success(request, "Tag {0} Successfully Deleted".format(t_copy))
 	else:
 		messages.error(request, "Something went wrong")
 	return HttpResponseRedirect(reverse('tags'))
@@ -1207,3 +1211,21 @@ def delete_event(request, event_id):
 		return JsonResponse({'instance':serializers.serialize('json',[instance,])}, status=200)
 	else:
 		return JsonResponse({"error":""}, status=400)
+
+
+def calendar_view(request, user_id):
+	if not request.user.projector.admin:
+		raise Http404
+	context = {'videos': videos}
+	return render(request, 'vid_manager/calendar_view.html', context)
+
+def tag_manager(request, video_id=None):
+	if not request.user.projector.admin:
+		raise Http404
+	if video_id:
+		video = Video.objects.get(video_id)
+		context = {'video', video}
+	else:
+		videos = Video.objects.filter(owner=request.user.id)
+		context = {'videos': videos}
+	return render(request, 'vid_manager/tag_manager.html', context)
