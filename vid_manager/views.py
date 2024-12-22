@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core import serializers #ajax
 from django.core.paginator import Paginator
 from django.db.models import Count, Sum, Max
+
 import json
 from django.conf import settings
 
@@ -479,7 +480,6 @@ def videos(request):
 	tags = list(dict.fromkeys(request.GET.getlist('tag')))
 	actors = list(dict.fromkeys(request.GET.getlist('actor')))
 	sort = request.GET.get('sort')
-	print(sort)
 	res = request.GET.get('res')
 	#check against valid sort options and set a default if invalid
 	video_sort = VIDEO_SORT_OPTIONS
@@ -502,33 +502,31 @@ def timr(start, title):
 #Handles multiple filter inputs and returns a filtered and sorted list. 
 #I need to grab the filter options from the videos themselves. They should not be preset.
 def fine_filter(user, sort, tags=None, actors=None, res=None):
-	#filter videos by username or public depending on call
-	if user.id:
-		videos = user.video_set.all()
-	else:
-		videos = Video.objects.filter(public=True)
-
 	#Needs to be redone to include complete resolutions
 	#the values in reses are valid sorting options for resolutions. They keys are checked against video height
 	reses = {720: ['HD'], 1080: ['FHD'], 2160: ['4K', 'UHD'], 1440: ['2K', 'QHD']}
 	
-	#resolution is currently guaged by video height.
+	#resolution is currently gauged by video height.
 	if 'resolution' in sort:
 		sort = sort.replace('resolution','height')
-
 	#Filters videos by actor names provided
+	filter=Q()
 	if actors:
+		actor_filter=Q()
 		for a in actors:
 			name = a.split()
 			if len(name) > 1:
-				videos = videos.filter(Q(actors__first_name__icontains=name[0]) & Q(actors__last_name__icontains=name[-1]))
+					actor_filter |= Q(actors__first_name__icontains=name[0]) & Q(actors__last_name__icontains=name[-1])
 			else:
-				videos = videos.filter(Q(actors__first_name__icontains=name[0]))
+					actor_filter |= Q(actors__first_name__icontains=name[0])
+		filter &= actor_filter
 
 	#Filters videos by tag names provided
 	if tags:
+		tag_filter=Q()
 		for t in tags:
-			videos = videos.filter(Q(tags__tag_name=t))
+				tag_filter |= Q(tags__tag_name=t)
+		filter &= tag_filter
 
 	#Filters by resolution(height). Inputs ending in p (e.g. 1080p) are valid.
 	#> < => =< are valid. = is the default
@@ -554,18 +552,25 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 
 		#if input is not valid after striping of 'P' and conditionals then return all valid video regardless of resolution
 		if not isinstance(r, int):
-			videos = videos.filter(Q(videosource__height__gte=0))
+			filter &= Q(videosource__height__gte=0)
 		elif sym == '<=':
-			videos = videos.filter(Q(videosource__height__lte=r))
+			filter &= Q(videosource__height__lte=r)
 		elif sym == '>=':
-			videos = videos.filter(Q(videosource__height__gte=r))
+			filter &= Q(videosource__height__gte=r)
 		elif sym == '<':
-			videos = videos.filter(Q(videosource__height__lt=r))		
+			filter &= Q(videosource__height__lt=r)
 		elif sym == '>':
-			videos = videos.filter(Q(videosource__height__gt=r))
+			filter &= Q(videosource__height__gt=r)
 		else:
-			videos = videos.filter(Q(videosource__height=res))
+			filter &= Q(videosource__height=res)
 
+	#filter videos by username or public depending on call
+	if user.id:
+		videos = user.video_set.filter(filter).distinct()
+	else:
+		videos = Video.objects.filter(filter, Q(public=True)).distinct()
+
+	print(videos)
 	#Order By
 	if 'actor_num' in sort:
 		videos = videos.annotate(actor_num=Count('actors'))
