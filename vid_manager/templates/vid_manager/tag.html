@@ -1,11 +1,12 @@
 {% extends "vid_manager/base.html" %}
-{% load django_bootstrap5 %}
+{% load bootstrap4 %}
 
 {% block title %}{{tag}}{% endblock %}
 
 {% block header %}
 <div class="jumbotron bg-dark text-light pt-1 pb-3 text-center display-4 mt-5 mb-0">
 	<h2>{{ tag }}<a class="text-light float-right mr-2" href="{% url 'random_video' %}?tag={{tag}}"><i class="bi-title bi-shuffle"></i></a>
+	</<i>
 </div>
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'vid_manager/preview.css' %}">
@@ -22,14 +23,16 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				Please confirm that you would like to remove this tag.
+				Please confirm that you would like to remove this video.
         	</div>
         	<div class="modal-footer">
         		<button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
 				<form action="{% url 'delete_tag' tag.id %}" method="post" class="m-0">
 					{% csrf_token %}
 					<input type="hidden" name="tag_id" value="{{ tag.id }}"/>
-					{% bootstrap_button button_type="submit" button_class="btn btn-danger text-light" content="Confirm" %}
+					{% buttons %}
+					<a href="{% url 'delete_tag' tag.id %}"><button name='submit' class="btn bg-danger text-light">Confirm</button></a>
+					{% endbuttons %}
 				</form>
         	</div>
     	</div>

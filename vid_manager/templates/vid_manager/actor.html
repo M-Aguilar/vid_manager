@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load django_bootstrap5 %}
+{% load bootstrap4 %}
 
 {% block title %}{{ actor }}{% endblock %}
 
@@ -45,7 +45,9 @@
 			<form id="alias_form" action="{% url 'new_alias' %}" method='post' class="form">
 			{% csrf_token %}
 			{% bootstrap_form alias_form %}
-			{% bootstrap_button button_type="submit" button_class="btn btn-dark" content="Submit" %}
+			{% buttons %}
+				<button name="submit" class="btn btn-dark">Submit</button>
+			{% endbuttons %}	
 			</form>
 		</div>
 	</div>
@@ -93,7 +95,7 @@
 			{% endfor %}
 		</div>
 	</div>
-	<h2>Recently Added <a class="ref-link" href="{% url 'videos' %}?actor={{actor}}">Videos ({{ actor.videos.all.count }})</a></h2>
+	<h2>Recently Added <a href="{% url 'videos' %}?actor={{actor}}">Videos ({{ actor.videos.all.count }})</a></h2>
 	<div class="d-inline-block">
 		<div class='row'>
 			{% for video in videos %}
@@ -107,11 +109,6 @@
 		{% endif %}
 	</div>
 </div>
-<style>
-	.ref-link a:link, a:visited {
-		text-decoration: none;
-	}
-</style>
 <script>
 	$("#alias_form").submit(function (e) {
 		e.preventDefault();

@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load django_bootstrap5 %}
+{% load bootstrap4 %}
 
 {% block title %}
 Account
@@ -32,7 +32,6 @@ Account
 				<a class="btn btn-dark" href="{% url 'edit_account' request.user.username %}">change username</a>
 				<a class="btn btn-dark" href="{% url 'password_change' %}">change password</a>
 				<a class="btn btn-dark" href="{% url 'manager' %}">Manager</a>
-				<!--<a class="btn btn-dark" href="{% url 'calendar_view' request.user.id %}">Calendar View</a>-->
 			</div>
 			<div>
 			{% for actor in new_actors %}

@@ -10,8 +10,8 @@
         <div class="bottom-video-row pl-2" style="background-color: lightgrey">
             <div class="row">
                 <div class="col-auto ml-auto">
-                    <a class="preview-text" href="{% url 'images' %}?tag={{tag}}"><i class="bi-image"></i> {{ tag.tag_images.count }} </a>
-                    <a class="preview-text" href="{% url 'videos' %}?tag={{tag}}"><i class="bi-film"></i> {{ tag.videos.count }}</div></a>
+                    <a class="preview-text" href="{% url 'images' %}?actor={{tag}}"><i class="bi-image"></i> {{ tag.tag_images.count }} </a>
+                    <a class="preview-text" href="{% url 'videos' %}?actor={{tag}}"><i class="bi-film"></i> {{ tag.videos.count }}</div></a>
             </div>
         </div>
     </a>

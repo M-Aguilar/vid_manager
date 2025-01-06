@@ -18,9 +18,6 @@ class VideoForm(forms.ModelForm):
 		widgets = {
 		'title': forms.TextInput(attrs={'placeholder':'Title','autofocus':'autofocus'}),
 		'release_date': forms.DateInput(attrs={'placeholder':'MM-DD-YYYY','format':'%m/%d/%Y'}),
-		'actors': forms.SelectMultiple(attrs={'class':'w-100 form-control'}),
-		'tags': forms.SelectMultiple(attrs={'class':'w-100 form-control'}),
-		'public': forms.CheckboxInput(attrs={'class':'form-check-input form-check-inline'}),
 		}
 
 class AliasForm(forms.ModelForm):
@@ -48,10 +45,8 @@ class ImageForm(forms.ModelForm):
 		fields = ['actors','video','image','tags']
 
 		widgets = {
-			'image' : forms.FileInput(attrs={'multiple':'', 'class': 'form-control'}),
+			'image' : forms.FileInput(attrs={'multiple':''}),
 			'video' : forms.Select(attrs={'class': 'form-control py-0'}),
-			'actors': forms.SelectMultiple(attrs={'class':'w-100 form-control'}),
-			'tags': forms.SelectMultiple(attrs={'class':'w-100 form-control'}),
 		}
 
 class EventForm(forms.ModelForm):

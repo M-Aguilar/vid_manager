@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load django_bootstrap5 %}
+{% load bootstrap4 %}
 
 {% block title %}New Video Source{% endblock %}
 
@@ -22,7 +22,9 @@
 		<form action="{% url 'new_video_source' video.id %}" method='post' class="form">
 			{% csrf_token %}
 			{% bootstrap_form form %}
-			{% bootstrap_button button_type="submit" button_class="btn btn-dark" content="Add" %}
+			{% buttons %}
+				<button name="submit" class="btn btn-dark">add video source</button>
+			{% endbuttons %}
 		</form>
 	</div>
 </div>

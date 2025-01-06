@@ -1,5 +1,5 @@
 {% extends "vid_manager/base.html" %}
-{% load django_bootstrap5 %}
+{% load bootstrap4 %}
 
 {% block title %}
 Login
@@ -16,7 +16,9 @@ Login
     <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
         {% bootstrap_form form %}
-        {% bootstrap_button button_type="submit" button_class="btn btn-dark" content="Submit" %}
+        {% buttons %}
+        <button name="submit" class="btn btn-dark">log in</button>
+        {% endbuttons %}
         <input type="hidden" name="next" value="{% url 'index' %}" />
     </form>
 </div>
