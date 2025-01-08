@@ -417,7 +417,6 @@ def manager(request):
 def video(request, video_id):
 	video = get_object_or_404(Video, id=video_id)
 	if not request.user.is_authenticated:
-		print(('login?{0}').format(request.path))
 		return HttpResponseRedirect(reverse('login') + '?next={0}'.format(request.path))
 	if video.owner != request.user and not video.public:
 		raise Http404
@@ -517,12 +516,8 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 			name = a.split()
 			if len(name) > 1:
 				actor_filter |= (Q(actors__first_name__icontains=name[0]) & Q(actors__last_name__icontains=name[-1]))
-				#Delete
-				#videos = videos.filter(Q(actors__first_name__icontains=name[0]) & Q(actors__last_name__icontains=name[-1]))
 			else:
 				actor_filter |= Q(actors__first_name__icontains=name[0])
-				#DELETE
-				#videos = videos.filter(Q(actors__first_name__icontains=name[0]))
 		filter &= actor_filter
 
 	#Filters videos by tag names provided
@@ -530,8 +525,6 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		tag_filter = Q()
 		for t in tags:
 			tag_filter |= Q(tags__tag_name=t)
-			#DELETE
-			#videos = videos.filter(Q(tags__tag_name=t))
 		filter &= tag_filter
 
 	#Filters by resolution(height). Inputs ending in p (e.g. 1080p) are valid.
@@ -559,28 +552,16 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		#if input is not valid after striping of 'P' and conditionals then return all valid video regardless of resolution
 		if not isinstance(r, int):
 			filter &= Q(videosource__height__gte=0)
-			#DELETE
-			#videos = videos.filter(Q(videosource__height__gte=0))
 		elif sym == '<=':
 			filter &= Q(videosource__height__lte=r)
-			#DELETE
-			#videos = videos.filter(Q(videosource__height__lte=r))
 		elif sym == '>=':
 			filter &= Q(videosource__height__gte=r)
-			#DELETE
-			#videos = videos.filter(Q(videosource__height__gte=r))
 		elif sym == '<':
-			filter &= Q(videosource__height__lt=r)
-			#DELETE
-			#videos = videos.filter(Q(videosource__height__lt=r))		
+			filter &= Q(videosource__height__lt=r)	
 		elif sym == '>':
 			filter &= Q(videosource__height__gt=r)
-			#DELETE
-			#videos = videos.filter(Q(videosource__height__gt=r))
 		else:
 			filter &= Q(videosource__height=res)
-			#DELETE
-			#videos = videos.filter(Q(videosource__height=res))
 
 	#filter videos by username or public depending on call
 	if user.id:
@@ -675,7 +656,8 @@ def available_fp(cur=None):
 	else:
 		form = VideoSourceForm()
 	all_fps = [x.file_path for x in VideoSource.objects.all()]
-	form.fields['file_path'].choices  = [x for x in form.fields['file_path'].choices if ((cur) and cur.file_path in x[0]) or x[0] not in all_fps]
+	choices = form.fields['file_path'].choices
+	form.fields['file_path'].choices  = [x for x in choices if ((cur) and cur.file_path in x[0]) or x[0] not in all_fps]
 	return form
 
 #Takes a video objects. scans and creates/updates video attributes. Video dimmensions/length/size/bitrate
@@ -818,9 +800,11 @@ def tag(request, tag_id=None):
 	if not request.user.projector.admin:
 		raise Http404
 	else:
+		v_tot = Video.objects.filter(tags=tag_id).count()
+		i_tot = Image.objects.filter(tags=tag_id).count()
 		videos = Video.objects.filter(tags=tag_id)[:6]
 		images = Image.objects.filter(tags=tag_id)[:6]
-	context = {'tag' : tag, 'videos': videos, 'images': images, 'v_tot':videos.count(), 'i_tot':images.count()}
+	context = {'tag' : tag, 'videos': videos, 'images': images, 'v_tot':v_tot, 'i_tot': i_tot}
 	return render(request, 'vid_manager/tag.html', context)	
 
 #Returns Paginated list of all Tags and empty TagForm
@@ -862,7 +846,6 @@ def delete_tag(request, tag_id):
 		raise Http404
 	if request.user.is_authenticated:
 		t = get_object_or_404(Tag, id=tag_id)
-		context = {'tag_id': t.id, 'tag_name': t.tag_name}
 		t_copy=t
 		t.delete()
 		messages.success(request, "Tag {0} Succesfully Deleted".format(t_copy))
@@ -1006,6 +989,11 @@ def actors(request):
 	context = {'actors': page_o, 'form': form, 'new_actors':len(new_actor_count()),'total':total,'sort':sort,'sort_options': actor_sort}
 	return render(request, 'vid_manager/actors.html', context)
 
+#this is going to be on a case by case scenario
+#Do I want to delete an actor along with all of their videos? 
+#As of now it only deletes an actor along with all images. Videos remain.
+#This is complicated by the fact that certain videos have more than one actor associated.
+#In this instance one would want to have the option presented.
 #deletes actors as well as all associated images
 @login_required
 def delete_actor(request, actor_id):
