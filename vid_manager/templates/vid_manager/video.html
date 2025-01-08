@@ -4,7 +4,7 @@
 {% block title %}{{ video.title }}{% endblock %}
 
 {% block header %}
-	<div class="jumbotron overflow-auto if not video.postr.image_color.color %}bg-dark {% endif %} video-text p-auto text-center display-4 mt-5 mb-0 pt-2 pb-3" style="{% if video.postr.image_color.color %} background-color:rgb({{video.postr.image_color.color}}){% endif %}">
+	<div class="jumbotron overflow-auto {% if not video.postr.image_color.color %}bg-dark {% endif %} video-text p-auto text-center display-4 mt-5 mb-0 pt-2 pb-3" style="{% if video.postr.image_color.color %} background-color:rgb({{video.postr.image_color.color}}){% endif %}">
 		<h2>
 			<div class="mw-100">
 				<div class="col">
