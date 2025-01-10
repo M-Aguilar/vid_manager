@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.core import serializers #ajax
 from django.core.paginator import Paginator
 from django.db.models import Count, Sum, Max
+from django.db.models.functions import Lower
+
 import json
 from django.conf import settings
 
@@ -591,9 +593,9 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 	elif 'star_num' in sort:
 		videos = videos.annotate(star_num=Count('star'))
 	if sort.replace('-','') in ['title', 'release_date','actor_num','tag_num','image_num', 'source_num','length','size', 'bitrate','height','star_num']:
-		videos = videos.order_by(sort).reverse()
+		videos = videos.order_by(sort, Lower('title').asc())
 	else:
-		videos = videos.order_by(sort)
+		videos = videos.order_by(sort, Lower('title'))
 	return videos
 
 #Checks for valid keywords such as "FHD" or "UHD"
@@ -972,7 +974,7 @@ def actor(request, actor_id):
 @login_required
 def actors(request):
 	sort = request.GET.get('sort')
-	actor_sort = ['first_name','last_name','vid_num','image_num']
+	actor_sort = ['first_name','last_name','vid_num','image_num','star_num']
 	if not sort or sort.replace('-','') not in actor_sort:
 		sort = 'first_name'
 	if not request.user.projector.admin:
@@ -981,6 +983,8 @@ def actors(request):
 		actors = Actor.objects.annotate(vid_num=Count('videos')).order_by(sort)
 	elif sort.replace('-','') == 'image_num':
 		actors = Actor.objects.annotate(image_num=Count('actor_images')).order_by(sort)
+	elif sort.replace('-','') == 'star_num':
+		actors = Actor.objects.annotate(star_num=Count('videos__star')).order_by(sort, 'first_name')
 	else:
 		actors = Actor.objects.all().order_by(sort)
 	total = actors.count()

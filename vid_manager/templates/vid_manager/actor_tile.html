@@ -10,6 +10,7 @@
         <div class="bottom-video-row pl-2" style="background-color: lightgrey">
             <div class="row">
                 <div class="col-auto ml-auto">
+                    <i class="bi-star preview-text">{{ actor.stars }}</i>
                     <a class="preview-text" href="{% url 'images' %}?actor={{actor}}"><i class="bi-image"></i> {{ actor.actor_images.count }} </a>
                     <a class="preview-text" href="{% url 'videos' %}?actor={{actor}}"><i class="bi-film"></i> {{ actor.videos.count }}</div></a>
             </div>

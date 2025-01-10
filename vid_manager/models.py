@@ -94,6 +94,10 @@ class Actor(ActorBase):
 	@property
 	def type(self):
 		return 'actor'
+	
+	@property
+	def stars(self):
+		return Star.objects.filter(video__actors=self).count()
 
 class Alias(ActorBase):
 	actor = models.ForeignKey(Actor, on_delete=models.CASCADE, related_name='alias')
@@ -127,7 +131,7 @@ class Video(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'videos'
-		ordering = ['title']
+		ordering = ['title', 'date_added']
 
 	def __str__(self):
 		return self.title
