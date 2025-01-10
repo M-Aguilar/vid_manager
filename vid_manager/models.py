@@ -112,7 +112,8 @@ VIDEO_SORT_OPTIONS = ['release_date' ,
 					  'tag_num',
 					  'bitrate',
 					  'image_num',
-					  'source_num'
+					  'source_num',
+					  'star_num',
 					  ]
 
 class Video(models.Model):

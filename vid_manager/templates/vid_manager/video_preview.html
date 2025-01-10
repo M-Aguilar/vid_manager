@@ -21,13 +21,12 @@
 			{% endif %}
 		</div>
 		<div class="col col-auto ml-auto float-right px-0">
+			<i class="bi-star preview-text">{{ video.star_set.count }}</i>
 			<a class="preview-text" href="{% url 'tags' %}?video={{video.id}}">
-			<i class="bi-tag"></i>
-				{{ video.tags.count }}
+				<i class="bi-tag">{{ video.tags.count }}</i>
 			</a>
 			<a class="preview-text" href="{% url 'images' %}?video={{video.id}}"> 
-				<i class="bi-image"></i>
-				{{ video.images.count }}
+				<i class="bi-image">{{ video.images.count }}</i>
 			</a> 
 		</div>
 	</div>

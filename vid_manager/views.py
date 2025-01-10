@@ -588,7 +588,9 @@ def fine_filter(user, sort, tags=None, actors=None, res=None):
 		videos = videos.annotate(bitrate=Max('videosource__bitrate'))
 	elif 'height' in sort:
 		videos = videos.annotate(height=Max('videosource__height'))
-	if sort.replace('-','') in ['title', 'release_date','actor_num','tag_num','image_num', 'source_num','length','size', 'bitrate','height']:
+	elif 'star_num' in sort:
+		videos = videos.annotate(star_num=Count('star'))
+	if sort.replace('-','') in ['title', 'release_date','actor_num','tag_num','image_num', 'source_num','length','size', 'bitrate','height','star_num']:
 		videos = videos.order_by(sort).reverse()
 	else:
 		videos = videos.order_by(sort)

@@ -96,8 +96,8 @@
 		</div>
 	</div>
 	<h2>Recently Added <a href="{% url 'videos' %}?actor={{actor}}">Videos ({{ actor.videos.all.count }})</a></h2>
-	<div class="d-inline-block">
-		<div class='row'>
+	<div class="container-fluid">
+		<div class="row">
 			{% for video in videos %}
 				{% include 'vid_manager/videos_preview.html' %}
 			{% empty %}
